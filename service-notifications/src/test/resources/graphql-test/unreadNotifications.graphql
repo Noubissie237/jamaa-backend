@@ -1,0 +1,12 @@
+query unreadNotifications($email: String!) {
+  unreadNotifications(email: $email) {
+    id
+    title
+    message
+    email
+    dateEnvoi
+    lu
+    type
+    serviceEmetteur
+  }
+} 

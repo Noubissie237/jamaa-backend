@@ -1,0 +1,12 @@
+mutation markAsRead($id: ID!) {
+  markAsRead(id: $id) {
+    id
+    title
+    message
+    email
+    dateEnvoi
+    lu
+    type
+    serviceEmetteur
+  }
+} 

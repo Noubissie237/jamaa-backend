@@ -1,0 +1,17 @@
+type Wallet {
+    id: ID!
+    userId: String!
+    name: String!
+    balance: Float!
+    creationDate: String!
+}
+
+type Query {
+    getWallet(userId: String!): Wallet
+}
+
+type Mutation {
+    createWallet(userId: String!, name: String!): Wallet
+    updateBalance(userId: String!, amount: Float!): Wallet
+    deleteWallet(userId: String!): Boolean
+}

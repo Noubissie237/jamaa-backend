@@ -1,0 +1,41 @@
+interface Person {
+    id: ID!
+    lastName: String!
+    firstName: String!
+    email: String!
+    password: String!
+}
+
+type Customer implements Person {
+    id: ID!
+    lastName: String!
+    firstName: String!
+    email: String!
+    password: String!
+    phone: String!
+    cniNumber: String!
+    cniRecto: String!
+    cniVerso: String!
+}
+
+input CustomerInput {
+    lastName: String!
+    firstName: String!
+    email: String!
+    password: String!
+    phone: String!
+    cniNumber: String!
+    cniRecto: String!
+    cniVerso: String!
+}
+
+type Query {
+    getAllCustomers: [Customer!]
+    getCustomerById(id: ID!): Customer
+    getCustomerByEmail(email: String!): Customer
+}
+
+type Mutation {
+    createCustomer(input: CustomerInput!): Customer!
+    deleteCustomer(id: ID!): [Customer]!
+}

@@ -1,0 +1,22 @@
+# Avoir la liste de tous les customers
+query {
+	getAllCustomers{
+		email,
+	}
+}
+
+# Insérer un utilisateur
+mutation {
+	createCustomer(input: {
+		lastName: "Noubissie Kamga",
+		firstName: "Wilfried",
+		email: "wilfried.noubissie@facsciences-uy1.cm",
+		password: "admin",
+		phone: "690232120",
+		cniNumber: "000",
+		cniRecto: "000",
+		cniVerso: "000"
+	}) {
+		email
+	}
+}

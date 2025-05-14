@@ -1,0 +1,34 @@
+package com.jamaa.service_users.resolver;
+
+import java.util.List;
+
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.stereotype.Controller;
+
+import com.jamaa.service_users.model.Customer;
+import com.jamaa.service_users.service.CustomerService;
+
+import lombok.RequiredArgsConstructor;
+
+@Controller
+@RequiredArgsConstructor
+public class CustomerMutationResolver {
+    
+    private final CustomerService customerService;
+
+    @MutationMapping
+    public Customer createCustomer(@Argument Customer input) {
+        return customerService.createCustomer(input);
+    }
+
+    @MutationMapping
+    public List<Customer> deleteCustomer(@Argument Long id) {
+        return customerService.deleteCustomer(id);
+    }
+
+    @MutationMapping
+    public String login(@Argument String email, @Argument String password) {
+        return customerService.login(email, password);
+    }
+}

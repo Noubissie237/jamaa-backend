@@ -33,6 +33,7 @@ type Query {
     getAllCustomers: [Customer!]
     getCustomerById(id: ID!): Customer
     getCustomerByEmail(email: String!): Customer
+    getCustomerByPhone(phone: String!): Customer
 }
 
 type Mutation {

@@ -1,11 +1,11 @@
-package com.jamaa.service_users.dto;
+package com.jamaa.service_auth.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
-public class LoginRequest {
+@Setter
+public class CustomerLoginRequest {
     private String login;
     private String password;
 }

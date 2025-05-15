@@ -7,4 +7,5 @@ import com.jamaa.service_users.model.Customer;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     public Optional<Customer> findByEmail(String email);
+    public Optional<Customer> findByPhone(String phone);
 }

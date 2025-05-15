@@ -31,4 +31,9 @@ public class CustomerQueryResolver {
     public Customer getCustomerByEmail(@Argument String email) {
         return customerService.getCustomerByEmail(email);
     }
+
+    @QueryMapping
+    public Customer getCustomerByPhone(@Argument String phone) {
+        return customerService.getCustomerByPhone(phone);
+    }
 }

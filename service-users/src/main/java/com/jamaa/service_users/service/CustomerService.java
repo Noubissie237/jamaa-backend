@@ -43,10 +43,11 @@ public class CustomerService {
             event.setCniVerso(customer.getCniVerso());
 
             Customer saving = customerRepository.save(customer);
-            rabbitTemplate.convertAndSend("customerExchange", "customer.create", event);
-
+            rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.admin", event);
+            rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.account", event);
+            rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.notification", event);
             login(customer.getEmail(), initialPassword);
-
+            
             return saving;
 
         } catch (Exception e) {
@@ -71,7 +72,7 @@ public class CustomerService {
         String url = "http://127.0.0.1:8079/SERVICE-AUTH/auth/login";
         LoginRequest loginRequest = new LoginRequest();
 
-        loginRequest.setEmail(email);
+        loginRequest.setLogin(email);
         loginRequest.setPassword(password);
 
         try {
@@ -83,5 +84,9 @@ public class CustomerService {
 
     public Customer getCustomerByEmail(String email) {
         return customerRepository.findByEmail(email).orElse(null);
+    }
+
+    public Customer getCustomerByPhone(String phone) {
+        return customerRepository.findByPhone(phone).orElse(null);
     }
 }

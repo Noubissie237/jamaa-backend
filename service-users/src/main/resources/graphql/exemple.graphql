@@ -20,3 +20,52 @@ mutation {
 		email
 	}
 }
+
+
+# query {
+# 	getAllCustomers{
+# 		id,
+# 		email,
+# 		lastName,
+# 		firstName,
+# 		phone,
+# 		password,
+# 		cniRecto
+# 	}
+# }
+
+# query {
+# 	getCustomerByEmail(email:"wilfried.noubissie@facsciences-uy1.cm2") {
+# 		id,
+# 		email,
+# 		phone,
+# 		password
+# 	}
+# }
+
+# query {
+# 	getCustomerByPhone(phone:"690232121") {
+# 		email
+# 	}
+# }
+
+# mutation {
+# 	createCustomer(input: {
+# 		lastName: "Noubissie Kamga",
+# 		firstName: "Wilfried",
+# 		email: "wilfried.noubissie@facsciences-uy1.cm14",
+# 		password: "admin",
+# 		phone: "690232114",
+# 		cniNumber: "000",
+# 		cniRecto: "000",
+# 		cniVerso: "000"
+# 	}) {
+# 		id
+# 	}
+# }
+
+# mutation {
+# 	deleteCustomer(id: 17) {
+# 		id
+# 	}
+# }

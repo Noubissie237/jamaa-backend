@@ -1,0 +1,7 @@
+# Obtenir la liste des comptes
+query {
+  getAllAccounts{
+    id,
+  }
+}
+

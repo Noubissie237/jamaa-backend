@@ -43,6 +43,8 @@ public class CustomerService {
             event.setCniVerso(customer.getCniVerso());
 
             Customer saving = customerRepository.save(customer);
+            event.setId(saving.getId());
+            
             rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.admin", event);
             rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.account", event);
             rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.notification", event);

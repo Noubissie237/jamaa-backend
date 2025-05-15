@@ -1,0 +1,16 @@
+type Account {
+  id: ID!
+  userId: ID!
+  accountNumber: String!
+  balance: Float!
+  createdAt: String!
+}
+
+
+type Mutation {
+    createAccount(userId: ID!, firstName: String!): Account
+}
+
+type Query {
+    getAllAccounts: [Account!]
+}

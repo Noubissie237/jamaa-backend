@@ -12,6 +12,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class CustomerEvent {
+    @JsonProperty("id")
+    private Long id;
     @JsonProperty("firstName")
     private String firstName;
     @JsonProperty("lastName")

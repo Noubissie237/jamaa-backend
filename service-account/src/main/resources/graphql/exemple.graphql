@@ -5,3 +5,13 @@ query {
   }
 }
 
+# Creation d'un compte utilisateur
+mutation {
+  createAccount(userId:1){
+    id,
+    userId,
+    accountNumber,
+    balance,
+    createdAt
+  }
+}

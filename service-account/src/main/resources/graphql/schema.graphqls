@@ -8,7 +8,7 @@ type Account {
 
 
 type Mutation {
-    createAccount(userId: ID!, firstName: String!): Account
+    createAccount(userId: ID!): Account
 }
 
 type Query {

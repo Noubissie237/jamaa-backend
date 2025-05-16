@@ -2,6 +2,7 @@ package com.jamaa.service_account.service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -57,22 +58,54 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
+    public Account incrementBalance(Long accountId, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Le montant doit être strictement positif");
+        }
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Compte introuvable avec l'ID : " + accountId));
+
+        BigDecimal newBalance = account.getBalance().add(amount).setScale(2, RoundingMode.HALF_UP);
+        account.setBalance(newBalance);
+
+        return accountRepository.save(account);
+    }
+
+    public Account decrementBalance(Long accountId, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Le montant doit être strictement positif");
+        }
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Compte introuvable avec l'ID : " + accountId));
+
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Solde insuffisant pour effectuer cette opération");
+        }
+
+        BigDecimal newBalance = account.getBalance().subtract(amount).setScale(2, RoundingMode.HALF_UP);
+        account.setBalance(newBalance);
+
+        return accountRepository.save(account);
+    }
 
     public boolean deleteAccount(Account account) {
-    if (account == null || account.getId() == null) {
-        System.out.println("Le compte à supprimer est invalide.");
-        return false;
-    }
+        if (account == null || account.getId() == null) {
+            System.out.println("Le compte à supprimer est invalide.");
+            return false;
+        }
 
-    boolean exists = accountRepository.existsById(account.getId());
-    if (!exists) {
-        System.out.println("Le compte avec l'ID " + account.getId() + " n'existe pas.");
-        return false;
-    }
+        boolean exists = accountRepository.existsById(account.getId());
+        if (!exists) {
+            System.out.println("Le compte avec l'ID " + account.getId() + " n'existe pas.");
+            return false;
+        }
 
-    accountRepository.delete(account);
-    System.out.println("Compte supprimé avec succès : " + account.getId());
-    return true;
-}
+        accountRepository.delete(account);
+        System.out.println("Compte supprimé avec succès : " + account.getId());
+        return true;
+
+    }
 
 }

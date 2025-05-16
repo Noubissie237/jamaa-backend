@@ -5,107 +5,169 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jamaa.service_account.model.Account;
 import com.jamaa.service_account.repository.AccountRepository;
 import com.jamaa.service_account.utils.Util;
+import com.jamaa.service_account.exception.AccountNotFoundException;
+import com.jamaa.service_account.exception.InsufficientBalanceException;
+import com.jamaa.service_account.exception.UserNotFoundException;
 
 @Service
+@Transactional
 public class AccountService {
     
+    private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
+    private static final int MAX_ATTEMPTS = 10;
+    private static final String ACCOUNT_PREFIX = "2025-";
+    
     @Autowired
-    AccountRepository accountRepository;
+    private AccountRepository accountRepository;
 
     @Autowired
-    Util util;
+    private Util util;
 
-    public Account createAccount(Long userId) throws IOException {
+    public void createAccount(Long userId) throws IOException {
+        logger.info("Tentative de création d'un compte pour l'utilisateur ID: {}", userId);
 
-        if (util.userExist(userId)) {
-            Account account = new Account();
-    
-            account.setBalance(BigDecimal.ZERO);
-            account.setCreatedAt(LocalDateTime.now());
-            account.setUserId(userId);
-    
-            String tmpNumber = "";
-            int attempts = 0;
-            final int MAX_ATTEMPTS = 10;
-            do {
-                tmpNumber = "2025" + "-" + util.generateRandomCode();
-                attempts++;
-                if (attempts > MAX_ATTEMPTS) {
-                    throw new IllegalStateException("Unable to generate unique account number");
-                }
-            } while (accountRepository.findByAccountNumber(tmpNumber).isPresent());
-    
-    
-            account.setAccountNumber(tmpNumber);
-    
-            return accountRepository.save(account);
-            
-        } else {
-            throw new RuntimeException("Cet Id n'appartient à aucun utilisateur !");
+        if (!util.userExist(userId)) {
+            logger.error("Utilisateur non trouvé avec l'ID: {}", userId);
+            throw new UserNotFoundException("Utilisateur introuvable avec l'ID : " + userId);
         }
 
+        Optional<Account> existingAccount = accountRepository.findByUserId(userId);
+        if (existingAccount.isPresent()) {
+            logger.warn("Un compte existe déjà pour l'utilisateur ID: {}. Retour de l'existant.", userId);
+        }
+
+        Account account = new Account();
+        account.setBalance(BigDecimal.ZERO);
+        account.setCreatedAt(LocalDateTime.now());
+        account.setUserId(userId);
+
+        logger.info("Instance Account créée avec succès pour l'utilisateur ID {}", userId);
+
+        String accountNumber = generateUniqueAccountNumber();
+        logger.info("Numéro de compte {} généré avec succès", accountNumber);
+        account.setAccountNumber(accountNumber);
+
+        accountRepository.save(account);
+        logger.info("Compte créé avec succès - Numéro de compte: {}, User ID: {}", accountNumber, userId);
 
     }
 
+
+    private String generateUniqueAccountNumber() {
+        logger.debug("Génération d'un numéro de compte unique");
+        
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            String candidateNumber = ACCOUNT_PREFIX + util.generateRandomCode();
+            
+            if (!accountRepository.findByAccountNumber(candidateNumber).isPresent()) {
+                logger.debug("Numéro de compte unique généré: {} après {} tentative(s)", candidateNumber, attempt);
+                return candidateNumber;
+            }
+            
+            logger.debug("Numéro de compte {} déjà existant, tentative {}/{}", candidateNumber, attempt, MAX_ATTEMPTS);
+        }
+        
+        logger.error("Impossible de générer un numéro de compte unique après {} tentatives", MAX_ATTEMPTS);
+        throw new IllegalStateException("Impossible de générer un numéro de compte unique");
+    }
+
+    @Transactional(readOnly = true)
     public List<Account> getAllAccounts() {
-        return accountRepository.findAll();
+        logger.debug("Récupération de tous les comptes");
+        List<Account> accounts = accountRepository.findAll();
+        logger.info("Nombre de comptes récupérés: {}", accounts.size());
+        return accounts;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Account> getAccount(Long id) {
+        logger.debug("Récupération du compte id {}", id);
+        return accountRepository.findById(id);
     }
 
     public Account incrementBalance(Long accountId, BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Le montant doit être strictement positif");
-        }
-
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Compte introuvable avec l'ID : " + accountId));
-
-        BigDecimal newBalance = account.getBalance().add(amount).setScale(2, RoundingMode.HALF_UP);
+        validateAmount(amount);
+        logger.info("Incrémentation du solde - Compte ID: {}, Montant: {}", accountId, amount);
+        
+        Account account = findAccountById(accountId);
+        BigDecimal oldBalance = account.getBalance();
+        BigDecimal newBalance = oldBalance.add(amount).setScale(2, RoundingMode.HALF_UP);
+        
         account.setBalance(newBalance);
-
-        return accountRepository.save(account);
+        Account updatedAccount = accountRepository.save(account);
+        
+        logger.info("Solde incrémenté avec succès - Compte ID: {}, Ancien solde: {}, Nouveau solde: {}", 
+                   accountId, oldBalance, newBalance);
+        
+        return updatedAccount;
     }
 
     public Account decrementBalance(Long accountId, BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Le montant doit être strictement positif");
+        validateAmount(amount);
+        logger.info("Décrémentation du solde - Compte ID: {}, Montant: {}", accountId, amount);
+        
+        Account account = findAccountById(accountId);
+        BigDecimal currentBalance = account.getBalance();
+        
+        if (currentBalance.compareTo(amount) < 0) {
+            logger.error("Solde insuffisant - Compte ID: {}, Solde actuel: {}, Montant demandé: {}", 
+                        accountId, currentBalance, amount);
+            throw new InsufficientBalanceException("Solde insuffisant pour effectuer cette opération");
         }
-
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Compte introuvable avec l'ID : " + accountId));
-
-        if (account.getBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Solde insuffisant pour effectuer cette opération");
-        }
-
-        BigDecimal newBalance = account.getBalance().subtract(amount).setScale(2, RoundingMode.HALF_UP);
+        
+        BigDecimal newBalance = currentBalance.subtract(amount).setScale(2, RoundingMode.HALF_UP);
         account.setBalance(newBalance);
-
-        return accountRepository.save(account);
+        Account updatedAccount = accountRepository.save(account);
+        
+        logger.info("Solde décrémenté avec succès - Compte ID: {}, Ancien solde: {}, Nouveau solde: {}", 
+                   accountId, currentBalance, newBalance);
+        
+        return updatedAccount;
     }
 
     public boolean deleteAccount(Account account) {
         if (account == null || account.getId() == null) {
-            System.out.println("Le compte à supprimer est invalide.");
+            logger.warn("Tentative de suppression d'un compte invalide");
             return false;
         }
 
-        boolean exists = accountRepository.existsById(account.getId());
-        if (!exists) {
-            System.out.println("Le compte avec l'ID " + account.getId() + " n'existe pas.");
+        Long accountId = account.getId();
+        
+        if (!accountRepository.existsById(accountId)) {
+            logger.warn("Tentative de suppression d'un compte inexistant - ID: {}", accountId);
             return false;
         }
 
+        logger.info("Suppression du compte - ID: {}, Numéro de compte: {}", accountId, account.getAccountNumber());
         accountRepository.delete(account);
-        System.out.println("Compte supprimé avec succès : " + account.getId());
+        logger.info("Compte supprimé avec succès - ID: {}", accountId);
+        
         return true;
-
     }
 
+    private void validateAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.error("Montant invalide: {}", amount);
+            throw new IllegalArgumentException("Le montant doit être strictement positif");
+        }
+    }
+
+    private Account findAccountById(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> {
+                    logger.error("Compte introuvable avec l'ID: {}", accountId);
+                    return new AccountNotFoundException("Compte introuvable avec l'ID : " + accountId);
+                });
+    }
 }

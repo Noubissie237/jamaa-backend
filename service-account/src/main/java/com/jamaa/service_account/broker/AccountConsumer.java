@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.jamaa.service_account.service.AccountService;
 import com.jamaa.service_account.events.CustomerEvent;
-import com.jamaa.service_account.model.Account;
 
 @Service
 public class AccountConsumer {
@@ -17,7 +16,7 @@ public class AccountConsumer {
     private AccountService accountService;
 
     @RabbitListener(queues = "customerCreateQueueAccount")
-    public Account customerCreateConsumer(CustomerEvent event) throws IOException {
-        return accountService.createAccount(event.getId());
+    public void customerCreateConsumer(CustomerEvent event) throws IOException {
+       accountService.createAccount(event.getId());
     }
 }

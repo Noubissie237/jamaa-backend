@@ -8,4 +8,5 @@ import com.jamaa.service_account.model.Account;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByAccountNumber(String accountNumber);
+    Optional<Account> findByUserId(Long userId);
 }

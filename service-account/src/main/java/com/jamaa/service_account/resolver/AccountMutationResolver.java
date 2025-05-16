@@ -18,11 +18,17 @@ public class AccountMutationResolver {
     private final AccountService accountService;
 
     @MutationMapping
-    public Account createAccount(@Argument Long userId) throws IOException {
-        return accountService.createAccount(userId);
+    public void createAccount(@Argument Long userId) throws IOException {
+        accountService.createAccount(userId);
     }
+
     @MutationMapping
-    public Account incrementBalance(@Argument BigDecimal amount ,@Argument Long accountId) throws IOException{
+    public Account incrementBalance(@Argument Long accountId, @Argument BigDecimal amount) throws IOException{
         return accountService.incrementBalance(accountId,amount);
+    }
+
+    @MutationMapping
+    public Account decrementBalance(@Argument Long accountId, @Argument BigDecimal amount) throws IOException{
+        return accountService.decrementBalance(accountId,amount);
     }
 }

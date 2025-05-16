@@ -15,3 +15,28 @@ mutation {
     createdAt
   }
 }
+
+# query {
+#   getAllAccounts{
+#     id,
+#     balance
+#   }
+# }
+
+# query {
+#   getAccount(id: 1) {
+#     balance
+#   }
+# }
+
+# mutation {
+#   incrementBalance(accountId: 1, amount: "1000000"){
+#     balance
+#   }
+# }
+
+# mutation {
+#   decrementBalance(accountId: 1, amount: "1000000.00") {
+#     balance
+#   }
+# }

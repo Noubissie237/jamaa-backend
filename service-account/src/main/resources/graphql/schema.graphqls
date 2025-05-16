@@ -2,16 +2,18 @@ type Account {
   id: ID!
   userId: ID!
   accountNumber: String!
-  balance: Float!
+  balance: String!
   createdAt: String!
 }
 
 
 type Mutation {
     createAccount(userId: ID!): Account
-    i
+    incrementBalance(accountId: ID!, amount: String!): Account
+    decrementBalance(accountId: ID!, amount: String!): Account
 }
 
 type Query {
     getAllAccounts: [Account!]
+    getAccount(id: ID!): Account
 }

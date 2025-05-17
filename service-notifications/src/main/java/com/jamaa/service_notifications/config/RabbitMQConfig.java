@@ -61,5 +61,13 @@ public class RabbitMQConfig {
     public Queue accountNotificationQueue() {
         return new Queue("account.notification.queue", true);
     }
+    @Bean
+    public Queue suspiciousActivityQueue() {
+        return new Queue("suspicious.activity.queue", true);
+    }
+    @Bean
+    public Queue insufficientFundsQueue() {
+        return new Queue("insufficient.funds.queue", true);
+    }
 
 } 

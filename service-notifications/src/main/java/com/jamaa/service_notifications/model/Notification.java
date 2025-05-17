@@ -1,12 +1,19 @@
 package com.jamaa.service_notifications.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "notifications")
@@ -109,7 +116,9 @@ public class Notification implements Serializable {
         MOT_DE_PASSE_REINITIALISE,
         CONFIRMATION_SOUSCRIPTION_BANQUE,
         TRANSACTION_REUSSIE,
-        AUTHENTIFICATION
+        AUTHENTIFICATION,
+        ALERTE_SECURITE,
+        ALERTE_SOLDE,
     }
 
     public enum ServiceEmetteur {
@@ -118,6 +127,8 @@ public class Notification implements Serializable {
         TRANSFER_SERVICE,
         AUTH_SERVICE,
         BANK_SERVICE,
-        TRANSACTION_SERVICE
+        TRANSACTION_SERVICE, 
+        SECURITY_SERVICE
+        
     }
 } 

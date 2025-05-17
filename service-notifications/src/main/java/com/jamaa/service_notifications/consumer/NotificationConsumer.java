@@ -14,15 +14,19 @@ import org.springframework.stereotype.Component;
 
 import jakarta.mail.MessagingException;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 public class NotificationConsumer {
     private static final Logger logger = LoggerFactory.getLogger(NotificationConsumer.class);
     private final NotificationService notificationService;
-    private final EmailSender mailservice;
+    private final EmailSender emailService;
 
-    public NotificationConsumer(NotificationService notificationService, EmailSender mailservice) {
+    public NotificationConsumer(NotificationService notificationService, EmailSender emailService) {
         this.notificationService = notificationService;
-        this.mailservice = mailservice;
+        this.emailService = emailService;
     }
 
     @RabbitListener(queues = "deposit.notification.queue")
@@ -32,15 +36,21 @@ public class NotificationConsumer {
         logger.info("Montant: {}", event.getAmount());
         
         try {
-            String message = 
-                "Bonjour,<br>" + 
-                "Nous vous confirmons que votre dépôt de " + event.getAmount() + " € a été effectué avec succès. <br>" + 
-                "Méthode : " + event.getDepositMethod() + "<br>" + 
-                "Référence : " + event.getReferenceNumber() + "<br>" + 
-                "Banque : " + event.getBankName() + "<br>" + 
-                "Compte : " + event.getAccountNumber() + "<br>" + 
-                "Cordialement, <br>L'équipe Jamaa";
+            // Préparation des données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("amount", event.getAmount());
+            data.put("depositMethod", event.getDepositMethod());
+            data.put("referenceNumber", event.getReferenceNumber());
+            data.put("bankName", event.getBankName());
+            data.put("accountNumber", event.getAccountNumber());
+            
+            // Message pour la base de données (version simplifiée)
+            String message = String.format(
+                "Dépôt de %.2f € effectué avec succès via %s (Réf: %s)",
+                event.getAmount(), event.getDepositMethod(), event.getReferenceNumber()
+            );
 
+            // Création et sauvegarde de la notification
             Notification notification = new Notification();
             notification.setEmail(event.getEmail());
             notification.setTitle("Confirmation de dépôt");
@@ -52,10 +62,15 @@ public class NotificationConsumer {
             Notification savedNotification = notificationService.saveNotification(notification);
             logger.info("Notification sauvegardée avec l'ID: {}", savedNotification.getId());
 
+            // Envoi de l'email avec le template
             logger.info("Envoi de l'email...");
-            mailservice.sendMail(event.getEmail(), "Confirmation de dépôt", message);
+            emailService.sendNotification(
+                event.getEmail(), 
+                EmailSender.NotificationType.DEPOSIT,
+                data
+            );
+            
             logger.info("Email envoyé avec succès");
-
             logger.info("=== Fin du traitement de la notification de dépôt ===");
         } catch (MessagingException e) {
             logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
@@ -67,15 +82,21 @@ public class NotificationConsumer {
     @RabbitListener(queues = "withdrawal.notification.queue")
     public void handleWithdrawalNotification(WithdrawalEvent event) {
         try {
-            String message = 
-                "Bonjour,<br>" + 
-                "Votre retrait de " + event.getAmount() + " € a été effectué avec succès.<br>" + 
-                "Méthode : " + event.getWithdrawalMethod() + "<br>" + 
-                "Compte destinataire : " + event.getDestinationAccount() + "<br>" + 
-                "Banque : " + event.getBankName() + "<br>" + 
-                "Compte : " + event.getAccountNumber() + "<br>" + 
-                "Cordialement,<br>L'équipe Jamaa";
+            // Préparation des données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("amount", event.getAmount());
+            data.put("withdrawalMethod", event.getWithdrawalMethod());
+            data.put("destinationAccount", event.getDestinationAccount());
+            data.put("bankName", event.getBankName());
+            data.put("accountNumber", event.getAccountNumber());
+            
+            // Message pour la base de données
+            String message = String.format(
+                "Retrait de %.2f € effectué avec succès via %s",
+                event.getAmount(), event.getWithdrawalMethod()
+            );
 
+            // Création et sauvegarde de la notification
             Notification notification = new Notification();
             notification.setEmail(event.getEmail());
             notification.setTitle("Confirmation de retrait");
@@ -84,9 +105,16 @@ public class NotificationConsumer {
             notification.setServiceEmetteur(ServiceEmetteur.WITHDRAWAL_SERVICE);
 
             notificationService.saveNotification(notification);
-            mailservice.sendMail(event.getEmail(), "Confirmation de retrait", message);
+            
+            // Envoi de l'email avec le template
+            emailService.sendNotification(
+                event.getEmail(), 
+                EmailSender.NotificationType.WITHDRAWAL,
+                data
+            );
+            
             logger.info("Notification de retrait traitée pour la transaction: {}", event.getTransactionId());
-        } catch (MessagingException e) {
+        } catch (MessagingException | IOException e) {
             logger.error("Erreur lors de l'envoi de la notification de retrait: {}", e.getMessage());
         }
     }
@@ -94,16 +122,22 @@ public class NotificationConsumer {
     @RabbitListener(queues = "transfer.notification.queue")
     public void handleTransferNotification(TransferEvent event) {
         try {
-            String message = 
-                "Bonjour,<br>" + 
-                "Votre transfert de " + event.getAmount() + " € a été effectué avec succès.<br>" + 
-                "Compte source : " + event.getSourceAccount() + "<br>" + 
-                "Compte destinataire : " + event.getDestinationAccount() + "<br>" + 
-                "Banque destinataire : " + event.getDestinationBank() + "<br>" + 
-                "Bénéficiaire : " + event.getBeneficiaryName() + "<br>" + 
-                "Motif : " + event.getTransferReason() + "<br>" + 
-                "Cordialement,<br>L'équipe Jamaa";
+            // Préparation des données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("amount", event.getAmount());
+            data.put("sourceAccount", event.getSourceAccount());
+            data.put("destinationAccount", event.getDestinationAccount());
+            data.put("destinationBank", event.getDestinationBank());
+            data.put("beneficiaryName", event.getBeneficiaryName());
+            data.put("transferReason", event.getTransferReason());
+            
+            // Message pour la base de données
+            String message = String.format(
+                "Transfert de %.2f € effectué vers %s (%s)",
+                event.getAmount(), event.getBeneficiaryName(), event.getDestinationBank()
+            );
 
+            // Création et sauvegarde de la notification
             Notification notification = new Notification();
             notification.setEmail(event.getEmail());
             notification.setTitle("Confirmation de transfert");
@@ -112,9 +146,16 @@ public class NotificationConsumer {
             notification.setServiceEmetteur(ServiceEmetteur.TRANSFER_SERVICE);
 
             notificationService.saveNotification(notification);
-            mailservice.sendMail(event.getEmail(), "Confirmation de transfert", message);
+            
+            // Envoi de l'email avec le template
+            emailService.sendNotification(
+                event.getEmail(), 
+                EmailSender.NotificationType.TRANSFER,
+                data
+            );
+            
             logger.info("Notification de transfert traitée pour la transaction: {}", event.getTransactionId());
-        } catch (MessagingException e) {
+        } catch (MessagingException | IOException e) {
             logger.error("Erreur lors de l'envoi de la notification de transfert: {}", e.getMessage());
         }
     }
@@ -122,14 +163,21 @@ public class NotificationConsumer {
     @RabbitListener(queues = "account.notification.queue")
     public void handleAccountNotification(AccountEvent event) {
         try {
-            String message = 
-                "Bonjour,<br>" + 
-                "Votre compte a été " + event.getAccountStatus() + " avec succès.<br>" + 
-                "Type de compte : " + event.getAccountType() + "<br>" + 
-                "Devise : " + event.getCurrency() + "<br>" + 
-                "Solde : " + event.getBalance() + " " + event.getCurrency() + "<br>" + 
-                "Cordialement,<br>L'équipe Jamaa";
+            // Préparation des données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("accountStatus", event.getAccountStatus());
+            data.put("accountType", event.getAccountType());
+            data.put("currency", event.getCurrency());
+            data.put("balance", event.getBalance());
+            
+            // Message pour la base de données
+            String message = String.format(
+                "Compte %s %s. Solde initial: %.2f %s",
+                event.getAccountType(), event.getAccountStatus(), 
+                event.getBalance(), event.getCurrency()
+            );
 
+            // Création et sauvegarde de la notification
             Notification notification = new Notification();
             notification.setEmail(event.getEmail());
             notification.setTitle("Notification de compte");
@@ -138,9 +186,16 @@ public class NotificationConsumer {
             notification.setServiceEmetteur(ServiceEmetteur.BANK_SERVICE);
 
             notificationService.saveNotification(notification);
-            mailservice.sendMail(event.getEmail(), "Notification de compte", message);
+            
+            // Envoi de l'email avec le template
+            emailService.sendNotification(
+                event.getEmail(), 
+                EmailSender.NotificationType.ACCOUNT,
+                data
+            );
+            
             logger.info("Notification de compte traitée pour l'utilisateur: {}", event.getUserId());
-        } catch (MessagingException e) {
+        } catch (MessagingException | IOException e) {
             logger.error("Erreur lors de l'envoi de la notification de compte: {}", e.getMessage());
         }
     }
@@ -148,13 +203,19 @@ public class NotificationConsumer {
     @RabbitListener(queues = "auth.notification.queue")
     public void handleAuthNotification(AuthEvent event) {
         try {
-            String message = 
-                "Bonjour,<br>" + 
-                "Votre " + event.getAuthType().toLowerCase() + " a été effectuée avec succès.<br>" + 
-                "Appareil : " + event.getDeviceInfo() + "<br>" + 
-                "Localisation : " + event.getLocation() + "<br>" + 
-                "Cordialement,<br>L'équipe Jamaa";
+            // Préparation des données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("authType", event.getAuthType().toLowerCase());
+            data.put("deviceInfo", event.getDeviceInfo());
+            data.put("location", event.getLocation());
+            
+            // Message pour la base de données
+            String message = String.format(
+                "%s effectuée depuis %s à %s",
+                event.getAuthType(), event.getDeviceInfo(), event.getLocation()
+            );
 
+            // Création et sauvegarde de la notification
             Notification notification = new Notification();
             notification.setEmail(event.getEmail());
             notification.setTitle("Notification d'authentification");
@@ -163,10 +224,86 @@ public class NotificationConsumer {
             notification.setServiceEmetteur(ServiceEmetteur.AUTH_SERVICE);
 
             notificationService.saveNotification(notification);
-            mailservice.sendMail(event.getEmail(), "Notification d'authentification", message);
+            
+            // Envoi de l'email avec le template
+            emailService.sendNotification(
+                event.getEmail(), 
+                EmailSender.NotificationType.AUTHENTICATION,
+                data
+            );
+            
             logger.info("Notification d'authentification traitée pour l'utilisateur: {}", event.getUserId());
-        } catch (MessagingException e) {
+        } catch (MessagingException | IOException e) {
             logger.error("Erreur lors de l'envoi de la notification d'authentification: {}", e.getMessage());
         }
     }
-} 
+    
+    // Ajout de deux nouveaux listeners pour les notifications supplémentaires
+    
+    @RabbitListener(queues = "suspicious.activity.queue")
+    public void handleSuspiciousActivityNotification(SuspiciousActivityEvent event) {
+        try {
+            // Utilisation de la méthode spécialisée
+            emailService.sendSuspiciousActivityAlert(
+                event.getEmail(),
+                event.getActivityType(),
+                event.getLocation(),
+                event.getDeviceInfo(),
+                event.getActivityTime()
+            );
+            
+            // Création et sauvegarde de la notification
+            String message = String.format(
+                "Activité suspecte détectée: %s depuis %s à %s",
+                event.getActivityType(), event.getDeviceInfo(), event.getLocation()
+            );
+            
+            Notification notification = new Notification();
+            notification.setEmail(event.getEmail());
+            notification.setTitle("Alerte de sécurité");
+            notification.setMessage(message);
+            notification.setType(NotificationType.ALERTE_SECURITE);
+            notification.setServiceEmetteur(ServiceEmetteur.SECURITY_SERVICE);
+
+            notificationService.saveNotification(notification);
+            
+            logger.info("Notification d'activité suspecte envoyée: {}", event.getActivityId());
+        } catch (MessagingException | IOException e) {
+            logger.error("Erreur lors de l'envoi de l'alerte d'activité suspecte: {}", e.getMessage());
+        }
+    }
+    
+    @RabbitListener(queues = "insufficient.funds.queue")
+    public void handleInsufficientFundsNotification(InsufficientFundsEvent event) {
+        try {
+            // Utilisation de la méthode spécialisée
+            emailService.sendInsufficientFundsAlert(
+                event.getEmail(),
+                event.getAccountNumber(),
+                event.getCurrentBalance(),
+                event.getRequiredAmount(),
+                event.getTransactionType()
+            );
+            
+    //         // Création et sauvegarde de la notification
+            String message = String.format(
+                "Solde insuffisant pour %s. Solde actuel: %.2f €, Montant requis: %.2f €",
+                event.getTransactionType(), event.getCurrentBalance(), event.getRequiredAmount()
+            );
+            
+            Notification notification = new Notification();
+            notification.setEmail(event.getEmail());
+            notification.setTitle("Alerte de solde insuffisant");
+            notification.setMessage(message);
+            notification.setType(NotificationType.ALERTE_SOLDE);
+            notification.setServiceEmetteur(ServiceEmetteur.TRANSACTION_SERVICE);
+
+            notificationService.saveNotification(notification);
+            
+            logger.info("Notification de solde insuffisant envoyée pour le compte: {}", event.getAccountNumber());
+        } catch (MessagingException | IOException e) {
+            logger.error("Erreur lors de l'envoi de l'alerte de solde insuffisant: {}", e.getMessage());
+        }
+    }
+
+}

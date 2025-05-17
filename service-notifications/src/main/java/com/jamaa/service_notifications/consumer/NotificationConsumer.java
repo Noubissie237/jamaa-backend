@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import jakarta.mail.MessagingException;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -303,6 +304,59 @@ public class NotificationConsumer {
             logger.info("Notification de solde insuffisant envoyée pour le compte: {}", event.getAccountNumber());
         } catch (MessagingException | IOException e) {
             logger.error("Erreur lors de l'envoi de l'alerte de solde insuffisant: {}", e.getMessage());
+        }
+    }
+
+
+    @RabbitListener(queues = "customerCreateQueueNotification")
+    public void handleRegistrationNotification(CustomerEvent event) {
+        logger.info("=== Nouvelle notification d'inscription réussi ===");
+        logger.info("Email: {}", event.getEmail());
+        
+        try {
+            // Préparation des données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("email", event.getEmail());
+            data.put("firstName", event.getFirstName());
+            data.put("lastName", event.getLastName());
+            String fullName = event.getFirstName() + " " + event.getLastName();
+            data.put("fullName", fullName);
+            data.put("accountNumber", "2025-f4a5ge");
+            data.put("registrationDate", LocalDate.now());
+            data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
+            
+            // Message pour la base de données (version simplifiée)
+            String message = String.format(
+                "Client  %s - %s enrégistré avec succès",
+                event.getEmail(), event.getCniNumber()
+            );
+
+            // Création et sauvegarde de la notification
+            Notification notification = new Notification();
+            notification.setEmail(event.getEmail());
+            notification.setTitle("Confirmation d'inscription");
+            notification.setMessage(message);
+            notification.setType(NotificationType.CONFIRMATION_INSCRIPTION);
+            notification.setServiceEmetteur(ServiceEmetteur.AUTH_SERVICE);
+
+            logger.info("Sauvegarde de la notification dans la base de données...");
+            Notification savedNotification = notificationService.saveNotification(notification);
+            logger.info("Notification sauvegardée avec l'ID: {}", savedNotification.getId());
+
+            // Envoi de l'email avec le template
+            logger.info("Envoi de l'email...");
+            emailService.sendNotification(
+                event.getEmail(), 
+                EmailSender.NotificationType.CONFIRMATION_INSCRIPTION,
+                data
+            );
+            
+            logger.info("Email envoyé avec succès");
+            logger.info("=== Fin du traitement de la notification de dépôt ===");
+        } catch (MessagingException e) {
+            logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erreur inattendue: {}", e.getMessage());
         }
     }
 

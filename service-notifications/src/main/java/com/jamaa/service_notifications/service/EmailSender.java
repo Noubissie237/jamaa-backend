@@ -22,16 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
     
     import jakarta.mail.MessagingException;
     import jakarta.mail.internet.MimeMessage;
-    
-    /**
-     * Service de gestion des emails avec templates HTML
-     * Permet l'envoi d'emails professionnels avec une mise en forme cohérente
-     */
+
     @Service
     public class EmailSender {
         private static final Logger logger = LoggerFactory.getLogger(EmailSender.class);
         
-        private static final String TEMPLATES_BASE_PATH = "/template/";
+        private static final String TEMPLATES_BASE_PATH = "/templates/";
         private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         
         @Value("${email.sender.address:supp0rt.jamaa@gmail.com}")
@@ -52,9 +48,6 @@ import org.springframework.beans.factory.annotation.Autowired;
         @Autowired
         private ResourceLoader resourceLoader;
         
-        /**
-         * Types de notifications supportés
-         */
         public enum NotificationType {
             DEPOSIT("deposit-notification", "Confirmation de dépôt"),
             WITHDRAWAL("withdrawal-notification", "Confirmation de retrait"),
@@ -63,7 +56,8 @@ import org.springframework.beans.factory.annotation.Autowired;
             AUTHENTICATION("auth-notification", "Notification de sécurité"),
             INSUFFICIENT_FUNDS("insufficient-funds-notification", "Alerte de solde"),
             PASSWORD_CHANGE("password-change-notification", "Modification de mot de passe"),
-            SUSPICIOUS_ACTIVITY("suspicious-activity-notification", "Alerte de sécurité");
+            SUSPICIOUS_ACTIVITY("suspicious-activity-notification", "Alerte de sécurité"),
+            CONFIRMATION_INSCRIPTION("successful-registration", "Compte créé avec success");
             
             private final String templateName;
             private final String defaultSubject;
@@ -82,31 +76,14 @@ import org.springframework.beans.factory.annotation.Autowired;
             }
         }
         
-        /**
-         * Envoie un email avec un template prédéfini
-         * 
-         * @param to Adresse email du destinataire
-         * @param type Type de notification
-         * @param data Données à injecter dans le template
-         * @throws MessagingException En cas d'erreur d'envoi
-         * @throws IOException En cas d'erreur de lecture du template
-         */
+
         public void sendNotification(String to, NotificationType type, Map<String, Object> data) 
                 throws MessagingException, IOException {
-            sendNotification(to, type, null, data);
+            finalSendNotification(to, type, null, data);
         }
         
-        /**
-         * Envoie un email avec un template prédéfini et un sujet personnalisé
-         * 
-         * @param to Adresse email du destinataire
-         * @param type Type de notification
-         * @param customSubject Sujet personnalisé (null pour utiliser le sujet par défaut)
-         * @param data Données à injecter dans le template
-         * @throws MessagingException En cas d'erreur d'envoi
-         * @throws IOException En cas d'erreur de lecture du template
-         */
-        public void sendNotification(String to, NotificationType type, String customSubject, Map<String, Object> data) 
+        @SuppressWarnings("deprecation")
+        public void finalSendNotification(String to, NotificationType type, String customSubject, Map<String, Object> data) 
                 throws MessagingException, IOException {
             logger.info("Préparation de l'envoi d'une notification de type {}", type.name());
             
@@ -125,11 +102,7 @@ import org.springframework.beans.factory.annotation.Autowired;
             
             logger.info("Notification {} envoyée avec succès à {}", type.name(), to);
         }
-        
-        /**
-         * Envoie un email d'alerte d'activité suspecte
-         * Méthode spécialisée avec paramètres spécifiques
-         */
+
         public void sendSuspiciousActivityAlert(String to, String activityType, String location, 
                 String deviceInfo, Date activityTime) throws MessagingException, IOException {
             
@@ -142,10 +115,7 @@ import org.springframework.beans.factory.annotation.Autowired;
             sendNotification(to, NotificationType.SUSPICIOUS_ACTIVITY, data);
         }
         
-        /**
-         * Envoie une notification de changement de mot de passe
-         * Méthode spécialisée avec paramètres spécifiques
-         */
+
         public void sendPasswordChangeNotification(String to, String deviceInfo, String location) 
                 throws MessagingException, IOException {
             
@@ -157,10 +127,6 @@ import org.springframework.beans.factory.annotation.Autowired;
             sendNotification(to, NotificationType.PASSWORD_CHANGE, data);
         }
         
-        /**
-         * Envoie une notification de solde insuffisant
-         * Méthode spécialisée avec paramètres spécifiques
-         */
         public void sendInsufficientFundsAlert(String to, String accountNumber, double balance, 
                 double requiredAmount, String transactionType) throws MessagingException, IOException {
             
@@ -173,9 +139,6 @@ import org.springframework.beans.factory.annotation.Autowired;
             sendNotification(to, NotificationType.INSUFFICIENT_FUNDS, data);
         }
         
-        /**
-         * Charge et traite un template en remplaçant les variables par leurs valeurs
-         */
         private String loadAndProcessTemplate(String templateName, Map<String, Object> data) throws IOException {
             String templatePath = TEMPLATES_BASE_PATH + templateName + ".html";
             Resource resource = resourceLoader.getResource("classpath:" + templatePath);
@@ -199,10 +162,7 @@ import org.springframework.beans.factory.annotation.Autowired;
             
             return template;
         }
-        
-        /**
-         * Envoie un email avec le contenu HTML spécifié
-         */
+
         private void sendEmailWithTemplate(String to, String subject, String htmlContent) throws MessagingException {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

@@ -69,5 +69,9 @@ public class RabbitMQConfig {
     public Queue insufficientFundsQueue() {
         return new Queue("insufficient.funds.queue", true);
     }
+    @Bean
+    public Queue customerCreateQueueNotification() {
+        return new Queue("customerCreateQueueNotification", true);
+    }
 
 } 

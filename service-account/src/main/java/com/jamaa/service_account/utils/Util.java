@@ -14,7 +14,7 @@ public class Util {
     private final String graphqlUsersEndpoint = "http://127.0.0.1:8079/SERVICE-USERS/graphql";
     private final OkHttpClient client = new OkHttpClient();
     private final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private final int CODE_LENGTH = 4;
+    private final int CODE_LENGTH = 6;
     private final SecureRandom random = new SecureRandom();
 
     public String generateRandomCode() {

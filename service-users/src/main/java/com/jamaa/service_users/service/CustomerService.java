@@ -47,7 +47,6 @@ public class CustomerService {
             
             rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.admin", event);
             rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.account", event);
-            rabbitTemplate.convertAndSend("CustomerExchange", "customer.create.notification", event);
             login(customer.getEmail(), initialPassword);
             
             return saving;

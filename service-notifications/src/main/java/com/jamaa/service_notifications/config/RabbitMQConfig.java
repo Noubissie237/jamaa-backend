@@ -1,6 +1,7 @@
 package com.jamaa.service_notifications.config;
 
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -26,7 +27,10 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
     
-
+    @Bean
+    public TopicExchange AccountExchange(){
+        return new TopicExchange("AccountExchange", true, false);
+    }
     
     @Bean
     public Queue depositNotificationQueue() {
@@ -72,6 +76,11 @@ public class RabbitMQConfig {
     @Bean
     public Queue customerCreateQueueNotification() {
         return new Queue("customerCreateQueueNotification", true);
+    }
+
+    @Bean
+    public Queue accountCreateQueue(){
+        return new Queue("accountCreateQueue", true, false, false);
     }
 
 } 

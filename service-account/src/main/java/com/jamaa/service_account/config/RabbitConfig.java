@@ -36,13 +36,23 @@ public class RabbitConfig {
     }
 
     @Bean
+    public TopicExchange AccountExchange(){
+        return new TopicExchange("AccountExchange", true, false);
+    }
+
+    @Bean
     public Queue customerCreateQueueAccount(){
         return new Queue("customerCreateQueueAccount", true, false, false);
     }
 
     @Bean
-    public Binding binding(TopicExchange CustomerExchange, Queue customerCreateQueueAccount) {
-        return BindingBuilder.bind(customerCreateQueueAccount).to(CustomerExchange).with("customer.create.account");
+    public Queue accountCreateQueue(){
+        return new Queue("accountCreateQueue", true, false, false);
+    }
+
+    @Bean
+    public Binding binding(TopicExchange AccountExchange, Queue accountCreateQueue) {
+        return BindingBuilder.bind(accountCreateQueue).to(AccountExchange).with("account.create");
     }
 
 }

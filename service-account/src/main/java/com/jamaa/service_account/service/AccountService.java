@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.jamaa.service_account.model.Account;
 import com.jamaa.service_account.repository.AccountRepository;
 import com.jamaa.service_account.utils.Util;
+import com.jamaa.service_account.events.CustomerAccountEvent;
+import com.jamaa.service_account.events.CustomerEvent;
 import com.jamaa.service_account.exception.AccountNotFoundException;
 import com.jamaa.service_account.exception.InsufficientBalanceException;
 import com.jamaa.service_account.exception.UserNotFoundException;
@@ -32,35 +35,45 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
     private Util util;
 
-    public void createAccount(Long userId) throws IOException {
-        logger.info("Tentative de création d'un compte pour l'utilisateur ID: {}", userId);
+    public void createAccount(CustomerEvent customerEv) throws IOException {
+        logger.info("Tentative de création d'un compte pour l'utilisateur ID: {}", customerEv.getId());
 
-        if (!util.userExist(userId)) {
-            logger.error("Utilisateur non trouvé avec l'ID: {}", userId);
-            throw new UserNotFoundException("Utilisateur introuvable avec l'ID : " + userId);
+        if (!util.userExist(customerEv.getId())) {
+            logger.error("Utilisateur non trouvé avec l'ID: {}", customerEv.getId());
+            throw new UserNotFoundException("Utilisateur introuvable avec l'ID : " + customerEv.getId());
         }
 
-        Optional<Account> existingAccount = accountRepository.findByUserId(userId);
+        Optional<Account> existingAccount = accountRepository.findByUserId(customerEv.getId());
         if (existingAccount.isPresent()) {
-            logger.warn("Un compte existe déjà pour l'utilisateur ID: {}. Retour de l'existant.", userId);
+            logger.warn("Un compte existe déjà pour l'utilisateur ID: {}. Retour de l'existant.", customerEv.getId());
         }
 
         Account account = new Account();
         account.setBalance(BigDecimal.ZERO);
         account.setCreatedAt(LocalDateTime.now());
-        account.setUserId(userId);
+        account.setUserId(customerEv.getId());
 
-        logger.info("Instance Account créée avec succès pour l'utilisateur ID {}", userId);
+        logger.info("Instance Account créée avec succès pour l'utilisateur ID {}", customerEv.getId());
 
         String accountNumber = generateUniqueAccountNumber();
         logger.info("Numéro de compte {} généré avec succès", accountNumber);
         account.setAccountNumber(accountNumber);
 
         accountRepository.save(account);
-        logger.info("Compte créé avec succès - Numéro de compte: {}, User ID: {}", accountNumber, userId);
+        logger.info("Compte créé avec succès - Numéro de compte: {}, User ID: {}", accountNumber, customerEv.getId());
 
+        CustomerAccountEvent event = new CustomerAccountEvent();
+        event.setFirstName(customerEv.getFirstName());
+        event.setLastName(customerEv.getLastName());
+        event.setEmail(customerEv.getEmail());
+        event.setAccountNumber(account.getAccountNumber());
+
+        rabbitTemplate.convertAndSend("AccountExchange", "account.create", event);
     }
 
 

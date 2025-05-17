@@ -17,6 +17,6 @@ public class AccountConsumer {
 
     @RabbitListener(queues = "customerCreateQueueAccount")
     public void customerCreateConsumer(CustomerEvent event) throws IOException {
-       accountService.createAccount(event.getId());
+       accountService.createAccount(event);
     }
 }

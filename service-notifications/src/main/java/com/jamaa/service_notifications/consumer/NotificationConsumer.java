@@ -308,7 +308,7 @@ public class NotificationConsumer {
     }
 
 
-    @RabbitListener(queues = "customerCreateQueueNotification")
+    @RabbitListener(queues = "accountCreateQueue")
     public void handleRegistrationNotification(CustomerEvent event) {
         logger.info("=== Nouvelle notification d'inscription réussi ===");
         logger.info("Email: {}", event.getEmail());
@@ -321,14 +321,14 @@ public class NotificationConsumer {
             data.put("lastName", event.getLastName());
             String fullName = event.getFirstName() + " " + event.getLastName();
             data.put("fullName", fullName);
-            data.put("accountNumber", "2025-f4a5ge");
+            data.put("accountNumber", event.getAccountNumber());
             data.put("registrationDate", LocalDate.now());
             data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
             
             // Message pour la base de données (version simplifiée)
             String message = String.format(
-                "Client  %s - %s enrégistré avec succès",
-                event.getEmail(), event.getCniNumber()
+                "Client  %s enrégistré avec succès",
+                event.getEmail()
             );
 
             // Création et sauvegarde de la notification

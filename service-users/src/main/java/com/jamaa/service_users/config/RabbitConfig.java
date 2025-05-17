@@ -46,11 +46,6 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue customerCreateQueueNotification(){
-        return new Queue("customerCreateQueueNotification", true, false, false);
-    }
-
-    @Bean
     public Binding binding(TopicExchange CustomerExchange, Queue customerCreateQueueAdmin) {
         return BindingBuilder.bind(customerCreateQueueAdmin).to(CustomerExchange).with("customer.create.admin");
     }
@@ -58,11 +53,6 @@ public class RabbitConfig {
     @Bean
     public Binding binding1(TopicExchange CustomerExchange, Queue customerCreateQueueAccount) {
         return BindingBuilder.bind(customerCreateQueueAccount).to(CustomerExchange).with("customer.create.account");
-    }
-
-    @Bean
-    public Binding binding2(TopicExchange CustomerExchange, Queue customerCreateQueueNotification) {
-        return BindingBuilder.bind(customerCreateQueueNotification).to(CustomerExchange).with("customer.create.notification");
     }
 
 }

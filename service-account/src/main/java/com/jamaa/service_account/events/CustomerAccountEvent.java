@@ -1,4 +1,4 @@
-package com.jamaa.service_notifications.events;
+package com.jamaa.service_account.events;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,7 +11,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class CustomerEvent {
+public class CustomerAccountEvent {
     @JsonProperty("firstName")
     private String firstName;
     @JsonProperty("lastName")

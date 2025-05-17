@@ -6,6 +6,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
+import com.jamaa.service_account.events.CustomerEvent;
 import com.jamaa.service_account.model.Account;
 import com.jamaa.service_account.service.AccountService;
 
@@ -18,8 +19,8 @@ public class AccountMutationResolver {
     private final AccountService accountService;
 
     @MutationMapping
-    public void createAccount(@Argument Long userId) throws IOException {
-        accountService.createAccount(userId);
+    public void createAccount(@Argument CustomerEvent customer) throws IOException {
+        accountService.createAccount(customer);
     }
 
     @MutationMapping

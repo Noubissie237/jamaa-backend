@@ -6,9 +6,19 @@ type Account {
   createdAt: String!
 }
 
+input CustomerInput {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  cniRecto: String!
+  cniVerso: String!
+  cniNumber: String!
+}
+
 
 type Mutation {
-    createAccount(userId: ID!): Account
+    createAccount(customer: CustomerInput!): Account
     incrementBalance(accountId: ID!, amount: String!): Account
     decrementBalance(accountId: ID!, amount: String!): Account
 }

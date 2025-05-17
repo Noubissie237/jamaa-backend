@@ -1,0 +1,40 @@
+enum NotificationType {
+    CONFIRMATION_DEPOT
+    CONFIRMATION_RETRAIT
+    CONFIRMATION_TRANSFERT
+    CONFIRMATION_INSCRIPTION
+    MOT_DE_PASSE_REINITIALISE
+    CONFIRMATION_SOUSCRIPTION_BANQUE
+    TRANSACTION_REUSSIE
+}
+
+enum ServiceEmetteur {
+    DEPOSIT_SERVICE
+    WITHDRAWAL_SERVICE
+    TRANSFER_SERVICE
+    AUTH_SERVICE
+    BANK_SERVICE
+    TRANSACTION_SERVICE
+}
+
+type Notification {
+    id: ID!
+    title: String!
+    message: String!
+    email: String!
+    dateEnvoi: String!
+    lu: Boolean!
+    type: NotificationType!
+    serviceEmetteur: ServiceEmetteur!
+}
+
+type Query {
+    notificationsByUser(email: String!): [Notification!]!
+    unreadNotifications(email: String!): [Notification!]!
+    notificationsByType(email: String!, type: NotificationType!): [Notification!]!
+    notificationsByService(email: String!, service: ServiceEmetteur!): [Notification!]!
+}
+
+type Mutation {
+    markAsRead(id: ID!): Notification!
+} 

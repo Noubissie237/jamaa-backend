@@ -352,7 +352,7 @@ public class NotificationConsumer {
             );
             
             logger.info("Email envoyé avec succès");
-            logger.info("=== Fin du traitement de la notification de dépôt ===");
+            logger.info("=== Fin du traitement de la notification d'inscription ===");
         } catch (MessagingException e) {
             logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
         } catch (Exception e) {

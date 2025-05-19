@@ -1,0 +1,251 @@
+"""
+Schéma GraphQL pour le service bancaire
+"""
+
+# Types principaux
+type Bank {
+    id: ID!
+    name: String!
+    description: String!
+    logoUrl: String
+    customerServicePhone: String!
+    customerServiceEmail: String!
+    services: [BankServiceType!]!
+    fees: [BankFee!]!
+    minimumBalance: Float!
+    minimumBalanceDescription: String
+    active: Boolean!
+    createdAt: String!
+    updatedAt: String
+}
+
+type BankService {
+    id: ID!
+    serviceType: BankServiceType!
+    description: String
+    available: Boolean!
+}
+
+type BankCondition {
+    id: ID!
+    type: String!
+    description: String!
+    value: String
+}
+
+type BankFee {
+    id: ID!
+    type: BankFeeType!
+    amount: Float!
+    frequency: BankFeeFrequency!
+    description: String
+}
+
+# Types pour les souscriptions
+type BankSubscription {
+    id: ID!
+    userId: ID!
+    bank: Bank!
+    status: SubscriptionStatus!
+    rejectionReason: String
+    subscriptionNumber: String!
+    createdAt: String!
+    updatedAt: String
+}
+
+type StatusCount {
+    status: String!
+    label: String!
+    count: Int!
+}
+
+type BankSubscriptionStats {
+    bankId: ID!
+    bankName: String!
+    totalSubscriptions: Int!
+    activeSubscriptions: Int!
+    pendingSubscriptions: Int!
+    rejectedSubscriptions: Int!
+    closedSubscriptions: Int!
+    approvedSubscriptions: Int!
+    subscriptionsByStatus: [StatusCount!]!
+    approvalRate: Float!
+    activeRate: Float!
+}
+
+# Inputs
+input CreateBankInput {
+    name: String!
+    description: String!
+    logoUrl: String!
+    customerServicePhone: String!
+    customerServiceEmail: String!
+    minimumBalance: Float!
+    minimumBalanceDescription: String
+    services: [BankServiceType!]!
+    fees: [BankFeeInput!]
+}
+
+input BankServiceInput {
+    serviceType: BankServiceType!
+    description: String
+}
+
+input BankFeeInput {
+    type: BankFeeType!
+    amount: Float!
+    frequency: BankFeeFrequency!
+    description: String
+}
+
+input UpdateBankInput {
+    name: String
+    description: String
+    logoUrl: String
+    customerServicePhone: String
+    customerServiceEmail: String
+    minimumBalance: Float
+    minimumBalanceDescription: String
+    active: Boolean
+    services: [BankServiceType!]
+    fees: [BankFeeInput!]
+}
+
+input BankSubscriptionInput {
+    userId: ID!
+    bankId: ID!
+}
+
+input BankSubscriptionStatsFilter {
+    fromDate: String
+    toDate: String
+    includeInactive: Boolean = false
+}
+
+# Enums
+enum BankServiceType {
+    VIRTUAL_CARD
+    CASH_DEPOSIT
+    CASH_WITHDRAWAL
+    MONEY_TRANSFER
+}
+
+enum BankFeeType {
+    MAINTENANCE_FEE
+    ACCOUNT_OPENING_FEE
+    VIRTUAL_CARD_FEE
+    WITHDRAWAL_FEE
+    INTERNAL_TRANSFER_FEE
+    EXTERNAL_TRANSFER_FEE
+}
+
+enum BankFeeFrequency {
+    ONCE
+    MONTHLY
+    YEARLY
+    PER_TRANSACTION
+}
+
+enum SubscriptionStatus {
+    PENDING
+    APPROVED
+    ACTIVE
+    REJECTED
+    CLOSED
+}
+
+# Queries
+type Query {
+    """
+    Obtenir une banque par son ID
+    """
+    bank(id: ID!): Bank
+
+    """
+    Liste de toutes les banques
+    """
+    banks: [Bank!]!
+
+    """
+    Liste des banques actives
+    """
+    activeBanks: [Bank!]!
+
+    """
+    Obtenir une souscription par son ID
+    """
+    bankSubscription(id: ID!): BankSubscription
+
+    """
+    Liste des souscriptions d'un utilisateur
+    """
+    userBankSubscriptions(userId: ID!): [BankSubscription!]!
+
+    """
+    Statistiques d'une banque spécifique
+    """
+    bankSubscriptionStats(bankId: ID!): BankSubscriptionStats!
+
+    """
+    Statistiques de toutes les banques
+    """
+    allBanksSubscriptionStats: [BankSubscriptionStats!]!
+}
+
+# Mutations
+type Mutation {
+    """
+    Créer une nouvelle banque
+    """
+    createBank(input: CreateBankInput!): Bank!
+
+    """
+    Mettre à jour une banque existante
+    """
+    updateBank(id: ID!, input: UpdateBankInput!): Bank!
+
+    """
+    Activer/désactiver une banque
+    """
+    toggleBankStatus(id: ID!): Bank!
+
+    """
+    Créer une nouvelle souscription bancaire
+    """
+    createBankSubscription(input: BankSubscriptionInput!): BankSubscription!
+
+    """
+    Approuver une souscription bancaire
+    """
+    approveBankSubscription(id: ID!): BankSubscription!
+
+    """
+    Rejeter une souscription bancaire
+    """
+    rejectBankSubscription(id: ID!, reason: String!): BankSubscription!
+
+    """
+    Clôturer une souscription bancaire
+    """
+    closeBankSubscription(id: ID!): BankSubscription!
+
+    """
+    Ajouter un nouveau frais bancaire
+    """
+    addBankFee(bankId: ID!, input: BankFeeInput!): Bank!
+
+    """
+    Mettre à jour un frais bancaire existant
+    """
+    updateBankFee(bankId: ID!, feeId: ID!, input: BankFeeInput!): Bank!
+
+    """
+    Supprimer un frais bancaire
+    """
+    removeBankFee(bankId: ID!, feeId: ID!): Bank!
+
+    """
+    Mettre à jour plusieurs frais bancaires en une seule opération
+    """
+    updateBankFees(bankId: ID!, fees: [BankFeeInput!]!): Bank!
+} 

@@ -10,14 +10,21 @@ import org.springframework.web.client.RestTemplate;
 
 import com.jamaa.service_users.dto.LoginRequest;
 import com.jamaa.service_users.events.CustomerEvent;
+import com.jamaa.service_users.events.SupAdminEvent;
 import com.jamaa.service_users.model.Customer;
+import com.jamaa.service_users.model.SuperAdmin;
 import com.jamaa.service_users.repository.CustomerRepository;
+import com.jamaa.service_users.repository.SuperAdminRepository;
+import com.jamaa.service_users.utils.Util;
 
 @Service
 public class CustomerService {
     
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    SuperAdminRepository superAdminRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -27,6 +34,9 @@ public class CustomerService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private Util util;
 
     public Customer createCustomer(Customer customer) {
         try {
@@ -90,4 +100,47 @@ public class CustomerService {
     public Customer getCustomerByPhone(String phone) {
         return customerRepository.findByPhone(phone).orElse(null);
     }
+
+    public SuperAdmin createSuperAdmin(SuperAdmin supAdmin) {
+        supAdmin.setPassword(util.generateRandomPassword());
+        supAdmin.setUsername(generateUniqueUsername(supAdmin.getFirstName(), supAdmin.getLastName()));
+
+        SupAdminEvent event = new SupAdminEvent();
+        event.setEmail(supAdmin.getEmail());
+        event.setFirstName(supAdmin.getFirstName());
+        event.setLastName(supAdmin.getLastName());
+        event.setUsername(supAdmin.getUsername());
+        event.setPassword(supAdmin.getPassword());
+
+        SuperAdmin saving = superAdminRepository.save(supAdmin);
+
+        rabbitTemplate.convertAndSend("AdminExchange", "superadmin.create.notification", event);
+        
+        return saving;
+    }
+
+    public List<SuperAdmin> getAllSuperAdmins() {
+        return superAdminRepository.findAll();
+    }
+
+    public SuperAdmin getSuperAdminById(Long id) {
+        return superAdminRepository.findById(id).orElse(null);
+    }
+
+    public SuperAdmin getSuperAdminByUsername(String username) {
+        return superAdminRepository.findByUsername(username).orElse(null);
+    }
+
+    private String generateUniqueUsername(String firstName, String lastName) {
+        for(int attempt = 1; attempt <= 10; attempt++) {
+            String candidateUsername = util.generateUsername(firstName, lastName);
+
+            if(!superAdminRepository.findByUsername(candidateUsername).isPresent()) {
+                return candidateUsername;
+            }
+        }
+
+        throw new IllegalStateException("Impossible de générer un username unique");
+    }
+
 }

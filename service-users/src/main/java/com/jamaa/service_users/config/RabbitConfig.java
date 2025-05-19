@@ -36,6 +36,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public TopicExchange AdminExchange(){
+        return new TopicExchange("AdminExchange", true, false);
+    }
+
+    @Bean
     public Queue customerCreateQueueAdmin(){
         return new Queue("customerCreateQueueAdmin", true, false, false);
     }
@@ -46,6 +51,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue SuperAdminCreateQueue(){
+        return new Queue("SuperAdminCreateQueue", true, false, false);
+    }
+
+    @Bean
     public Binding binding(TopicExchange CustomerExchange, Queue customerCreateQueueAdmin) {
         return BindingBuilder.bind(customerCreateQueueAdmin).to(CustomerExchange).with("customer.create.admin");
     }
@@ -53,6 +63,11 @@ public class RabbitConfig {
     @Bean
     public Binding binding1(TopicExchange CustomerExchange, Queue customerCreateQueueAccount) {
         return BindingBuilder.bind(customerCreateQueueAccount).to(CustomerExchange).with("customer.create.account");
+    }
+
+    @Bean
+    public Binding binding2(TopicExchange AdminExchange, Queue SuperAdminCreateQueue) {
+        return BindingBuilder.bind(SuperAdminCreateQueue).to(AdminExchange).with("superadmin.create.notification");
     }
 
 }

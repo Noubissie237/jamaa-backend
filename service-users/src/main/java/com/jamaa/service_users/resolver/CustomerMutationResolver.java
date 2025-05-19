@@ -7,6 +7,7 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
 import com.jamaa.service_users.model.Customer;
+import com.jamaa.service_users.model.SuperAdmin;
 import com.jamaa.service_users.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,4 +32,10 @@ public class CustomerMutationResolver {
     public String login(@Argument String email, @Argument String password) {
         return customerService.login(email, password);
     }
+
+    @MutationMapping
+    public SuperAdmin createSuperAdmin(@Argument SuperAdmin input) {
+        return customerService.createSuperAdmin(input);
+    }
+    
 }

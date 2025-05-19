@@ -18,6 +18,15 @@ type Customer implements Person {
     cniVerso: String!
 }
 
+type SuperAdmin implements Person {
+    id: ID!
+    lastName: String!
+    firstName: String!
+    email: String!
+    password: String!
+    username: String!
+}
+
 input CustomerInput {
     lastName: String!
     firstName: String!
@@ -29,14 +38,25 @@ input CustomerInput {
     cniVerso: String!
 }
 
+input SuperAdminInput {
+    lastName: String!
+    firstName: String!
+    email: String!
+}
+
 type Query {
     getAllCustomers: [Customer!]
     getCustomerById(id: ID!): Customer
     getCustomerByEmail(email: String!): Customer
     getCustomerByPhone(phone: String!): Customer
+    
+    getAllSuperAdmins: [SuperAdmin!]
+    getSuperAdminById(id: ID!): SuperAdmin
+    getSuperAdminByUsername(username: String!): SuperAdmin
 }
 
 type Mutation {
     createCustomer(input: CustomerInput!): Customer!
     deleteCustomer(id: ID!): [Customer]!
+    createSuperAdmin(input: SuperAdminInput!): SuperAdmin!
 }

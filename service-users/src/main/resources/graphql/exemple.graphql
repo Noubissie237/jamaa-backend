@@ -69,3 +69,26 @@ mutation {
 # 		id
 # 	}
 # }
+
+
+
+
+# query {
+# 	getAllSuperAdmins{
+# 		id,
+# 		username,
+# 		password
+# 	}
+# }
+
+# mutation {
+# 	createSuperAdmin(input: {
+# 		firstName: "Tchami",
+# 		lastName: "Sorelle",
+# 		email: "sorelle@gmail.com",
+# 	}) {
+# 		id,
+# 		username,
+# 		password,
+# 	}
+# }

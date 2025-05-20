@@ -1,0 +1,19 @@
+type Transfert {
+  id: ID!,
+  senderAccountId: ID!,
+  receiverAccountId: ID!,
+  amount: Float!,
+  createAt: String!
+}
+
+type Mutation {
+  makeAppTransfert(
+    idSenderAccount: ID!,
+    idReceiverAccount: ID!,
+    amount: Float!
+  ): Transfert
+}
+
+type Query {
+  getAllTransferts: [Transfert!]
+}

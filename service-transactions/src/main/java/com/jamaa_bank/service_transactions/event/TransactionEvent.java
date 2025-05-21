@@ -1,21 +1,24 @@
-package com.jamaa_bank.service_transfert.events;
+package com.jamaa_bank.service_transactions.event;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jamaa_bank.service_transfert.model.TransactionStatus;
+import com.jamaa_bank.service_transactions.model.TransactionStatus;
+import com.jamaa_bank.service_transactions.model.TransactionType;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString
-public class TransfertEvent {
+public class TransactionEvent {
+    
+    @JsonProperty("transactionType")
+    private TransactionType transactionType;
+
     @JsonProperty("idAccountSender")
     private Long idAccountSender;
 
@@ -30,4 +33,8 @@ public class TransfertEvent {
 
     @JsonProperty("createdAt")
     private LocalDateTime createdAt;
+
+    @JsonProperty("dateEvent")
+    private LocalDateTime dateEvent;
+
 }

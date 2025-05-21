@@ -1,0 +1,13 @@
+# query {
+# 	getAllTransferts{
+# 		id,
+# 		amount,
+# 		createAt
+# 	}
+# }
+
+# mutation {
+# 	makeAppTransfert(idSenderAccount:1, idReceiverAccount:2, amount: 125) {
+# 		id
+# 	}
+# }

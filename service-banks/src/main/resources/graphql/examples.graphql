@@ -1,410 +1,168 @@
-# Exemples de Queries
+# Exemples de requêtes et mutations pour le service bancaire
 
-#recuperer une banque par son id 
-query GetBank {
-  bank(id: "1") {  # Remplacez "1" par l'ID de votre banque
+# ===== MUTATIONS =====
+
+# Créer une nouvelle banque
+mutation CreateBank {
+  createBank(bank: {
+    name: "Banque Populaire"
+    slogan: "La banque du peuple"
+    logoUrl: "https://example.com/logo.png"
+    minimumBalance: 1000.0
+    withdrawFees: 2.5
+    internalTransferFees: 0.0
+    externalTransferFees: 5.0
+    isActive: true
+  }) {
     id
     name
-    description
+    slogan
     logoUrl
-    customerServicePhone
-    customerServiceEmail
     minimumBalance
-    minimumBalanceDescription
-    active
-    services
-    fees {
-      id
-      type
-      amount
-      frequency
-      description
-    }
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActive
     createdAt
     updatedAt
   }
 }
 
-#recuperer toutes les banques
+# Mettre à jour une banque existante
+mutation UpdateBank {
+  updateBank(
+    id: "1"
+    bank: {
+      name: "Banque Populaire Modifiée"
+      slogan: "Nouveau slogan"
+      minimumBalance: 1500.00
+      withdrawFees: 3.00
+      internalTransferFees: 1.00
+      externalTransferFees: 6.00
+      isActive: true
+    }
+  ) {
+    id
+    name
+    slogan
+    minimumBalance
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActive
+    updatedAt
+  }
+}
+
+# Supprimer une banque
+mutation DeleteBank {
+  deleteBank(id: "1")
+}
+
+# Souscrire à une banque
+mutation SubscribeToBank {
+  subscribeToBank(subscription: {
+    userId: "123"
+    bankId: "1"
+  }) {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}
+
+# Mettre à jour le statut d'une souscription
+mutation UpdateSubscriptionStatus {
+  updateSubscriptionStatus(
+    id: "1"
+    status: INACTIVE
+  ) {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}
+
+# ===== QUERIES =====
+
+# Récupérer une banque par son ID
+query GetBank {
+  bank(id: "1") {
+    id
+    name
+    slogan
+    logoUrl
+    minimumBalance
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActive
+    createdAt
+    updatedAt
+  }
+}
+
+# Récupérer toutes les banques
 query GetAllBanks {
   banks {
     id
     name
-    description
+    slogan
     logoUrl
-    customerServicePhone
-    customerServiceEmail
     minimumBalance
-    minimumBalanceDescription
-    active
-    services
-    fees {
-      id
-      type
-      amount
-      frequency
-      description
-    }
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActiveactive
     createdAt
     updatedAt
   }
 }
 
-# Liste des banques actives
-query GetActiveBanks {
-  activeBanks {
+# Récupérer une souscription par son ID
+query GetSubscription {
+  subscription(id: "1") {
     id
-    name
-    customerServicePhone
-    customerServiceEmail
-    minimumBalance
-    active
+    userId
+    bankId
+    status
+    createdAt
   }
 }
 
-# Obtenir les souscriptions d'un utilisateur
+# Récupérer toutes les souscriptions d'un utilisateur
 query GetUserSubscriptions {
-  userBankSubscriptions(userId: "123") {
+  subscriptionsByUserId(userId: "123") {
     id
-    subscriptionNumber
-    status
-    bank {
-      name
-      description
-    }
-    createdAt
-    updatedAt
-  }
-}
-
-# Obtenir les statistiques d'une banque
-query BankStats {
-  bankSubscriptionStats(bankId: "1") {
+    userId
     bankId
-    bankName
-    totalSubscriptions
-    activeSubscriptions
-    pendingSubscriptions
-    rejectedSubscriptions
-    closedSubscriptions
-    approvedSubscriptions
-    subscriptionsByStatus {
-      status
-      label
-      count
-    }
-    approvalRate
-    activeRate
-  }
-}
-
-# Exemples de Mutations
-
-# Créer une nouvelle banque
-mutation CreateBank {
-  createBank(
-    input: {
-      name: "Banque Example"
-      description: "Une nouvelle banque digitale"
-      logoUrl: "kdjsbfhfhbb"
-      customerServicePhone: "+22500000000"
-      customerServiceEmail: "contact@banque-example.com"
-      minimumBalance: 5000
-      minimumBalanceDescription: "Solde minimum requis pour l'ouverture"
-      services: [VIRTUAL_CARD, MONEY_TRANSFER]
-      fees: [
-        {
-          type: MAINTENANCE_FEE
-          amount: 1000
-          frequency: MONTHLY
-          description: "Frais de tenue de compte"
-        }
-      ]
-    }
-  ) {
-    id
-    name
-    services
-    fees {
-      type
-      amount
-      frequency
-    }
-  }
-}
-
-#modifier une banque exixtante 
-mutation UpdateBank {
-  updateBank(
-    id: "1",  # Remplacez par l'ID de votre banque
-    input: {
-      name: "Nouveau Nom Banque"  # Optionnel
-      description: "Nouvelle description"  # Optionnel
-      logoUrl: "nouvelle-url-logo"  # Optionnel
-      customerServicePhone: "+22511111111"  # Optionnel
-      customerServiceEmail: "nouveau@email.com"  # Optionnel
-      minimumBalance: 10000  # Optionnel
-      minimumBalanceDescription: "Nouveau solde minimum"  # Optionnel
-      active: true  # Optionnel
-      services: [VIRTUAL_CARD, MONEY_TRANSFER]  # Optionnel
-      fees: [  # Optionnel
-        {
-          type: MAINTENANCE_FEE
-          amount: 2000
-          frequency: MONTHLY
-          description: "Nouveaux frais de maintenance"
-        }
-      ]
-    }
-  ) {
-    id
-    name
-    description
-    logoUrl
-    customerServicePhone
-    customerServiceEmail
-    minimumBalance
-    minimumBalanceDescription
-    active
-    services
-    fees {
-      type
-      amount
-      frequency
-      description
-    }
-    createdAt
-    updatedAt
-  }
-}
-
-# Exemple de mutation pour créer une souscription
-mutation CreateSubscription {
-  createBankSubscription(
-    input: {
-      userId: "123"
-      bankId: "1"
-    }
-  ) {
-    id
-    subscriptionNumber
     status
-    bank {
-      name
-    }
     createdAt
   }
 }
 
-# Approuver une souscription
-mutation ApproveSubscription {
-  approveBankSubscription(id: "1") {
+# Récupérer toutes les souscriptions d'une banque
+query GetBankSubscriptions {
+  subscriptionsByBankId(bankId: "1") {
     id
-    status
-    updatedAt
-  }
-}
-
-# Rejeter une souscription
-mutation RejectSubscription {
-  rejectBankSubscription(id: "1", reason: "Documents incomplets") {
-    id
-    status
-    rejectionReason
-    updatedAt
-  }
-}
-
-# Créer une nouvelle banque avec des frais
-mutation CreateBankWithFees {
-  createBank(
-    input: {
-      name: "Banque Example"
-      description: "Une nouvelle banque digitale"
-      customerServicePhone: "+22500000000"
-      customerServiceEmail: "contact@banque-example.com"
-      minimumBalance: 5000
-      minimumBalanceDescription: "Solde minimum requis pour l'ouverture"
-      services: [
-        {
-          serviceType: VIRTUAL_CARD
-          description: "Carte virtuelle gratuite"
-        }
-      ]
-      fees: [
-        {
-          type: MAINTENANCE_FEE
-          amount: 1000
-          frequency: "MONTHLY"
-          description: "Frais de tenue de compte"
-        },
-        {
-          type: VIRTUAL_CARD_FEE
-          amount: 5000
-          frequency: "YEARLY"
-          description: "Frais annuels de carte virtuelle"
-        },
-        {
-          type: WITHDRAWAL_FEE
-          amount: 2
-          frequency: "PER_TRANSACTION"
-          description: "Frais de retrait"
-        }
-      ]
-    }
-  ) {
-    id
-    name
-    fees {
-      type
-      amount
-      frequency
-      description
-    }
-  }
-}
-
-# Ajouter un nouveau frais à une banque existante
-mutation AddBankFee {
-  addBankFee(
-    bankId: "1"
-    input: {
-      type: EXTERNAL_TRANSFER_FEE
-      amount: 1500
-      frequency: "PER_TRANSACTION"
-      description: "Frais de transfert vers d'autres banques"
-    }
-  ) {
-    id
-    name
-    fees {
-      type
-      amount
-      frequency
-    }
-  }
-}
-
-# Mettre à jour un frais existant
-mutation UpdateBankFee {
-  updateBankFee(
-    bankId: "1"
-    feeId: "1"
-    input: {
-      type: MAINTENANCE_FEE
-      amount: 1200
-      frequency: "MONTHLY"
-      description: "Frais de tenue de compte - Nouveau tarif"
-    }
-  ) {
-    id
-    fees {
-      type
-      amount
-      frequency
-      description
-    }
-  }
-}
-
-# Mettre à jour plusieurs frais en une fois
-mutation UpdateBankFees {
-  updateBankFees(
-    bankId: "1"
-    fees: [
-      {
-        type: MAINTENANCE_FEE
-        amount: 1200
-        frequency: "MONTHLY"
-        description: "Frais de tenue de compte - Nouveau tarif"
-      },
-      {
-        type: WITHDRAWAL_FEE
-        amount: 600
-        frequency: "PER_TRANSACTION"
-        description: "Frais de retrait - Nouveau tarif"
-      }
-    ]
-  ) {
-    id
-    fees {
-      type
-      amount
-      frequency
-      description
-    }
-  }
-}
-
-# Query pour obtenir les détails d'une banque avec ses frais
-query GetBankWithFees {
-  bank(id: "1") {
-    id
-    name
-    description
-    fees {
-      type
-      amount
-      frequency
-      description
-    }
-    services {
-      serviceType
-      description
-    }
-  }
-}
-
-# Exemple de requête pour obtenir les statistiques de toutes les banques
-query AllBanksStats {
-  allBanksSubscriptionStats {
+    userId
     bankId
-    bankName
-    totalSubscriptions
-    activeSubscriptions
-    pendingSubscriptions
-    rejectedSubscriptions
-    closedSubscriptions
-    approvedSubscriptions
-    subscriptionsByStatus {
-      status
-      label
-      count
-    }
-    approvalRate
-    activeRate
-  }
-}
-
-# Exemple de mutation pour clôturer une souscription
-mutation CloseSubscription {
-  closeBankSubscription(id: "1") {
-    id
     status
-    updatedAt
+    createdAt
   }
 }
 
-# Variables pour les requêtes (à utiliser dans un environnement GraphQL)
-{
-  "bankId": "1",
-  "userId": "123",
-  "statsFilter": {
-    "fromDate": "2024-01-01T00:00:00Z",
-    "toDate": "2024-03-31T23:59:59Z",
-    "includeInactive": true
-  },
-  "createBankInput": {
-    "name": "Banque Example",
-    "description": "Une nouvelle banque digitale",
-    "customerServicePhone": "+22500000000",
-    "customerServiceEmail": "contact@banque-example.com",
-    "minimumBalance": 5000,
-    "services": [
-      {
-        "serviceType": "VIRTUAL_CARD",
-        "description": "Carte virtuelle gratuite"
-      }
-    ]
+# Récupérer les souscriptions actives d'une banque
+query GetActiveBankSubscriptions {
+  activeSubscriptionsByBankId(bankId: "1") {
+    id
+    userId
+    bankId
+    status
+    createdAt
   }
 } 

@@ -28,13 +28,7 @@ public class NotificationService {
         return notificationRepository.findByEmailAndLuFalse(email);
     }
 
-    @Transactional
-    public Notification markAsRead(Long id) {
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
-        notification.setLu(true);
-        return notificationRepository.save(notification);
-    }
+    
 
     public List<Notification> getNotificationsByTypeAndUser(String email, Notification.NotificationType type) {
         return notificationRepository.findByEmailAndType(email, type);

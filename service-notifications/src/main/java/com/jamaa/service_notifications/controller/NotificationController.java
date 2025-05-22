@@ -39,8 +39,5 @@ public class NotificationController {
         return notificationService.getNotificationsByServiceAndUser(email, service);
     }
 
-    @MutationMapping
-    public Notification markAsRead(@Argument Long id) {
-        return notificationService.markAsRead(id);
-    }
+    
 } 

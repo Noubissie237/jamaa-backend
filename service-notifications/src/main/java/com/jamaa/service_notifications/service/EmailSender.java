@@ -56,8 +56,10 @@ import org.springframework.beans.factory.annotation.Autowired;
             AUTHENTICATION("auth-notification", "Notification de sécurité"),
             INSUFFICIENT_FUNDS("insufficient-funds-notification", "Alerte de solde"),
             PASSWORD_CHANGE("password-change-notification", "Modification de mot de passe"),
-            SUSPICIOUS_ACTIVITY("suspicious-activity-notification", "Alerte de sécurité"),
-            CONFIRMATION_INSCRIPTION("successful-registration", "Compte créé avec success");
+            CONFIRMATION_SOUSCRIPTION_BANQUE("successful-registration", "Compte créé avec success"),
+            RECHARGE("recharge-confirmation", "Confirmation de transfert"),
+            ACCOUNT_DELETION("delete-notification", "Compte supprimé"),
+            ACCOUNT_CREATION_ERROR("error-registration", "Erreur lors de la création du compte");
             
             private final String templateName;
             private final String defaultSubject;
@@ -101,18 +103,6 @@ import org.springframework.beans.factory.annotation.Autowired;
             sendEmailWithTemplate(to, subject, templateContent);
             
             logger.info("Notification {} envoyée avec succès à {}", type.name(), to);
-        }
-
-        public void sendSuspiciousActivityAlert(String to, String activityType, String location, 
-                String deviceInfo, Date activityTime) throws MessagingException, IOException {
-            
-            Map<String, Object> data = new HashMap<>();
-            data.put("activityType", activityType);
-            data.put("location", location);
-            data.put("deviceInfo", deviceInfo);
-            data.put("activityTime", DATE_FORMAT.format(activityTime));
-            
-            sendNotification(to, NotificationType.SUSPICIOUS_ACTIVITY, data);
         }
         
 

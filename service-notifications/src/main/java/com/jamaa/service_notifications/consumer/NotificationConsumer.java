@@ -1,23 +1,30 @@
 package com.jamaa.service_notifications.consumer;
 
-import com.jamaa.service_notifications.events.*;
-import com.jamaa.service_notifications.model.Notification;
-import com.jamaa.service_notifications.model.Notification.NotificationType;
-import com.jamaa.service_notifications.model.Notification.ServiceEmetteur;
-import com.jamaa.service_notifications.service.NotificationService;
-import com.jamaa.service_notifications.service.EmailSender;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import jakarta.mail.MessagingException;
+import com.jamaa.service_notifications.events.AccountEvent;
+import com.jamaa.service_notifications.events.AuthEvent;
+import com.jamaa.service_notifications.events.CustomerEvent;
+import com.jamaa.service_notifications.events.DepositEvent;
+import com.jamaa.service_notifications.events.InsufficientFundsEvent;
+import com.jamaa.service_notifications.events.RechargeEvent;
+import com.jamaa.service_notifications.events.TransferEvent;
+import com.jamaa.service_notifications.events.WithdrawalEvent;
+import com.jamaa.service_notifications.model.Notification;
+import com.jamaa.service_notifications.model.Notification.NotificationType;
+import com.jamaa.service_notifications.model.Notification.ServiceEmetteur;
+import com.jamaa.service_notifications.service.EmailSender;
+import com.jamaa.service_notifications.service.NotificationService;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.mail.MessagingException;
 
 @Component
 public class NotificationConsumer {
@@ -183,7 +190,7 @@ public class NotificationConsumer {
             notification.setEmail(event.getEmail());
             notification.setTitle("Notification de compte");
             notification.setMessage(message);
-            notification.setType(NotificationType.CONFIRMATION_SOUSCRIPTION_BANQUE);
+            notification.setType(NotificationType.CONFIRMATION_INSCRIPTION);
             notification.setServiceEmetteur(ServiceEmetteur.BANK_SERVICE);
 
             notificationService.saveNotification(notification);
@@ -198,6 +205,57 @@ public class NotificationConsumer {
             logger.info("Notification de compte traitée pour l'utilisateur: {}", event.getUserId());
         } catch (MessagingException | IOException e) {
             logger.error("Erreur lors de l'envoi de la notification de compte: {}", e.getMessage());
+        }
+    }
+
+    @RabbitListener(queues = "recharge.notification.queue")
+    public void handleRechargeNotification(RechargeEvent event) {
+        logger.info("=== Nouvelle notification de recharge reçue ===");
+        logger.info("Email: {}", event.getEmail());
+        logger.info("Montant: {}", event.getAmount());
+        
+        try {
+            // Préparation des données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("amount", event.getAmount());
+            data.put("rechargeMethod", event.getRechargeMethod());
+            data.put("referenceNumber", event.getReferenceNumber());
+            data.put("phoneNumber", event.getPhoneNumber());
+            data.put("operatorName", event.getOperatorName());
+            data.put("accountNumber", event.getAccountNumber());
+            
+            // Message pour la base de données (version simplifiée)
+            String message = String.format(
+                "Recharge de %.2f FCFA effectuée avec succès pour le numéro %s (%s) - Réf: %s",
+                event.getAmount(), event.getPhoneNumber(), event.getOperatorName(), event.getReferenceNumber()
+            );
+
+            // Création et sauvegarde de la notification
+            Notification notification = new Notification();
+            notification.setEmail(event.getEmail());
+            notification.setTitle("Confirmation de recharge");
+            notification.setMessage(message);
+            notification.setType(NotificationType.CONFIRMATION_RECHARGE);
+            notification.setServiceEmetteur(ServiceEmetteur.RECHARGE_SERVICE);
+
+            logger.info("Sauvegarde de la notification dans la base de données...");
+            Notification savedNotification = notificationService.saveNotification(notification);
+            logger.info("Notification sauvegardée avec l'ID: {}", savedNotification.getId());
+
+            // Envoi de l'email avec le template
+            logger.info("Envoi de l'email...");
+            emailService.sendNotification(
+                event.getEmail(), 
+                EmailSender.NotificationType.RECHARGE,
+                data
+            );
+            
+            logger.info("Email envoyé avec succès");
+            logger.info("=== Fin du traitement de la notification de recharge ===");
+        } catch (MessagingException e) {
+            logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erreur inattendue: {}", e.getMessage());
         }
     }
 
@@ -241,39 +299,7 @@ public class NotificationConsumer {
     
     // Ajout de deux nouveaux listeners pour les notifications supplémentaires
     
-    @RabbitListener(queues = "suspicious.activity.queue")
-    public void handleSuspiciousActivityNotification(SuspiciousActivityEvent event) {
-        try {
-            // Utilisation de la méthode spécialisée
-            emailService.sendSuspiciousActivityAlert(
-                event.getEmail(),
-                event.getActivityType(),
-                event.getLocation(),
-                event.getDeviceInfo(),
-                event.getActivityTime()
-            );
-            
-            // Création et sauvegarde de la notification
-            String message = String.format(
-                "Activité suspecte détectée: %s depuis %s à %s",
-                event.getActivityType(), event.getDeviceInfo(), event.getLocation()
-            );
-            
-            Notification notification = new Notification();
-            notification.setEmail(event.getEmail());
-            notification.setTitle("Alerte de sécurité");
-            notification.setMessage(message);
-            notification.setType(NotificationType.ALERTE_SECURITE);
-            notification.setServiceEmetteur(ServiceEmetteur.SECURITY_SERVICE);
-
-            notificationService.saveNotification(notification);
-            
-            logger.info("Notification d'activité suspecte envoyée: {}", event.getActivityId());
-        } catch (MessagingException | IOException e) {
-            logger.error("Erreur lors de l'envoi de l'alerte d'activité suspecte: {}", e.getMessage());
-        }
-    }
-    
+  
     @RabbitListener(queues = "insufficient.funds.queue")
     public void handleInsufficientFundsNotification(InsufficientFundsEvent event) {
         try {
@@ -308,56 +334,239 @@ public class NotificationConsumer {
     }
 
 
-    @RabbitListener(queues = "accountCreateQueue")
-    public void handleRegistrationNotification(CustomerEvent event) {
-        logger.info("=== Nouvelle notification d'inscription réussi ===");
-        logger.info("Email: {}", event.getEmail());
+    // @RabbitListener(queues = "accountCreateQueue")
+    // public void handleRegistrationNotification(CustomerEvent event) {
+    //     logger.info("=== Nouvelle notification d'inscription réussi ===");
+    //     logger.info("Email: {}", event.getEmail());
         
-        try {
-            // Préparation des données pour le template
-            Map<String, Object> data = new HashMap<>();
-            data.put("email", event.getEmail());
-            data.put("firstName", event.getFirstName());
-            data.put("lastName", event.getLastName());
-            String fullName = event.getFirstName() + " " + event.getLastName();
-            data.put("fullName", fullName);
-            data.put("accountNumber", event.getAccountNumber());
-            data.put("registrationDate", LocalDate.now());
-            data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
+    //     try {
+    //         // Préparation des données pour le template
+    //         Map<String, Object> data = new HashMap<>();
+    //         data.put("email", event.getEmail());
+    //         data.put("firstName", event.getFirstName());
+    //         data.put("lastName", event.getLastName());
+    //         String fullName = event.getFirstName() + " " + event.getLastName();
+    //         data.put("fullName", fullName);
+    //         data.put("accountNumber", event.getAccountNumber());
+    //         data.put("registrationDate", LocalDate.now());
+    //         data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
             
-            // Message pour la base de données (version simplifiée)
-            String message = String.format(
-                "Client  %s enrégistré avec succès",
-                event.getEmail()
-            );
+    //         // Message pour la base de données (version simplifiée)
+    //         String message = String.format(
+    //             "Client  %s enrégistré avec succès",
+    //             event.getEmail()
+    //         );
 
-            // Création et sauvegarde de la notification
-            Notification notification = new Notification();
-            notification.setEmail(event.getEmail());
-            notification.setTitle("Confirmation d'inscription");
-            notification.setMessage(message);
-            notification.setType(NotificationType.CONFIRMATION_INSCRIPTION);
-            notification.setServiceEmetteur(ServiceEmetteur.AUTH_SERVICE);
+    //         // Création et sauvegarde de la notification
+    //         Notification notification = new Notification();
+    //         notification.setEmail(event.getEmail());
+    //         notification.setTitle("Confirmation d'inscription");
+    //         notification.setMessage(message);
+    //         notification.setType(NotificationType.CONFIRMATION_INSCRIPTION);
+    //         notification.setServiceEmetteur(ServiceEmetteur.AUTH_SERVICE);
 
-            logger.info("Sauvegarde de la notification dans la base de données...");
-            Notification savedNotification = notificationService.saveNotification(notification);
-            logger.info("Notification sauvegardée avec l'ID: {}", savedNotification.getId());
+    //         logger.info("Sauvegarde de la notification dans la base de données...");
+    //         Notification savedNotification = notificationService.saveNotification(notification);
+    //         logger.info("Notification sauvegardée avec l'ID: {}", savedNotification.getId());
 
-            // Envoi de l'email avec le template
-            logger.info("Envoi de l'email...");
-            emailService.sendNotification(
-                event.getEmail(), 
-                EmailSender.NotificationType.CONFIRMATION_INSCRIPTION,
-                data
-            );
+    //         // Envoi de l'email avec le template
+    //         logger.info("Envoi de l'email...");
+    //         emailService.sendNotification(
+    //             event.getEmail(), 
+    //             EmailSender.NotificationType.CONFIRMATION_INSCRIPTION,
+    //             data
+    //         );
             
-            logger.info("Email envoyé avec succès");
-            logger.info("=== Fin du traitement de la notification d'inscription ===");
-        } catch (MessagingException e) {
-            logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erreur inattendue: {}", e.getMessage());
+    //         logger.info("Email envoyé avec succès");
+    //         logger.info("=== Fin du traitement de la notification d'inscription ===");
+    //     } catch (MessagingException e) {
+    //         logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
+    //     } catch (Exception e) {
+    //         logger.error("Erreur inattendue: {}", e.getMessage());
+    //     }
+    // }
+
+    @RabbitListener(queues = "accountCreateQueue")
+public void handleRegistrationNotification(CustomerEvent event) {
+    logger.info("=== Notification de création de compte reçue ===");
+    logger.info("Email: {}", event.getEmail());
+    
+    try {
+        // Vérifier s'il y a une erreur
+        if (event.getErrorMessage() != null && !event.getErrorMessage().isEmpty()) {
+            logger.info("=== Traitement d'une erreur de création de compte ===");
+            handleAccountCreationError(event);
+        } else {
+            logger.info("=== Traitement d'un succès de création de compte ===");
+            handleAccountCreationSuccess(event);
         }
+        
+    } catch (MessagingException e) {
+        logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
+    } catch (IOException e) {
+        logger.error("Erreur d'entrée/sortie: {}", e.getMessage());
+    } catch (Exception e) {
+        logger.error("Erreur inattendue: {}", e.getMessage());
     }
+}
 
+/**
+ * Méthode pour gérer les créations de compte réussies
+ */
+private void handleAccountCreationSuccess(CustomerEvent event) throws MessagingException, IOException {
+    logger.info("Traitement du succès de création de compte pour: {}", event.getEmail());
+    
+    // Préparation des données pour le template de SUCCÈS
+    Map<String, Object> data = new HashMap<>();
+    data.put("email", event.getEmail());
+    data.put("firstName", event.getFirstName());
+    data.put("lastName", event.getLastName());
+    data.put("fullName", event.getFirstName() + " " + event.getLastName());
+    data.put("accountNumber", event.getAccountNumber());
+    data.put("registrationDate", LocalDate.now());
+    data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
+    data.put("year", LocalDate.now().getYear());
+    
+    // Message pour la base de données
+    String message = String.format(
+        "Client %s enregistré avec succès - Compte: %s",
+        event.getEmail(), event.getAccountNumber()
+    );
+
+    // Création et sauvegarde de la notification de SUCCÈS
+    Notification notification = new Notification();
+    notification.setEmail(event.getEmail());
+    notification.setTitle("Confirmation d'inscription");
+    notification.setMessage(message);
+    notification.setType(NotificationType.CONFIRMATION_SOUSCRIPTION_BANQUE);
+    notification.setServiceEmetteur(ServiceEmetteur.AUTH_SERVICE);
+
+    logger.info("Sauvegarde de la notification de succès dans la base de données...");
+    Notification savedNotification = notificationService.saveNotification(notification);
+    logger.info("Notification de succès sauvegardée avec l'ID: {}", savedNotification.getId());
+
+    // Envoi de l'email avec le template de SUCCÈS
+    logger.info("Envoi de l'email de confirmation...");
+    emailService.sendNotification(
+        event.getEmail(), 
+        EmailSender.NotificationType.CONFIRMATION_SOUSCRIPTION_BANQUE,
+        data
+    );
+    
+    logger.info("Email de confirmation envoyé avec succès pour: {}", event.getEmail());
+    logger.info("=== Fin du traitement de succès ===");
+}
+
+/**
+ * Méthode pour gérer les erreurs de création de compte
+ */
+private void handleAccountCreationError(CustomerEvent event) throws MessagingException, IOException {
+    logger.info("Traitement de l'erreur de création de compte pour: {}", event.getEmail());
+    logger.info("Erreur: {}", event.getErrorMessage());
+    
+    // Préparation des données pour le template d'ERREUR
+    Map<String, Object> data = new HashMap<>();
+    data.put("email", event.getEmail());
+    data.put("firstName", event.getFirstName());
+    data.put("lastName", event.getLastName());
+    data.put("fullName", event.getFirstName() + " " + event.getLastName());
+    data.put("attemptDate", LocalDate.now());
+    data.put("errorMessage", event.getErrorMessage());
+    data.put("year", LocalDate.now().getYear());
+    
+    // Message pour la base de données
+    String message = String.format(
+        "Échec de création de compte pour %s - %s ",
+        event.getEmail(), event.getErrorMessage()
+    );
+
+    // Création et sauvegarde de la notification d'ERREUR
+    Notification notification = new Notification();
+    notification.setEmail(event.getEmail());
+    notification.setTitle("Informations à corriger");
+    notification.setMessage(message);
+    notification.setType(NotificationType.ERREUR_CREATION_COMPTE);
+    notification.setServiceEmetteur(ServiceEmetteur.AUTH_SERVICE);
+
+    logger.info("Sauvegarde de la notification d'erreur dans la base de données...");
+    Notification savedNotification = notificationService.saveNotification(notification);
+    logger.info("Notification d'erreur sauvegardée avec l'ID: {}", savedNotification.getId());
+
+    // Envoi de l'email avec le template d'ERREUR
+    logger.info("Envoi de l'email d'erreur...");
+    emailService.sendNotification(
+        event.getEmail(), 
+        EmailSender.NotificationType.ACCOUNT_CREATION_ERROR,
+        data
+    );
+    
+    logger.info("Email d'erreur envoyé avec succès pour: {}", event.getEmail());
+    logger.info("=== Fin du traitement d'erreur ===");
+}
+
+@RabbitListener(queues = "accountDeletionQueue")
+public void handleAccountDeletionNotification(CustomerEvent event) {
+    logger.info("=== Notification de suppression de compte reçue ===");
+    logger.info("Email: {}", event.getEmail());
+    logger.info("Compte: {}", event.getAccountNumber());
+    logger.info("Motif: {}", event.getDeletionReason());
+    
+    try {
+        handleAccountDeletionProcess(event);
+        
+    } catch (MessagingException e) {
+        logger.error("Erreur lors de l'envoi de l'email de suppression: {}", e.getMessage());
+    } catch (IOException e) {
+        logger.error("Erreur d'entrée/sortie lors de la suppression: {}", e.getMessage());
+    } catch (Exception e) {
+        logger.error("Erreur inattendue lors de la suppression: {}", e.getMessage());
+    }
+}
+
+/**
+ * Méthode pour gérer le processus de suppression de compte
+ */
+private void handleAccountDeletionProcess(CustomerEvent event) throws MessagingException, IOException {
+    logger.info("Traitement de la suppression de compte pour: {}", event.getEmail());
+    
+    // Préparation des données pour le template
+    Map<String, Object> data = new HashMap<>();
+    data.put("email", event.getEmail());
+    data.put("firstName", event.getFirstName());
+    data.put("lastName", event.getLastName());
+    data.put("fullName", event.getFirstName() + " " + event.getLastName());
+    data.put("accountNumber", event.getAccountNumber());
+    data.put("deletionReason", event.getDeletionReason() != null ? event.getDeletionReason() : "Demande du client");
+    data.put("year", LocalDate.now().getYear());
+    
+    // Message pour la base de données
+    String message = String.format(
+        "Compte %s supprimé définitivement le %s.",
+        event.getAccountNumber(), 
+        LocalDate.now()
+    );
+
+    // Création et sauvegarde de la notification
+    Notification notification = new Notification();
+    notification.setEmail(event.getEmail());
+    notification.setTitle("Confirmation de suppression de compte");
+    notification.setMessage(message);
+    notification.setType(NotificationType.SUPPRESSION_COMPTE);
+    notification.setServiceEmetteur(ServiceEmetteur.BANK_SERVICE);
+
+    logger.info("Sauvegarde de la notification de suppression dans la base de données...");
+    Notification savedNotification = notificationService.saveNotification(notification);
+    logger.info("Notification de suppression sauvegardée avec l'ID: {}", savedNotification.getId());
+
+    // Envoi de l'email avec le template
+    logger.info("Envoi de l'email de confirmation de suppression...");
+    emailService.sendNotification(
+        event.getEmail(), 
+        EmailSender.NotificationType.ACCOUNT_DELETION,
+        data
+    );
+    
+    logger.info("Email de confirmation de suppression envoyé avec succès pour: {}", event.getEmail());
+    logger.info("=== Fin du traitement de suppression de compte ===");
+}
 }

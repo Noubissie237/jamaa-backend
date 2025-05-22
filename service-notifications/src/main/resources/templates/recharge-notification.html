@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de transfert</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f6f6f6; color: #333333;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; border-collapse: collapse;">
+        <!-- HEADER AVEC BANNIÈRE -->
+        <tr>
+            <td style="padding: 0;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td style="background-color: #0A5D32; height: 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 15px 20px; border-bottom: 1px solid #eeeeee;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="25%" align="left">
+                                        <img src="cid:logoImage" alt="Jamaa Bank" width="70" style="display: block;">
+                                    </td>
+                                    <td width="75%" align="right" style="color: #0A5D32; font-size: 18px; font-weight: bold;">
+                                        Transfert confirmé
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- CONTENU PRINCIPAL -->
+        <tr>
+            <td style="background-color: #ffffff; padding: 30px 30px 20px 30px; border-radius: 0px 0px 4px 4px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">Bonjour,</p>
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">Nous vous confirmons que votre transfert a été effectué avec succès.</p>
+                            
+                            <!-- INFORMATION DU TRANSFERT -->
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #f9f9f9; border-radius: 4px;">
+                                <tr>
+                                    <td style="padding: 15px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Montant transféré</td>
+                                                <td style="font-size: 18px; font-weight: bold; text-align: right; color: #0A5D32;">${amount} FCFA</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Frais de transfert</td>
+                                                <td style="font-size: 14px; text-align: right;">${transferFees} FCFA</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Référence</td>
+                                                <td style="font-size: 14px; text-align: right; font-family: monospace; background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px;">${referenceNumber}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Compte débiteur</td>
+                                                <td style="font-size: 14px; text-align: right;">${senderAccount}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Bénéficiaire</td>
+                                                <td style="font-size: 14px; text-align: right; font-weight: bold;">${beneficiaryName}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Compte créditeur</td>
+                                                <td style="font-size: 14px; text-align: right;">${receiverAccount}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Banque destinataire</td>
+                                                <td style="font-size: 14px; text-align: right;">${receiverBank}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Motif</td>
+                                                <td style="font-size: 14px; text-align: right;">${transferReason}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Date</td>
+                                                <td style="font-size: 14px; text-align: right;">${date}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- RÉCAPITULATIF TOTAL -->
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #E8F5E8; border-radius: 4px; border: 1px solid #C8E6C9;">
+                                <tr>
+                                    <td style="padding: 15px 20px;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 16px; font-weight: bold; color: #2E7D32;">Montant total débité</td>
+                                                <td style="font-size: 18px; font-weight: bold; text-align: right; color: #2E7D32;">${totalAmount} FCFA</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- BOUTONS D'ACTION -->
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 25px;">
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="border-radius: 4px; margin-right: 10px;" bgcolor="#0A5D32">
+                                                    <a href="https://app.jamaa.com/transactions" target="_blank" style="display: inline-block; padding: 12px 25px; font-size: 14px; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: bold;">Voir mes transactions</a>
+                                                </td>
+                                                <td style="width: 10px;"></td>
+                                                
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- NOTE IMPORTANTE -->
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; background-color: #FFF3E0; border-radius: 4px; border-left: 4px solid #FF9800;">
+                                <tr>
+                                    <td style="padding: 15px 20px;">
+                                        <p style="margin: 0; font-size: 14px; color: #E65100; font-weight: bold;">📌 Information importante</p>
+                                        <p style="margin: 5px 0 0 0; font-size: 13px; color: #666666; line-height: 1.4;">Conservez cette confirmation pour vos dossiers. Le transfert peut prendre 1 à 3 jours ouvrables pour apparaître sur le compte du bénéficiaire selon la banque destinataire.</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">Pour toute question concernant cette opération, n'hésitez pas à contacter notre service client.</p>
+                            <p style="margin: 0; font-size: 16px; line-height: 1.6;">Cordialement,<br>L'équipe Jamaa</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="padding: 20px 30px; text-align: center; font-size: 12px; color: #888888; background-color: #f6f6f6;">
+                <p style="margin: 0 0 10px 0;">© ${year} Jamaa Bank. Tous droits réservés.</p>
+                <p style="margin: 0 0 10px 0;">Ce message a été envoyé depuis une adresse qui ne peut pas recevoir d'emails. Merci de ne pas y répondre.</p>
+                <p style="margin: 0;">
+                    <a href="https://www.jamaa.com/privacy" style="color: #0A5D32; text-decoration: underline; margin-right: 10px;">Politique de confidentialité</a>
+                    <a href="https://www.jamaa.com/contact" style="color: #0A5D32; text-decoration: underline;">Contact</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

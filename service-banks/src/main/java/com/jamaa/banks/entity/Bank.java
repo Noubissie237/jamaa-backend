@@ -2,11 +2,19 @@ package com.jamaa.banks.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @Table(name = "banks")
+@NoArgsConstructor
+@Getter
+@Setter
 public class Bank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,16 +36,16 @@ public class Bank {
     private LocalDateTime updatedAt;
 
     @Column(name = "minimum_balance", nullable = false)
-    private Double minimumBalance;
+    private BigDecimal minimumBalance;
 
     @Column(name = "withdraw_fees", nullable = false)
-    private Double withdrawFees;
+    private BigDecimal withdrawFees;
 
     @Column(name = "internal_transfer_fees", nullable = false)
-    private Double internalTransferFees;
+    private BigDecimal internalTransferFees;
 
     @Column(name = "external_transfer_fees", nullable = false)
-    private Double externalTransferFees;
+    private BigDecimal externalTransferFees;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;

@@ -27,7 +27,6 @@ public class Notification implements Serializable {
     private String message;
     private String email;
     private LocalDateTime dateEnvoi;
-    private boolean lu;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
@@ -76,13 +75,6 @@ public class Notification implements Serializable {
         this.dateEnvoi = dateEnvoi;
     }
 
-    public boolean isLu() {
-        return lu;
-    }
-
-    public void setLu(boolean lu) {
-        this.lu = lu;
-    }
 
     public NotificationType getType() {
         return type;
@@ -103,7 +95,6 @@ public class Notification implements Serializable {
     @PrePersist
     public void prePersist() {
         this.dateEnvoi = LocalDateTime.now();
-        this.lu = false;
     }
 
     public enum NotificationType {
@@ -115,8 +106,13 @@ public class Notification implements Serializable {
         CONFIRMATION_SOUSCRIPTION_BANQUE,
         TRANSACTION_REUSSIE,
         AUTHENTIFICATION,
-        ALERTE_SECURITE,
         ALERTE_SOLDE,
+        CONFIRMATION_RECHARGE,
+        RECHARGE,
+        SUPPRESSION_COMPTE,
+        ACCOUNT_DELETION,
+        ERREUR_CREATION_COMPTE,
+        ACCOUNT_CREATION_ERROR,
     }
 
     public enum ServiceEmetteur {
@@ -125,8 +121,8 @@ public class Notification implements Serializable {
         TRANSFER_SERVICE,
         AUTH_SERVICE,
         BANK_SERVICE,
-        TRANSACTION_SERVICE, 
-        SECURITY_SERVICE
+        TRANSACTION_SERVICE,
+        RECHARGE_SERVICE
         
     }
 } 

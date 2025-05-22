@@ -20,4 +20,8 @@ public class CustomerEvent {
     private String email;
     @JsonProperty("accountNumber")
     private String accountNumber;
+    @JsonProperty("error_message")
+    private String errorMessage;
+    @JsonProperty("deletion_reason")
+    private String deletionReason;
 }

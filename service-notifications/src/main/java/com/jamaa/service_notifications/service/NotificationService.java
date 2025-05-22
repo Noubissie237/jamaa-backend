@@ -1,7 +1,6 @@
 package com.jamaa.service_notifications.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.jamaa.service_notifications.model.Notification;
 import com.jamaa.service_notifications.repository.NotificationRepository;

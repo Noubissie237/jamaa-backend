@@ -23,12 +23,6 @@ public class NotificationService {
         return notificationRepository.findByEmail(email);
     }
 
-    public List<Notification> getUnreadNotifications(String email) {
-        return notificationRepository.findByEmailAndLuFalse(email);
-    }
-
-    
-
     public List<Notification> getNotificationsByTypeAndUser(String email, Notification.NotificationType type) {
         return notificationRepository.findByEmailAndType(email, type);
     }

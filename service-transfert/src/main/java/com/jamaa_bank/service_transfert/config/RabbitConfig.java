@@ -47,7 +47,7 @@ public class RabbitConfig {
 
     @Bean
     public Queue notificationQueue(){
-        return new Queue("notificationQueue", true, false, false);
+        return new Queue("transfer.notification.queue", true, false, false);
     }
 
     @Bean

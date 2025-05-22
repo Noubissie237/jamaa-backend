@@ -24,11 +24,6 @@ public class NotificationController {
     }
 
     @QueryMapping
-    public List<Notification> unreadNotifications(@Argument String email) {
-        return notificationService.getUnreadNotifications(email);
-    }
-
-    @QueryMapping
     public List<Notification> notificationsByType(@Argument String email, @Argument Notification.NotificationType type) {
         return notificationService.getNotificationsByTypeAndUser(email, type);
     }

@@ -48,6 +48,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue rechargeNotificationQueue() {
+        return new Queue("recharge.notification.queue", true);
+    }
+
+    @Bean
     public Queue authNotificationQueue() {
         return new Queue("auth.notification.queue", true);
     }

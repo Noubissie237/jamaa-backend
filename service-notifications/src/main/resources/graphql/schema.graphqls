@@ -30,11 +30,6 @@ type Notification {
 
 type Query {
     notificationsByUser(email: String!): [Notification!]!
-    unreadNotifications(email: String!): [Notification!]!
     notificationsByType(email: String!, type: NotificationType!): [Notification!]!
     notificationsByService(email: String!, service: ServiceEmetteur!): [Notification!]!
 }
-
-type Mutation {
-    markAsRead(id: ID!): Notification!
-} 

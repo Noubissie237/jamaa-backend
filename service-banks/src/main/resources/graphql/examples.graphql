@@ -63,7 +63,7 @@ mutation DeleteBank {
 mutation SubscribeToBank {
   subscribeToBank(subscription: {
     userId: "123"
-    bankId: "1"
+    bankId: "2"
   }) {
     id
     userId
@@ -72,6 +72,7 @@ mutation SubscribeToBank {
     createdAt
   }
 }
+
 
 # Mettre à jour le statut d'une souscription
 mutation UpdateSubscriptionStatus {
@@ -123,16 +124,7 @@ query GetAllBanks {
   }
 }
 
-# Récupérer une souscription par son ID
-query GetSubscription {
-  subscription(id: "1") {
-    id
-    userId
-    bankId
-    status
-    createdAt
-  }
-}
+
 
 # Récupérer toutes les souscriptions d'un utilisateur
 query GetUserSubscriptions {
@@ -166,3 +158,13 @@ query GetActiveBankSubscriptions {
     createdAt
   }
 } 
+
+query {
+  inactiveSubscriptionsByBankId(bankId: 1) {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}

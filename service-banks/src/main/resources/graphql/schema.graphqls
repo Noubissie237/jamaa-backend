@@ -5,6 +5,7 @@ type Query {
     subscriptionsByUserId(userId: ID!): [BankSubscription!]!
     subscriptionsByBankId(bankId: ID!): [BankSubscription!]!
     activeSubscriptionsByBankId(bankId: ID!): [BankSubscription!]!
+    inactiveSubscriptionsByBankId(bankId: ID!): [BankSubscription!]!
 }
 
 type Mutation {
@@ -51,6 +52,7 @@ type BankSubscription {
 input BankSubscriptionInput {
     userId: ID!
     bankId: ID!
+    
 }
 
 enum SubscriptionStatus {

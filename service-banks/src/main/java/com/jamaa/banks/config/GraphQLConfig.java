@@ -13,6 +13,8 @@ import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import java.math.BigDecimal;
+
 @Configuration
 public class GraphQLConfig {
 
@@ -20,7 +22,8 @@ public class GraphQLConfig {
     public RuntimeWiringConfigurer runtimeWiringConfigurer() {
         return wiringBuilder -> wiringBuilder
                 .scalar(dateTimeScalar())
-                .scalar(doubleScalar());
+                .scalar(doubleScalar())
+                .scalar(bigDecimalScalar());
     }
 
     // Scalar pour gérer LocalDateTime <-> String
@@ -48,7 +51,8 @@ public class GraphQLConfig {
                     @Override
                     public LocalDateTime parseLiteral(Object input) {
                         if (input instanceof StringValue) {
-                            return LocalDateTime.parse(((StringValue) input).getValue(), DateTimeFormatter.ISO_DATE_TIME);
+                            return LocalDateTime.parse(((StringValue) input).getValue(),
+                                    DateTimeFormatter.ISO_DATE_TIME);
                         }
                         throw new IllegalArgumentException("Expected a StringValue AST node.");
                     }
@@ -84,6 +88,45 @@ public class GraphQLConfig {
                             return ((FloatValue) input).getValue().doubleValue();
                         } else if (input instanceof IntValue) {
                             return ((IntValue) input).getValue().doubleValue();
+                        }
+                        throw new IllegalArgumentException("Expected a FloatValue or IntValue.");
+                    }
+                })
+                .build();
+    }
+
+    private GraphQLScalarType bigDecimalScalar() {
+        return GraphQLScalarType.newScalar()
+                .name("BigDecimal")
+                .description("Custom scalar for java.math.BigDecimal")
+                .coercing(new Coercing<BigDecimal, BigDecimal>() {
+
+                    @Override
+                    public BigDecimal serialize(Object dataFetcherResult) {
+                        if (dataFetcherResult instanceof BigDecimal) {
+                            return (BigDecimal) dataFetcherResult;
+                        } else if (dataFetcherResult instanceof Number) {
+                            return new BigDecimal(dataFetcherResult.toString());
+                        }
+                        throw new IllegalArgumentException("Expected a Number or BigDecimal for serialization.");
+                    }
+
+                    @Override
+                    public BigDecimal parseValue(Object input) {
+                        if (input instanceof BigDecimal) {
+                            return (BigDecimal) input;
+                        } else if (input instanceof Number || input instanceof String) {
+                            return new BigDecimal(input.toString());
+                        }
+                        throw new IllegalArgumentException("Expected a Number or String to parse into BigDecimal.");
+                    }
+
+                    @Override
+                    public BigDecimal parseLiteral(Object input) {
+                        if (input instanceof FloatValue) {
+                            return ((FloatValue) input).getValue();
+                        } else if (input instanceof IntValue) {
+                            return new BigDecimal(((IntValue) input).getValue());
                         }
                         throw new IllegalArgumentException("Expected a FloatValue or IntValue.");
                     }

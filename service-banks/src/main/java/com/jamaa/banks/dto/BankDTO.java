@@ -3,6 +3,7 @@ package com.jamaa.banks.dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -25,19 +26,19 @@ public class BankDTO {
 
     @NotNull(message = "Le solde minimum est obligatoire")
     @DecimalMin(value = "0.0", inclusive = true, message = "Le solde minimum doit être positif")
-    private Double minimumBalance;
+    private BigDecimal minimumBalance;
 
     @NotNull(message = "Les frais de retrait sont obligatoires")
     @DecimalMin(value = "0.0", inclusive = true, message = "Les frais de retrait doivent être positifs")
-    private Double withdrawFees;
+    private BigDecimal withdrawFees;
 
     @NotNull(message = "Les frais de transfert interne sont obligatoires")
     @DecimalMin(value = "0.0", inclusive = true, message = "Les frais de transfert interne doivent être positifs")
-    private Double internalTransferFees;
+    private BigDecimal internalTransferFees;
 
     @NotNull(message = "Les frais de transfert externe sont obligatoires")
     @DecimalMin(value = "0.0", inclusive = true, message = "Les frais de transfert externe doivent être positifs")
-    private Double externalTransferFees;
+    private BigDecimal externalTransferFees;
 
     @NotNull(message = "Le statut actif est obligatoire")
     private Boolean isActive;

@@ -2,11 +2,18 @@ package com.jamaa.banks.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @Table(name = "bank_subscriptions")
+@NoArgsConstructor
+@Getter
+@Setter
 public class BankSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

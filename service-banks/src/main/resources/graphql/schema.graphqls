@@ -23,10 +23,10 @@ type Bank {
     logoUrl: String
     createdAt: DateTime!
     updatedAt: DateTime
-    minimumBalance: Double!
-    withdrawFees: Double!
-    internalTransferFees: Double!
-    externalTransferFees: Double!
+    minimumBalance: BigDecimal!
+    withdrawFees: BigDecimal!
+    internalTransferFees: BigDecimal!
+    externalTransferFees: BigDecimal!
     isActive: Boolean!
 }
 
@@ -34,10 +34,10 @@ input BankInput {
     name: String!
     slogan: String
     logoUrl: String
-    minimumBalance: Double!
-    withdrawFees: Double!
-    internalTransferFees: Double!
-    externalTransferFees: Double!
+    minimumBalance: BigDecimal!
+    withdrawFees: BigDecimal!
+    internalTransferFees: BigDecimal!
+    externalTransferFees: BigDecimal!
     isActive: Boolean!
 }
 
@@ -64,3 +64,4 @@ scalar DateTime
 
 scalar Double
 
+scalar BigDecimal

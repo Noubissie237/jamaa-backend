@@ -1,0 +1,58 @@
+type Query {
+    card(id: ID!): Card
+    cardByNumber(cardNumber: String!): Card
+    cardsByCustomer(customerId: ID!): [Card!]!
+    allCards: [Card!]!
+}
+
+type Mutation {
+    createCard(input: CardCreateInput!): Card!
+    updateCard(id: ID!, input: CardUpdateInput!): Card!
+    deleteCard(id: ID!): Boolean!
+    activateCard(id: ID!): Card!
+    blockCard(id: ID!): Card!
+}
+
+type Card {
+    id: ID!
+    cardNumber: String!
+    maskedCardNumber: String!
+    holderName: String!
+    customerId: ID!
+    cardType: CardType!
+    status: CardStatus!
+    expiryDate: String!
+    creditLimit: Float!
+    currentBalance: Float!
+    isVirtual: Boolean!
+    createdAt: String!
+    lastUsedAt: String
+}
+
+input CardCreateInput {
+    holderName: String!
+    customerId: ID!
+    cardType: CardType!
+    creditLimit: Float
+    pin: String
+}
+
+input CardUpdateInput {
+    status: CardStatus
+    creditLimit: Float
+    pin: String
+}
+
+enum CardType {
+    VISA
+    MASTERCARD
+    AMERICAN_EXPRESS
+}
+
+enum CardStatus {
+    ACTIVE
+    INACTIVE
+    BLOCKED
+    EXPIRED
+    PENDING_ACTIVATION
+}

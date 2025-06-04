@@ -1,3 +1,8 @@
+enum CanalNotification {
+    IN_APP
+    EMAIL
+}
+
 enum NotificationType {
     CONFIRMATION_DEPOT
     CONFIRMATION_RETRAIT
@@ -26,10 +31,16 @@ type Notification {
     lu: Boolean!
     type: NotificationType!
     serviceEmetteur: ServiceEmetteur!
+    canal: CanalNotification!
 }
 
 type Query {
     notificationsByUser(email: String!): [Notification!]!
     notificationsByType(email: String!, type: NotificationType!): [Notification!]!
     notificationsByService(email: String!, service: ServiceEmetteur!): [Notification!]!
+}
+
+type Mutation {
+    marquerCommeLue(id: ID!): Boolean
+    marquerToutesCommeLues(email: String!): Boolean
 }

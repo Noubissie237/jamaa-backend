@@ -1,6 +1,7 @@
 package com.jamaa.service_notifications.controller;
 
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
@@ -32,6 +33,20 @@ public class NotificationController {
     public List<Notification> notificationsByService(@Argument String email, @Argument Notification.ServiceEmetteur service) {
         return notificationService.getNotificationsByServiceAndUser(email, service);
     }
-
     
+    @QueryMapping
+    public List<Notification> unreadNotifications(@Argument String email) {
+        return notificationService.getUnreadNotificationsByUser(email);
+    }
+    
+    @MutationMapping
+    public Boolean marquerCommeLue(@Argument Long id) {
+        notificationService.marquerCommeLue(id);
+        return true;
+    }
+    
+    @MutationMapping
+    public Integer marquerToutesCommeLues(@Argument String email) {
+        return notificationService.marquerToutesCommeLues(email);
+    }
 } 

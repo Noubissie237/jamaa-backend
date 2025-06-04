@@ -15,6 +15,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByEmail(String email);
     List<Notification> findByEmailAndType(String email, NotificationType type);
     List<Notification> findByEmailAndServiceEmetteur(String email, ServiceEmetteur service);
+    
+    List<Notification> findByEmailAndLuFalse(String email);
 
     @Transactional
     void deleteByEmail(String email);

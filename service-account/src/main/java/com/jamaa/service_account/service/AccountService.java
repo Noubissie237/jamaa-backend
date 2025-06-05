@@ -184,4 +184,26 @@ public class AccountService {
                 });
     }
     
+    @Transactional
+    public void transfer(Long fromAccountId, Long toAccountId, BigDecimal amount) {
+        validateAmount(amount);
+        if (fromAccountId.equals(toAccountId)) {
+            logger.error("Transfert impossible : comptes source et destination identiques");
+            throw new IllegalArgumentException("Les comptes source et destination doivent être différents");
+        }
+        logger.info("Transfert de {} à {} du montant {}", fromAccountId, toAccountId, amount);
+        Account fromAccount = findAccountById(fromAccountId);
+        Account toAccount = findAccountById(toAccountId);
+        if (fromAccount.getBalance().compareTo(amount) < 0) {
+            logger.error("Solde insuffisant pour le transfert - Compte source: {}, Solde: {}, Montant: {}", fromAccountId, fromAccount.getBalance(), amount);
+            throw new InsufficientBalanceException("Solde insuffisant pour effectuer le transfert");
+        }
+        // Débit
+        fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+        // Crédit
+        toAccount.setBalance(toAccount.getBalance().add(amount));
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);
+        logger.info("Transfert réussi de {} à {} du montant {}", fromAccountId, toAccountId, amount);
+    }
 }

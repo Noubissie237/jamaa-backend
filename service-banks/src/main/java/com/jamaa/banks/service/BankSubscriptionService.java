@@ -2,17 +2,21 @@ package com.jamaa.banks.service;
 
 import com.jamaa.banks.dto.BankSubscriptionDTO;
 import com.jamaa.banks.dto.BankSubscriptionInputDTO;
+import com.jamaa.banks.dto.CustomerDTO;
 import com.jamaa.banks.entity.Bank;
 import com.jamaa.banks.entity.BankSubscription;
 import com.jamaa.banks.entity.SubscriptionStatus;
 import com.jamaa.banks.exception.CustomException;
 import com.jamaa.banks.repository.BankRepository;
 import com.jamaa.banks.repository.BankSubscriptionRepository;
+import com.jamaa.banks.utils.Util;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +27,8 @@ import java.util.stream.Collectors;
 public class BankSubscriptionService {
     private final BankSubscriptionRepository subscriptionRepository;
     private final BankRepository bankRepository;
+    private final RabbitTemplate rabbitTemplate;
+    private final Util util;
 
     @Transactional
 public BankSubscriptionDTO subscribeToBank(BankSubscriptionInputDTO inputDTO) {
@@ -49,6 +55,13 @@ public BankSubscriptionDTO subscribeToBank(BankSubscriptionInputDTO inputDTO) {
     // ou le laisser à null si c’est fait via @PrePersist
 
     BankSubscription saved = subscriptionRepository.save(subscription);
+
+    CustomerDTO customerDTO = new CustomerDTO();
+    customerDTO.setCustomerId(util.getCustomer(inputDTO.getUserId()).getCustomerId());
+    customerDTO.setHolderName(util.getCustomer(inputDTO.getUserId()).getHolderName());
+
+    rabbitTemplate.convertAndSend("CardExchange", "bank-subscription", customerDTO);
+
     return convertToDTO(saved);
 }
 

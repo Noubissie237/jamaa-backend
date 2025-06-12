@@ -19,7 +19,7 @@ import okhttp3.*;
 @Component
 public class Util {
     
-    @Value("${service.account.endpoint:http://127.0.0.1:8079/SERVICE-ACCOUNT/graphql}")
+    @Value("${service.account.endpoint:http://192.168.1.125:8079/SERVICE-ACCOUNT/graphql}")
     private String accountServiceEndpoint;
     
     @Value("${service.account.timeout.connect:5}")

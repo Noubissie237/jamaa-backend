@@ -14,12 +14,16 @@ import org.springframework.stereotype.Component;
 import com.jamaa_bank.service_transactions.dto.AccountDTO;
 import com.jamaa_bank.service_transactions.exceptions.AccountServiceException;
 
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Component
 public class Util {
     
-    @Value("${service.account.endpoint:http://127.0.0.1:8079/SERVICE-ACCOUNT/graphql}")
+    @Value("${service.account.endpoint:http://192.168.1.125:8079/SERVICE-ACCOUNT/graphql}")
     private String accountServiceEndpoint;
     
     @Value("${service.account.timeout.connect:5}")

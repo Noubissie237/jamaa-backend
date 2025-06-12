@@ -91,9 +91,16 @@ import org.springframework.beans.factory.annotation.Autowired;
             
             // Ajout de données communes à tous les templates
             Map<String, Object> templateData = new HashMap<>(data);
-            templateData.put("date", DATE_FORMAT.format(new Date()));
-            templateData.put("appUrl", appBaseUrl);
+            // templateData.put("date", DATE_FORMAT.format(new Date()));
+            // templateData.put("appUrl", appBaseUrl);
             templateData.put("year", String.valueOf(new Date().getYear() + 1900));
+            templateData.put("fullName", data.get("firstName") + " " + data.get("lastName"));
+            templateData.put("firstName", data.get("firstName"));
+            templateData.put("lastName", data.get("lastName"));
+            templateData.put("email", data.get("email"));
+            templateData.put("accountNumber", data.get("accountNumber"));
+            templateData.put("registrationDate", data.get("registrationDate"));
+            
             
             // Chargement et préparation du template
             String templateContent = loadAndProcessTemplate(type.getTemplateName(), templateData);

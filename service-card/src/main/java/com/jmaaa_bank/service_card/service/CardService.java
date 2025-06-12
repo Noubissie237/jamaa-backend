@@ -2,13 +2,14 @@ package com.jmaaa_bank.service_card.service;
 
 import java.util.List;
 
-import com.jmaaa_bank.service_card.dto.CardCreateRequest;
 import com.jmaaa_bank.service_card.dto.CardResponse;
 import com.jmaaa_bank.service_card.dto.CardUpdateRequest;
+import com.jmaaa_bank.service_card.dto.CustomerDTO;
+import com.jmaaa_bank.service_card.model.Card;
 
 public interface CardService {
 
-CardResponse createCard(CardCreateRequest request);
+    void createCard(CustomerDTO request);
     CardResponse getCardById(Long id);
     CardResponse getCardByNumber(String cardNumber);
     List<CardResponse> getCardsByCustomerId(Long customerId);

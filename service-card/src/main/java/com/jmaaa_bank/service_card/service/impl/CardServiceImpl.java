@@ -9,10 +9,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.jmaaa_bank.service_card.exception.CardNotFoundException;
-import com.jmaaa_bank.service_card.dto.CardCreateRequest;
 import com.jmaaa_bank.service_card.dto.CardResponse;
 import com.jmaaa_bank.service_card.dto.CardUpdateRequest;
+import com.jmaaa_bank.service_card.dto.CustomerDTO;
 import com.jmaaa_bank.service_card.enums.CardStatus;
+import com.jmaaa_bank.service_card.enums.CardType;
 import com.jmaaa_bank.service_card.model.Card;
 import com.jmaaa_bank.service_card.repository.CardRepository;
 import com.jmaaa_bank.service_card.service.CardService;
@@ -32,11 +33,11 @@ public class CardServiceImpl  implements CardService{
     private final CardNumberGenerator cardNumberGenerator;
     
     @Override
-    public CardResponse createCard(CardCreateRequest request) {
+    public void createCard(CustomerDTO request) {
         log.info("Création d'une nouvelle carte pour le client: {}", request.getCustomerId());
         
         // Générer un numéro de carte unique
-        String cardNumber = cardNumberGenerator.generateCardNumber(request.getCardType());
+        String cardNumber = cardNumberGenerator.generateCardNumber(CardType.VISA);
         
         // Générer CVV
         String cvv = cardNumberGenerator.generateCVV();
@@ -48,20 +49,16 @@ public class CardServiceImpl  implements CardService{
                 .cardNumber(cardNumber)
                 .holderName(request.getHolderName())
                 .customerId(request.getCustomerId())
-                .cardType(request.getCardType())
+                .cardType(CardType.VISA)
                 .expiryDate(expiryDate)
                 .cvv(cvv)
-                .creditLimit(request.getCreditLimit() != null ? request.getCreditLimit() : BigDecimal.valueOf(1000))
-                .pin(request.getPin()) // Dans un vrai système, il faudrait hasher le PIN
+                .creditLimit(BigDecimal.valueOf(1000))
                 .build();
         
         Card savedCard = cardRepository.save(card);
-        
-        // Publier l'événement de création
+        log.info("Publication de l'événement de création de carte pour la carte: {}", savedCard.getId());
         eventPublisher.publishCardCreated(savedCard);
-        
         log.info("Carte créée avec succès: {}", savedCard.getId());
-        return mapToResponse(savedCard);
     }
     
     @Override
@@ -106,18 +103,16 @@ public class CardServiceImpl  implements CardService{
             updated = true;
         }
         
-        if (request.getPin() != null) {
-            card.setPin(request.getPin()); // Hasher dans un vrai système
-            updated = true;
-        }
         
         if (updated) {
             Card savedCard = cardRepository.save(card);
+            log.info("Publication de l'événement de mise à jour de carte pour la carte: {}", savedCard.getId());
             eventPublisher.publishCardUpdated(savedCard);
             log.info("Carte mise à jour: {}", id);
             return mapToResponse(savedCard);
+        } else {
+            log.info("Aucune modification détectée pour la carte: {}. Aucun événement publié.", id);
         }
-        
         return mapToResponse(card);
     }
     
@@ -127,6 +122,7 @@ public class CardServiceImpl  implements CardService{
                 .orElseThrow(() -> new CardNotFoundException("Carte non trouvée avec l'ID: " + id));
         
         cardRepository.delete(card);
+        log.info("Publication de l'événement de suppression de carte pour la carte: {}", card.getId());
         eventPublisher.publishCardDeleted(card);
         log.info("Carte supprimée: {}", id);
     }
@@ -138,7 +134,7 @@ public class CardServiceImpl  implements CardService{
         
         card.setStatus(CardStatus.ACTIVE);
         Card savedCard = cardRepository.save(card);
-        
+        log.info("Publication de l'événement d'activation de carte pour la carte: {}", savedCard.getId());
         eventPublisher.publishCardActivated(savedCard);
         log.info("Carte activée: {}", id);
         
@@ -152,7 +148,7 @@ public class CardServiceImpl  implements CardService{
         
         card.setStatus(CardStatus.BLOCKED);
         Card savedCard = cardRepository.save(card);
-        
+        log.info("Publication de l'événement de blocage de carte pour la carte: {}", savedCard.getId());
         eventPublisher.publishCardBlocked(savedCard);
         log.info("Carte bloquée: {}", id);
         

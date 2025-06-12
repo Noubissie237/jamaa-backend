@@ -1,0 +1,33 @@
+type Transfert {
+  id: ID!,
+  senderAccountId: ID!,
+  receiverAccountId: ID!,
+  amount: Float!,
+  createAt: String!
+}
+
+input TransferRequest {
+  fromAccountId: ID!
+  fromAccountType: AccountType!
+  toAccountId: ID!
+  toAccountType: AccountType!
+  amount: Float!
+}
+
+enum AccountType {
+  APPLICATION
+  BANK
+}
+
+type Mutation {
+  makeAppTransfert(
+    idSenderAccount: ID!,
+    idReceiverAccount: ID!,
+    amount: Float!
+  ): Transfert
+  transfer(request: TransferRequest!): Boolean
+}
+
+type Query {
+  getAllTransferts: [Transfert!]
+}

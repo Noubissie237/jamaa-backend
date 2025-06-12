@@ -1,0 +1,15 @@
+# query {
+# 	getAllTransactions{
+# 		transactionType,
+# 		idAccountSender,
+# 		idAccountReceiver,
+# 		amount,
+# 		status,
+# 		createdAt,
+# 		dateEvent
+# 	}
+# }
+
+# mutation {
+#   deleteTransactionStream
+# }

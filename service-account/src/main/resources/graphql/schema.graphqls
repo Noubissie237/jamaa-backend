@@ -6,12 +6,37 @@ type Wallet {
     creationDate: String!
 }
 
-type Query {
-    getWallet(userId: String!): Wallet
+
+type Account {
+  id: ID!
+  userId: ID!
+  accountNumber: String!
+  balance: String!
+  createdAt: String!
 }
 
+input CustomerInput {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  cniRecto: String!
+  cniVerso: String!
+  cniNumber: String!
+}
+
+
 type Mutation {
+    createAccount(customer: CustomerInput!): Account
+    incrementBalance(accountId: ID!, amount: Float!): Account
+    decrementBalance(accountId: ID!, amount: Float!): Account
     createWallet(userId: String!, name: String!): Wallet
     updateBalance(userId: String!, amount: Float!): Wallet
     deleteWallet(userId: String!): Boolean
+}
+
+type Query {
+    getAllAccounts: [Account!]
+    getAccount(id: ID!): Account
+    getWallet(userId: String!): Wallet
 }

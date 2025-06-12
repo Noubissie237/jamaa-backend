@@ -1,0 +1,67 @@
+type Query {
+    bank(id: ID!): Bank
+    banks: [Bank!]!
+    subscription(id: ID!): BankSubscription
+    subscriptionsByUserId(userId: ID!): [BankSubscription!]!
+    subscriptionsByBankId(bankId: ID!): [BankSubscription!]!
+    activeSubscriptionsByBankId(bankId: ID!): [BankSubscription!]!
+    inactiveSubscriptionsByBankId(bankId: ID!): [BankSubscription!]!
+}
+
+type Mutation {
+    createBank(bank: BankInput!): Bank!
+    updateBank(id: ID!, bank: BankInput!): Bank!
+    deleteBank(id: ID!): Boolean!
+    subscribeToBank(subscription: BankSubscriptionInput!): BankSubscription!
+    updateSubscriptionStatus(id: ID!, status: SubscriptionStatus!): BankSubscription!
+}
+
+type Bank {
+    id: ID!
+    name: String!
+    slogan: String
+    logoUrl: String
+    createdAt: DateTime!
+    updatedAt: DateTime
+    minimumBalance: BigDecimal!
+    withdrawFees: BigDecimal!
+    internalTransferFees: BigDecimal!
+    externalTransferFees: BigDecimal!
+    isActive: Boolean!
+}
+
+input BankInput {
+    name: String!
+    slogan: String
+    logoUrl: String
+    minimumBalance: BigDecimal!
+    withdrawFees: BigDecimal!
+    internalTransferFees: BigDecimal!
+    externalTransferFees: BigDecimal!
+    isActive: Boolean!
+}
+
+type BankSubscription {
+    id: ID!
+    userId: ID!
+    bankId: ID!
+    status: SubscriptionStatus!
+    createdAt: DateTime!
+}
+
+input BankSubscriptionInput {
+    userId: ID!
+    bankId: ID!
+    
+}
+
+enum SubscriptionStatus {
+    ACTIVE
+    INACTIVE
+}
+
+scalar DateTime
+
+scalar Double
+
+scalar BigDecimal

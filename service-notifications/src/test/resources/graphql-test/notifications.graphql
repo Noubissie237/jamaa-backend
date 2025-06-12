@@ -1,0 +1,12 @@
+query notifications($email: String!) {
+  notificationsByUser(email: $email) {
+    id
+    title
+    message
+    email
+    dateEnvoi
+    lu
+    type
+    serviceEmetteur
+  }
+} 

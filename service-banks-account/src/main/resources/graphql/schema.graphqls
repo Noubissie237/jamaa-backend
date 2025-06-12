@@ -1,0 +1,15 @@
+type BankAccount {
+    id: ID!
+    bankId: ID!
+    totalBalance: Float!
+    totalWithdrawFees: Float!
+    totalInternalTransferFees: Float!
+    totalExternalTransferFees: Float!
+    createdAt: String!
+    updatedAt: String
+}
+
+type Query {
+    getBankAccountByBankId(bankId: ID!): BankAccount
+    getAllBankAccounts: [BankAccount!]!
+}

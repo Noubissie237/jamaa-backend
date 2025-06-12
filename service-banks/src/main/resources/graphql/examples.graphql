@@ -1,0 +1,170 @@
+# Exemples de requêtes et mutations pour le service bancaire
+
+# ===== MUTATIONS =====
+
+# Créer une nouvelle banque
+mutation CreateBank {
+  createBank(bank: {
+    name: "Banque Populaire"
+    slogan: "La banque du peuple"
+    logoUrl: "https://example.com/logo.png"
+    minimumBalance: 1000.0
+    withdrawFees: 2.5
+    internalTransferFees: 0.0
+    externalTransferFees: 5.0
+    isActive: true
+  }) {
+    id
+    name
+    slogan
+    logoUrl
+    minimumBalance
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActive
+    createdAt
+    updatedAt
+  }
+}
+
+# Mettre à jour une banque existante
+mutation UpdateBank {
+  updateBank(
+    id: "1"
+    bank: {
+      name: "Banque Populaire Modifiée"
+      slogan: "Nouveau slogan"
+      minimumBalance: 1500.00
+      withdrawFees: 3.00
+      internalTransferFees: 1.00
+      externalTransferFees: 6.00
+      isActive: true
+    }
+  ) {
+    id
+    name
+    slogan
+    minimumBalance
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActive
+    updatedAt
+  }
+}
+
+# Supprimer une banque
+mutation DeleteBank {
+  deleteBank(id: "1")
+}
+
+# Souscrire à une banque
+mutation SubscribeToBank {
+  subscribeToBank(subscription: {
+    userId: "123"
+    bankId: "2"
+  }) {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}
+
+
+# Mettre à jour le statut d'une souscription
+mutation UpdateSubscriptionStatus {
+  updateSubscriptionStatus(
+    id: "1"
+    status: INACTIVE
+  ) {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}
+
+# ===== QUERIES =====
+
+# Récupérer une banque par son ID
+query GetBank {
+  bank(id: "1") {
+    id
+    name
+    slogan
+    logoUrl
+    minimumBalance
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActive
+    createdAt
+    updatedAt
+  }
+}
+
+# Récupérer toutes les banques
+query GetAllBanks {
+  banks {
+    id
+    name
+    slogan
+    logoUrl
+    minimumBalance
+    withdrawFees
+    internalTransferFees
+    externalTransferFees
+    isActiveactive
+    createdAt
+    updatedAt
+  }
+}
+
+
+
+# Récupérer toutes les souscriptions d'un utilisateur
+query GetUserSubscriptions {
+  subscriptionsByUserId(userId: "123") {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}
+
+# Récupérer toutes les souscriptions d'une banque
+query GetBankSubscriptions {
+  subscriptionsByBankId(bankId: "1") {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}
+
+# Récupérer les souscriptions actives d'une banque
+query GetActiveBankSubscriptions {
+  activeSubscriptionsByBankId(bankId: "1") {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+} 
+
+query {
+  inactiveSubscriptionsByBankId(bankId: 1) {
+    id
+    userId
+    bankId
+    status
+    createdAt
+  }
+}

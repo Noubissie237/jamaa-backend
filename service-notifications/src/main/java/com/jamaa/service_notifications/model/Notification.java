@@ -3,6 +3,7 @@ package com.jamaa.service_notifications.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -35,6 +36,13 @@ public class Notification implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private ServiceEmetteur serviceEmetteur;
+    
+    @Column(nullable = false)
+    private boolean lu = false;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CanalNotification canal = CanalNotification.EMAIL; // Par défaut, on envoie par email
 
     @PrePersist
     public void prePersist() {
@@ -68,5 +76,10 @@ public class Notification implements Serializable {
         TRANSACTION_SERVICE,
         RECHARGE_SERVICE
         
+    }
+    
+    public enum CanalNotification {
+        IN_APP,  // Notification dans l'application
+        EMAIL    // Notification par email
     }
 } 

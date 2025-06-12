@@ -1,6 +1,7 @@
 package com.jamaa.banks.service;
 
 import com.jamaa.banks.dto.BankSubscriptionDTO;
+import com.jamaa.banks.dto.BankSubscriptionInputDTO;
 import com.jamaa.banks.entity.Bank;
 import com.jamaa.banks.entity.BankSubscription;
 import com.jamaa.banks.entity.SubscriptionStatus;
@@ -25,33 +26,33 @@ public class BankSubscriptionService {
     private final BankRepository bankRepository;
 
     @Transactional
-    public BankSubscriptionDTO subscribeToBank(@Valid BankSubscriptionDTO subscriptionDTO) {
-        log.info("Tentative de souscription à la banque {} pour l'utilisateur {}", 
-                subscriptionDTO.getBankId(), subscriptionDTO.getUserId());
+public BankSubscriptionDTO subscribeToBank(BankSubscriptionInputDTO inputDTO) {
+    log.info("Tentative de souscription à la banque {} pour l'utilisateur {}", 
+             inputDTO.getBankId(), inputDTO.getUserId());
 
-        Bank bank = bankRepository.findById(subscriptionDTO.getBankId())
-                .orElseThrow(() -> CustomException.notFound("Banque", subscriptionDTO.getBankId()));
+    Bank bank = bankRepository.findById(inputDTO.getBankId())
+            .orElseThrow(() -> CustomException.notFound("Banque", inputDTO.getBankId()));
 
-        if (!bank.getIsActive()) {
-            throw CustomException.invalidOperation("La banque n'est pas active");
-        }
-
-        if (subscriptionRepository.existsByUserIdAndBankId(
-                subscriptionDTO.getUserId(), subscriptionDTO.getBankId())) {
-            throw CustomException.alreadyExists("Souscription", "utilisateur et banque", 
-                    subscriptionDTO.getUserId() + " - " + subscriptionDTO.getBankId());
-        }
-
-        BankSubscription subscription = new BankSubscription();
-        subscription.setUserId(subscriptionDTO.getUserId());
-        subscription.setBank(bank);
-        // Le statut ACTIVE est défini automatiquement dans @PrePersist
-
-        BankSubscription savedSubscription = subscriptionRepository.save(subscription);
-        log.info("Souscription créée avec succès, id: {}", savedSubscription.getId());
-
-        return convertToDTO(savedSubscription);
+    if (!bank.getIsActive()) {
+        throw CustomException.invalidOperation("La banque n'est pas active");
     }
+
+    if (subscriptionRepository.existsByUserIdAndBankId(
+            inputDTO.getUserId(), inputDTO.getBankId())) {
+        throw CustomException.alreadyExists("Souscription", "utilisateur et banque", 
+                inputDTO.getUserId() + " - " + inputDTO.getBankId());
+    }
+
+    BankSubscription subscription = new BankSubscription();
+    subscription.setUserId(inputDTO.getUserId());
+    subscription.setBank(bank);
+    subscription.setStatus(SubscriptionStatus.ACTIVE); // Définir le statut ici
+    // ou le laisser à null si c’est fait via @PrePersist
+
+    BankSubscription saved = subscriptionRepository.save(subscription);
+    return convertToDTO(saved);
+}
+
 
     @Transactional
     public BankSubscriptionDTO updateSubscriptionStatus(Long id, SubscriptionStatus newStatus) {
@@ -101,6 +102,14 @@ public class BankSubscriptionService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<BankSubscriptionDTO> getInactiveSubscriptionsByBankId(Long bankId) {
+        log.debug("Récupération des souscriptions inactives pour la banque {}", bankId);
+        return subscriptionRepository.findByBankIdAndStatus(bankId, SubscriptionStatus.INACTIVE).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
 
     private BankSubscriptionDTO convertToDTO(BankSubscription subscription) {
         BankSubscriptionDTO dto = new BankSubscriptionDTO();

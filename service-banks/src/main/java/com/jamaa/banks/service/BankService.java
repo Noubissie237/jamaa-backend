@@ -3,6 +3,7 @@ package com.jamaa.banks.service;
 import com.jamaa.banks.dto.BankDTO;
 import com.jamaa.banks.entity.Bank;
 import com.jamaa.banks.exception.CustomException;
+import com.jamaa.banks.messaging.BankInfoProducer;
 import com.jamaa.banks.repository.BankRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,11 @@ import java.util.stream.Collectors;
 @Validated
 @RequiredArgsConstructor
 public class BankService {
+
+    private final BankInfoProducer bankInfoProducer;
     private final BankRepository bankRepository;
+
+   
 
     @Transactional
     public BankDTO createBank(@Valid BankDTO bankDTO) {
@@ -30,6 +35,9 @@ public class BankService {
         updateBankFromDTO(bank, bankDTO);
         Bank savedBank = bankRepository.save(bank);
         log.info("Banque créée avec succès, id: {}", savedBank.getId());
+
+        // Publier l'événement
+        bankInfoProducer.sendBankCreatedEvent(savedBank);
         
         return convertToDTO(savedBank);
     }

@@ -117,7 +117,19 @@
 			<artifactId>jbcrypt</artifactId>
 			<version>0.4</version>
 		</dependency>
+		<!-- Pour Stripe -->
+		<dependency>
+    		<groupId>com.stripe</groupId>
+    		<artifactId>stripe-java</artifactId>
+    		<version>4.2.0</version>	
+		</dependency>
 		<!-- Fin -->
+		<!--Ajout -->
+		<dependency>
+    		<groupId>com.graphql-java</groupId>
+    		<artifactId>graphql-java-extended-scalars</artifactId>
+    		<version>21.0</version> <!-- ou la dernière version -->
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

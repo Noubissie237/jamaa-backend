@@ -1,7 +1,6 @@
 package com.jamaa.banks.messaging;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamaa.banks.dto.BankInfoDTO;
 import com.jamaa.banks.entity.Bank;
 import com.jamaa.banks.event.BankCreatedEvent;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Component;
 public class BankInfoProducer {
 
     private final RabbitTemplate rabbitTemplate;
-    private final ObjectMapper objectMapper;
-
     public void sendBankCreatedEvent(Bank bank) {
         try {
             BankInfoDTO bankInfo = new BankInfoDTO();

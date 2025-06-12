@@ -102,6 +102,7 @@ public class NotificationConsumer {
                     // Mapper le type de notification au type d'email
                     EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
                     
+                    
                     // Envoyer l'email
                     logger.info("Envoi de l'email...");
                     emailService.sendNotification(
@@ -349,61 +350,6 @@ public class NotificationConsumer {
         }
     }
 
-    // @RabbitListener(queues = "accountCreateQueue")
-    // public void handleRegistrationNotification(CustomerEvent event) {
-    // logger.info("=== Nouvelle notification d'inscription réussi ===");
-    // logger.info("Email: {}", event.getEmail());
-
-    // try {
-    // // Préparation des données pour le template
-    // Map<String, Object> data = new HashMap<>();
-    // data.put("email", event.getEmail());
-    // data.put("firstName", event.getFirstName());
-    // data.put("lastName", event.getLastName());
-    // String fullName = event.getFirstName() + " " + event.getLastName();
-    // data.put("fullName", fullName);
-    // data.put("accountNumber", event.getAccountNumber());
-    // data.put("registrationDate", LocalDate.now());
-    // data.put("verificationToken",
-    // "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
-
-    // // Message pour la base de données (version simplifiée)
-    // String message = String.format(
-    // "Client %s enrégistré avec succès",
-    // event.getEmail()
-    // );
-
-    // // Création et sauvegarde de la notification
-    // Notification notification = new Notification();
-    // notification.setEmail(event.getEmail());
-    // notification.setTitle("Confirmation d'inscription");
-    // notification.setMessage(message);
-    // notification.setType(NotificationType.CONFIRMATION_INSCRIPTION);
-    // notification.setServiceEmetteur(ServiceEmetteur.AUTH_SERVICE);
-
-    // logger.info("Sauvegarde de la notification dans la base de données...");
-    // Notification savedNotification =
-    // notificationService.saveNotification(notification);
-    // logger.info("Notification sauvegardée avec l'ID: {}",
-    // savedNotification.getId());
-
-    // // Envoi de l'email avec le template
-    // logger.info("Envoi de l'email...");
-    // emailService.sendNotification(
-    // event.getEmail(),
-    // EmailSender.NotificationType.CONFIRMATION_INSCRIPTION,
-    // data
-    // );
-
-    // logger.info("Email envoyé avec succès");
-    // logger.info("=== Fin du traitement de la notification d'inscription ===");
-    // } catch (MessagingException e) {
-    // logger.error("Erreur lors de l'envoi de l'email: {}", e.getMessage());
-    // } catch (Exception e) {
-    // logger.error("Erreur inattendue: {}", e.getMessage());
-    // }
-    // }
-
     @RabbitListener(queues = "accountCreateQueue")
     public void handleRegistrationNotification(CustomerEvent event) {
         logger.info("=== Notification de création de compte reçue ===");
@@ -430,8 +376,9 @@ public class NotificationConsumer {
 
     /**
      * Méthode pour gérer les créations de compte réussies
+     * @throws Exception 
      */
-   private void handleAccountCreationSuccess(CustomerEvent event) {
+   public void handleAccountCreationSuccess(CustomerEvent event) throws Exception {
        try {
            // Validation des données
            if (event.getEmail() == null || event.getEmail().isEmpty()) {
@@ -449,7 +396,9 @@ public class NotificationConsumer {
            data.put("fullName", fullName);
            data.put("accountNumber", event.getAccountNumber());
            data.put("registrationDate", LocalDate.now());
-        data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
+           // À remplacer par
+          //data.put("verificationToken", event.getVerificationToken());
+           data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
            data.put("year", LocalDate.now().getYear());
    
            // Création de la notification
@@ -466,7 +415,17 @@ public class NotificationConsumer {
            notification.setCanal(Notification.CanalNotification.EMAIL); // Définition du canal
    
            // Traitement de la notification (sauvegarde + envoi si nécessaire)
-           traiterNotification(notification);
+        //    traiterNotification(notification);
+           // Envoi de l'email avec le template
+           EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
+                    
+           // Envoyer l'email
+           logger.info("Envoi de l'email...");
+           emailService.sendNotification(
+               notification.getEmail(),
+               emailType,
+               data
+           );
    
            logger.info("Traitement de la création de compte réussi pour: {}", event.getEmail());
        } catch (Exception e) {
@@ -478,7 +437,7 @@ public class NotificationConsumer {
     /**
      * Méthode pour gérer les erreurs de création de compte
      */
-    private void handleAccountCreationError(CustomerEvent event) throws MessagingException, IOException {
+    public void handleAccountCreationError(CustomerEvent event) throws MessagingException, IOException {
         logger.info("Traitement de l'erreur de création de compte pour: {}", event.getEmail());
         logger.info("Erreur: {}", event.getErrorMessage());
 
@@ -520,69 +479,4 @@ public class NotificationConsumer {
         logger.info("=== Fin du traitement d'erreur ===");
     }
 
-    // @RabbitListener(queues = "accountDeletionQueue")
-    // public void handleAccountDeletionNotification(CustomerEvent event) {
-    // logger.info("=== Notification de suppression de compte reçue ===");
-    // logger.info("Email: {}", event.getEmail());
-    // logger.info("Compte: {}", event.getAccountNumber());
-    // logger.info("Motif: {}", event.getDeletionReason());
-
-    // try {
-    // handleAccountDeletionProcess(event);
-
-    // } catch (MessagingException e) {
-    // logger.error("Erreur lors de l'envoi de l'email de suppression: {}",
-    // e.getMessage());
-    // } catch (IOException e) {
-    // logger.error("Erreur d'entrée/sortie lors de la suppression: {}",
-    // e.getMessage());
-    // } catch (Exception e) {
-    // logger.error("Erreur inattendue lors de la suppression: {}", e.getMessage());
-    // }
-    // }
-
-    /**
-     * Méthode pour gérer le processus de suppression de compte
-     */
-    // private void handleAccountDeletionProcess(CustomerEvent event) throws MessagingException, IOException {
-    //     logger.info("Traitement de la suppression de compte pour: {}", event.getEmail());
-
-    //     // Préparation des données pour le template
-    //     Map<String, Object> data = new HashMap<>();
-    //     data.put("email", event.getEmail());
-    //     data.put("firstName", event.getFirstName());
-    //     data.put("lastName", event.getLastName());
-    //     data.put("fullName", event.getFirstName() + " " + event.getLastName());
-    //     data.put("accountNumber", event.getAccountNumber());
-    //     data.put("deletionReason", event.getDeletionReason() != null ? event.getDeletionReason() : "Demande du client");
-    //     data.put("year", LocalDate.now().getYear());
-
-    //     // Message pour la base de données
-    //     String message = String.format(
-    //             "Compte %s supprimé définitivement le %s.",
-    //             event.getAccountNumber(),
-    //             LocalDate.now());
-
-    //     // Création et sauvegarde de la notification
-    //     Notification notification = new Notification();
-    //     notification.setEmail(event.getEmail());
-    //     notification.setTitle("Confirmation de suppression de compte");
-    //     notification.setMessage(message);
-    //     notification.setType(NotificationType.SUPPRESSION_COMPTE);
-    //     notification.setServiceEmetteur(ServiceEmetteur.BANK_SERVICE);
-
-    //     logger.info("Sauvegarde de la notification de suppression dans la base de données...");
-    //     Notification savedNotification = notificationService.saveNotification(notification);
-    //     logger.info("Notification de suppression sauvegardée avec l'ID: {}", savedNotification.getId());
-
-    //     // Envoi de l'email avec le template
-    //     logger.info("Envoi de l'email de confirmation de suppression...");
-    //     emailService.sendNotification(
-    //             event.getEmail(),
-    //             EmailSender.NotificationType.ACCOUNT_DELETION,
-    //             data);
-
-    //     logger.info("Email de confirmation de suppression envoyé avec succès pour: {}", event.getEmail());
-    //     logger.info("=== Fin du traitement de suppression de compte ===");
-    // }
 }

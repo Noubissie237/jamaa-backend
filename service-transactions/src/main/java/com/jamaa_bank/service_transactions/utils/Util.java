@@ -14,7 +14,11 @@ import org.springframework.stereotype.Component;
 import com.jamaa_bank.service_transactions.dto.AccountDTO;
 import com.jamaa_bank.service_transactions.exceptions.AccountServiceException;
 
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Component
 public class Util {

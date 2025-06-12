@@ -1,6 +1,7 @@
 package com.jamaa.banks.graphql;
 
 import com.jamaa.banks.dto.BankSubscriptionDTO;
+import com.jamaa.banks.dto.BankSubscriptionInputDTO;
 import com.jamaa.banks.entity.SubscriptionStatus;
 import com.jamaa.banks.service.BankSubscriptionService;
 import jakarta.validation.Valid;
@@ -28,7 +29,7 @@ public class BankSubscriptionResolver {
      * @return DTO de la souscription créée
      */
     @MutationMapping
-    public BankSubscriptionDTO subscribeToBank(@Argument @Valid BankSubscriptionDTO subscription) {
+    public BankSubscriptionDTO subscribeToBank(@Argument @Valid BankSubscriptionInputDTO subscription) {
         log.info("Mutation GraphQL: création d'une nouvelle souscription pour l'utilisateur {} à la banque {}", 
                 subscription.getUserId(), subscription.getBankId());
         return subscriptionService.subscribeToBank(subscription);
@@ -50,11 +51,12 @@ public class BankSubscriptionResolver {
      * @param bankId Identifiant de la banque
      * @return Liste des DTOs des souscriptions
      */
-    @QueryMapping
-    public List<BankSubscriptionDTO> bankSubscriptions(@Argument Long bankId) {
+   @QueryMapping
+    public List<BankSubscriptionDTO> subscriptionsByBankId(@Argument Long bankId) {
         log.debug("Requête GraphQL: récupération des souscriptions pour la banque {}", bankId);
         return subscriptionService.getSubscriptionsByBankId(bankId);
     }
+
 
     /**
      * Récupère toutes les souscriptions d'un utilisateur.
@@ -62,7 +64,7 @@ public class BankSubscriptionResolver {
      * @return Liste des DTOs des souscriptions
      */
     @QueryMapping
-    public List<BankSubscriptionDTO> userSubscriptions(@Argument Long userId) {
+    public List<BankSubscriptionDTO> subscriptionsByUserId(@Argument Long userId) {
         log.debug("Requête GraphQL: récupération des souscriptions pour l'utilisateur {}", userId);
         return subscriptionService.getSubscriptionsByUserId(userId);
     }
@@ -73,8 +75,15 @@ public class BankSubscriptionResolver {
      * @return Liste des DTOs des souscriptions actives
      */
     @QueryMapping
-    public List<BankSubscriptionDTO> activeBankSubscriptions(@Argument Long bankId) {
+    public List<BankSubscriptionDTO> activeSubscriptionsByBankId(@Argument Long bankId) {
         log.debug("Requête GraphQL: récupération des souscriptions actives pour la banque {}", bankId);
         return subscriptionService.getActiveSubscriptionsByBankId(bankId);
     }
+
+    @QueryMapping
+    public List<BankSubscriptionDTO> inactiveSubscriptionsByBankId(@Argument Long bankId) {
+        log.debug("Requête GraphQL: récupération des souscriptions inactives pour la banque {}", bankId);
+        return subscriptionService.getInactiveSubscriptionsByBankId(bankId);
+    }
+
 } 

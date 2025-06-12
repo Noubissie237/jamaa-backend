@@ -1,0 +1,111 @@
+# -------------------------
+#         QUERIES
+# -------------------------
+
+# 1. Obtenir une carte par son ID
+query GetCardById {
+  card(id: 1) {
+    id
+    cardNumber
+    holderName
+    status
+    creditLimit
+  }
+}
+
+# 2. Obtenir une carte par son numéro
+query GetCardByNumber {
+  cardByNumber(cardNumber: "1234-5678-9012-3456") {
+    id
+    holderName
+    status
+    cardType
+    currentBalance
+  }
+}
+
+# 3. Obtenir toutes les cartes d’un client
+query GetCardsByCustomer {
+  cardsByCustomer(customerId: 1) {
+    id
+    cardNumber
+    holderName
+    status
+    creditLimit
+  }
+}
+
+# 4. Obtenir toutes les cartes existantes
+query GetAllCards {
+  allCards {
+    id
+    holderName
+    cardType
+    status
+    createdAt
+  }
+}
+
+# -------------------------
+#        MUTATIONS
+# -------------------------
+
+# 5. Créer une carte VISA
+mutation CreateVisaCard {
+  createCard(input: {
+    holderName: "John Doe"
+    customerId: 1
+    cardType: VISA
+    creditLimit: 5000.0
+    pin: "1234"
+  }) {
+    id
+    cardNumber
+    holderName
+    creditLimit
+    status
+  }
+}
+
+# 6. Mettre à jour statut et crédit
+mutation UpdateCardStatusAndLimit {
+  updateCard(id: 1, input: {
+    status: ACTIVE
+    creditLimit: 7000.0
+  }) {
+    id
+    status
+    creditLimit
+  }
+}
+
+# 7. Modifier le PIN
+mutation UpdateCardPin {
+  updateCard(id: 1, input: {
+    pin: "9999"
+  }) {
+    id
+    holderName
+  }
+}
+
+# 8. Supprimer une carte
+mutation DeleteCard {
+  deleteCard(id: 1)
+}
+
+# 9. Activer une carte
+mutation ActivateCard {
+  activateCard(id: 1) {
+    id
+    status
+  }
+}
+
+# 10. Bloquer une carte
+mutation BlockCard {
+  blockCard(id: 1) {
+    id
+    status
+  }
+}

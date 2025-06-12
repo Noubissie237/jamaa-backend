@@ -7,9 +7,9 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
-import com.jmaaa_bank.service_card.dto.CardCreateRequest;
 import com.jmaaa_bank.service_card.dto.CardResponse;
 import com.jmaaa_bank.service_card.dto.CardUpdateRequest;
+import com.jmaaa_bank.service_card.dto.CustomerDTO;
 import com.jmaaa_bank.service_card.service.CardService;
 
 import lombok.RequiredArgsConstructor;
@@ -51,9 +51,9 @@ public class CardGraphController {
     // === MUTATIONS ===
     
     @MutationMapping
-    public CardResponse createCard(@Argument CardCreateRequest input) {
+    public void createCard(@Argument CustomerDTO input) {
         log.info("Mutation GraphQL: création d'une carte pour le client {}", input.getCustomerId());
-        return cardService.createCard(input);
+        cardService.createCard(input);
     }
     
     @MutationMapping

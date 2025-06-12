@@ -1,28 +1,28 @@
 package com.jmaaa_bank.service_card.messaging;
 
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+
+import com.jmaaa_bank.service_card.dto.CustomerDTO;
+import com.jmaaa_bank.service_card.model.Card;
+import com.jmaaa_bank.service_card.service.impl.CardServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
 public class CardEventListener {
-    // @RabbitListener(queues = "transaction.request.queue")
-    // public void handleTransactionRequest(TransactionRequest request) {
-    //     log.info("Demande de transaction reçue pour la carte: {}", request.getCardNumber());
-        
-    //     // Ici, vous pourriez valider la carte, vérifier les limites, etc.
-    //     // Pour l'exemple, on log simplement
-        
-    //     try {
-    //         // Logique de validation de la transaction
-    //         validateTransaction(request);
-    //         log.info("Transaction validée pour la carte: {}", request.getCardNumber());
-    //     } catch (Exception e) {
-    //         log.error("Erreur lors de la validation de la transaction", e);
-    //     }
-    // }
+
+    @Autowired
+    CardServiceImpl cardServiceImpl;
+
+
+    @RabbitListener(queues = "card.info.queue")
+    public void handleTransactionRequest(CustomerDTO customer) {
+        cardServiceImpl.createCard(customer);
+    }
     
     // @RabbitListener(queues = "customer.updated.queue")
     // public void handleCustomerUpdated(CustomerUpdatedEvent event) {
@@ -33,25 +33,25 @@ public class CardEventListener {
     // }
     
     // private void validateTransaction(TransactionRequest request) {
-    //     // Logique de validation ici
-    //     // Vérifier si la carte existe, est active, a suffisamment de crédit, etc.
-    // }
+        // Logique de validation ici
+        // Vérifier si la carte existe, est active, a suffisamment de crédit, etc.
+    }
     
     // Classes pour les événements entrants
-    @lombok.Data
-    public static class TransactionRequest {
-        private String cardNumber;
-        private java.math.BigDecimal amount;
-        private String merchantId;
-        private String transactionType;
-    }
+    // @lombok.Data
+    // public static class TransactionRequest {
+    //     private String cardNumber;
+    //     private java.math.BigDecimal amount;
+    //     private String merchantId;
+    //     private String transactionType;
+    // }
     
-    @lombok.Data
-    public static class CustomerUpdatedEvent {
-        private Long customerId;
-        private String firstName;
-        private String lastName;
-        private String email;
-    }
-}
+    // @lombok.Data
+    // public static class CustomerUpdatedEvent {
+    //     private Long customerId;
+    //     private String firstName;
+    //     private String lastName;
+    //     private String email;
+    // }
+// }
 

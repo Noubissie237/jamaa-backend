@@ -55,7 +55,7 @@ public class Card {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private CardStatus status = CardStatus.PENDING_ACTIVATION;
+    private CardStatus status = CardStatus.ACTIVE;
 
 
     @Column(nullable = false)
@@ -71,8 +71,6 @@ public class Card {
     @Column(precision = 15, scale = 2)
     @Builder.Default
     private BigDecimal currentBalance = BigDecimal.ZERO;
-
-    private String pin; // Hashé
 
     @Builder.Default
     private Boolean isVirtual = true;

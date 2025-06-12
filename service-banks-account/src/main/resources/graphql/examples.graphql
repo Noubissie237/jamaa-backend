@@ -1,0 +1,27 @@
+query {
+  getBankAccountByBankId(bankId: "3") {
+    id
+    bankId
+    totalBalance
+    totalWithdrawFees
+    totalInternalTransferFees
+    totalExternalTransferFees
+    createdAt
+    updatedAt
+  }
+}
+
+
+
+query {
+  getAllBankAccounts {
+    id
+    bankId
+    totalBalance
+    totalWithdrawFees
+    totalInternalTransferFees
+    totalExternalTransferFees
+    createdAt
+    updatedAt
+  }
+}

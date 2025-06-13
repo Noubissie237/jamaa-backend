@@ -38,5 +38,6 @@ type Mutation {
 type Query {
     getAllAccounts: [Account!]
     getAccount(id: ID!): Account
+    getAccountByUserId(userId: ID!): Account
     getWallet(userId: String!): Wallet
 }

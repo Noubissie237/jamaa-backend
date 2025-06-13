@@ -5,7 +5,6 @@ import java.util.List;
 import com.jmaaa_bank.service_card.dto.CardResponse;
 import com.jmaaa_bank.service_card.dto.CardUpdateRequest;
 import com.jmaaa_bank.service_card.dto.CustomerDTO;
-import com.jmaaa_bank.service_card.model.Card;
 
 public interface CardService {
 

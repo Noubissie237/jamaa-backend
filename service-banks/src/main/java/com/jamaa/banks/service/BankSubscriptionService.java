@@ -59,6 +59,8 @@ public BankSubscriptionDTO subscribeToBank(BankSubscriptionInputDTO inputDTO) {
     CustomerDTO customerDTO = new CustomerDTO();
     customerDTO.setCustomerId(util.getCustomer(inputDTO.getUserId()).getCustomerId());
     customerDTO.setHolderName(util.getCustomer(inputDTO.getUserId()).getHolderName());
+    customerDTO.setBankId(bank.getId());
+    customerDTO.setBankName(bank.getName());
 
     rabbitTemplate.convertAndSend("CardExchange", "bank-subscription", customerDTO);
 

@@ -80,7 +80,7 @@ public class CustomerService {
     }
 
     public String login(String email, String password) {
-        String url = "http://192.168.1.125:8079/SERVICE-AUTH/auth/login";
+        String url = "http://127.0.0.1:8079/SERVICE-AUTH/auth/login";
         LoginRequest loginRequest = new LoginRequest();
 
         loginRequest.setLogin(email);

@@ -109,6 +109,12 @@ public class AccountService {
         return accountRepository.findById(id);
     }
 
+    public Account getAccountByUserId(Long userId) {
+        logger.debug("Récupération du compte par utilisateur id {}", userId);
+        return accountRepository.findByUserId(userId)
+                .orElseThrow(() -> new AccountNotFoundException("Compte introuvable pour l'utilisateur ID: " + userId));
+    }
+
     public Account incrementBalance(Long accountId, BigDecimal amount) {
         validateAmount(amount);
         logger.info("Incrémentation du solde - Compte ID: {}, Montant: {}", accountId, amount);

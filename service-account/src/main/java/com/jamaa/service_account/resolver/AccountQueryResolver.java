@@ -23,6 +23,11 @@ public class AccountQueryResolver {
     }
 
     @QueryMapping
+    public Account getAccountByUserId(@Argument Long userId) {
+        return accountService.getAccountByUserId(userId);
+    }
+
+    @QueryMapping
     public Optional<Account> getAccount(@Argument Long id) {
         return accountService.getAccount(id);
     }

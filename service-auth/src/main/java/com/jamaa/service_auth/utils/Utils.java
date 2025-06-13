@@ -23,13 +23,14 @@ public class Utils {
         SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + (5 * 60 * 1000));
+        Date expiryDate = new Date(now.getTime() + (24 * 60 * 60 * 1000));
 
         JwtBuilder builder = Jwts.builder()
             .setSubject(customer.getString("email"))
             .setIssuedAt(now)
             .setExpiration(expiryDate)
             .signWith(key)
+            .claim("id", customer.getLong("id"))
             .claim("email", customer.getString("email"))
             .claim("phone", customer.getString("phone"))
             .claim("lastName", customer.getString("lastName"))

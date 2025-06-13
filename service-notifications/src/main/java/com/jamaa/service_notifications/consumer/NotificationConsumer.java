@@ -211,17 +211,22 @@ public class NotificationConsumer {
         try {
             // Préparation des données pour le template
             Map<String, Object> data = new HashMap<>();
-            data.put("accountStatus", event.getAccountStatus());
-            data.put("accountType", event.getAccountType());
-            data.put("currency", event.getCurrency());
-            data.put("balance", event.getBalance());
-
+            data.put("cardNumber", event.getCardNumber());
+            data.put("holderName", event.getHolderName());
+            data.put("customerId", event.getCustomerId());
+            data.put("cardType", event.getCardType());
+            data.put("expiryDate", event.getExpiryDate());
+            data.put("cvv", event.getCvv());
+            data.put("creditLimit", event.getCreditLimit());
             // Message pour la base de données
             String message = String.format(
-                    "Compte %s %s. Solde initial: %.2f %s",
-                    event.getAccountType(), event.getAccountStatus(),
-                    event.getBalance(), event.getCurrency());
-
+                "Carte %s (%s) au nom de %s créée. Limite de crédit initiale: %.2f, Expire le: %s",
+                event.getCardNumber(),
+                event.getCardType(),
+                event.getHolderName(),
+                event.getCreditLimit(),
+                event.getExpiryDate()
+            );
             // Création et sauvegarde de la notification
             Notification notification = new Notification();
             notification.setEmail(event.getEmail());

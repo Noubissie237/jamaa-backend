@@ -26,6 +26,8 @@ public class CardResponse {
     private Boolean isVirtual;
     private LocalDateTime createdAt;
     private LocalDateTime lastUsedAt;
+    private Long bankId;
+    private String bankName;
 
     public String getMaskedCardNumber() {
         if (cardNumber != null && cardNumber.length() >= 4) {

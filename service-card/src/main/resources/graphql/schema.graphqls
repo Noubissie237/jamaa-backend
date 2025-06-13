@@ -27,6 +27,8 @@ type Card {
     isVirtual: Boolean!
     createdAt: String!
     lastUsedAt: String
+    bankId: ID!
+    bankName: String!
 }
 
 input CardCreateInput {
@@ -35,12 +37,16 @@ input CardCreateInput {
     cardType: CardType!
     creditLimit: Float
     pin: String
+    bankId: ID!
+    bankName: String!
 }
 
 input CardUpdateInput {
     status: CardStatus
     creditLimit: Float
     pin: String
+    bankId: ID!
+    bankName: String!
 }
 
 enum CardType {

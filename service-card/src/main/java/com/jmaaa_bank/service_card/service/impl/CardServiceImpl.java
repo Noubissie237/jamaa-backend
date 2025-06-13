@@ -53,6 +53,8 @@ public class CardServiceImpl  implements CardService{
                 .expiryDate(expiryDate)
                 .cvv(cvv)
                 .creditLimit(BigDecimal.valueOf(1000))
+                .bankId(request.getBankId())
+                .bankName(request.getBankName())
                 .build();
         
         Card savedCard = cardRepository.save(card);
@@ -102,7 +104,6 @@ public class CardServiceImpl  implements CardService{
             card.setCreditLimit(request.getCreditLimit());
             updated = true;
         }
-        
         
         if (updated) {
             Card savedCard = cardRepository.save(card);
@@ -178,6 +179,8 @@ public class CardServiceImpl  implements CardService{
                 .isVirtual(card.getIsVirtual())
                 .createdAt(card.getCreatedAt())
                 .lastUsedAt(card.getLastUsedAt())
+                .bankId(card.getBankId())
+                .bankName(card.getBankName())
                 .build();
     }
     

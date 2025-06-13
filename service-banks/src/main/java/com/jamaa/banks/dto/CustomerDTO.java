@@ -12,4 +12,8 @@ public class CustomerDTO {
     private Long customerId;
     @JsonProperty("holderName")
     private String holderName;
+    @JsonProperty("bankId")
+    private Long bankId;
+    @JsonProperty("bankName")
+    private String bankName;
 }

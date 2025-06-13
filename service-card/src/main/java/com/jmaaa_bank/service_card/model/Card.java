@@ -83,8 +83,8 @@ public class Card {
     
     private LocalDateTime lastUsedAt;
 
+    private Long bankId;
 
-
-
+    private String bankName;
     
 }

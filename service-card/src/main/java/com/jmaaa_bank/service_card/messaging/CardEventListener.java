@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jmaaa_bank.service_card.dto.CustomerDTO;
-import com.jmaaa_bank.service_card.model.Card;
 import com.jmaaa_bank.service_card.service.impl.CardServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;

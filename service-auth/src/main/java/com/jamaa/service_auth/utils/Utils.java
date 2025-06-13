@@ -23,7 +23,7 @@ public class Utils {
         SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + 300000);
+        Date expiryDate = new Date(now.getTime() + (5 * 60 * 1000));
 
         JwtBuilder builder = Jwts.builder()
             .setSubject(customer.getString("email"))

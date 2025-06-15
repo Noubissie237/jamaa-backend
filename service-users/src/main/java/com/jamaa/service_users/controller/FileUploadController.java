@@ -10,19 +10,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.jamaa.service_users.service.StorageService;
+import com.jamaa.service_users.service.S3StorageService;
 
 @RestController
 @RequestMapping("/upload")
 public class FileUploadController {
 
     @Autowired
-    StorageService storageService;
+    S3StorageService s3StorageService;
 
     @PostMapping("/cni")
     public ResponseEntity<String> uploadCni(@RequestParam("file") MultipartFile file) {
         try {
-            String filePath = storageService.save(file); // Sauvegarde et retourne le chemin
+            String filePath = s3StorageService.save(file); 
             return ResponseEntity.ok(filePath);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Erreur lors de l’upload");

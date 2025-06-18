@@ -43,8 +43,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue transferNotificationQueue() {
-        return new Queue("transfer.notification.queue", true);
+    public Queue transferDoneQueue(){
+        return new Queue("notification.transfer.done", true);
     }
 
     @Bean

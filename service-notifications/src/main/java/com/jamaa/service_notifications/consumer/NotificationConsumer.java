@@ -16,7 +16,7 @@ import com.jamaa.service_notifications.events.CustomerEvent;
 import com.jamaa.service_notifications.events.DepositEvent;
 import com.jamaa.service_notifications.events.InsufficientFundsEvent;
 import com.jamaa.service_notifications.events.RechargeEvent;
-import com.jamaa.service_notifications.events.TransferEvent;
+import com.jamaa.service_notifications.events.TransfertEvent;
 import com.jamaa.service_notifications.events.WithdrawalEvent;
 import com.jamaa.service_notifications.model.Notification;
 import com.jamaa.service_notifications.model.Notification.NotificationType;
@@ -172,83 +172,68 @@ public class NotificationConsumer {
             notification.setCanal(Notification.CanalNotification.IN_APP);
 
             // Traiter la notification (sauvegarde + envoi si nécessaire)
-            traiterNotification(notification);
-            
+           // traiterNotification(notification);
+            // Envoi de l'email avec le template
+           EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
+                    
+           // Envoyer l'email
+           logger.info("Envoi de l'email...");
+        //    emailService.sendNotification(
+        //        notification.getEmail(),
+        //        emailType,
+        //        message
+        //    );
+
             logger.info("Notification de retrait traitée pour: {}", event.getEmail());
         } catch (Exception e) {
             logger.error("Erreur lors du traitement de la notification de retrait: {}", e.getMessage());
         }
     }
 
-    @RabbitListener(queues = "transfer.notification.queue")
-    public void handleTransferNotification(TransferEvent event) {
+    @RabbitListener(queues = "notification.transfer.done")
+    public void handleTransferNotification(TransfertEvent event) {
         try {
-            // Message pour la base de données
+            Map<String, Object> data = new HashMap<>();
+            data.put("idAccountSender", event.getIdAccountSender());
+            data.put("idAccountReceiver", event.getIdAccountReceiver());
+            data.put("amount", event.getAmount());
+            data.put("status", event.getStatus());
+            data.put("createdAt", event.getCreatedAt());
+    
             String message = String.format(
-                    "Transfert de %.2f € vers %s (Compte: %s) effectué avec succès",
-                    event.getAmount(), event.getBeneficiaryName(), event.getDestinationAccount());
-
-            // Création de la notification
+                "Transfert de %.2f effectué de l'utilisateur %d vers l'utilisateur %d. Statut : %s.",
+                event.getAmount(),
+                event.getIdAccountSender(),
+                event.getIdAccountReceiver(),
+                event.getStatus()
+            );
+    
             Notification notification = new Notification();
-            notification.setEmail(event.getEmail());
-            notification.setTitle("Confirmation de transfert");
+            notification.setTitle("Notification de Transfert");
             notification.setMessage(message);
             notification.setType(NotificationType.CONFIRMATION_TRANSFERT);
             notification.setServiceEmetteur(ServiceEmetteur.TRANSFER_SERVICE);
-            notification.setCanal(Notification.CanalNotification.IN_APP);
 
-            // Traiter la notification (sauvegarde + envoi si nécessaire)
-            traiterNotification(notification);
-            
-            logger.info("Notification de transfert traitée pour: {}", event.getEmail());
+            notification.setCanal(Notification.CanalNotification.IN_APP);
+    
+            notificationService.saveNotification(notification);
+
+            // Envoi de l'email avec le template
+           EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
+                    
+           // Envoyer l'email
+           logger.info("Envoi de l'email...");
+           emailService.sendNotification(
+               notification.getEmail(),
+               emailType,
+               data
+           );
+    
+            // emailService.sendNotification(..., data, ...); // à adapter selon ta logique d'email
         } catch (Exception e) {
             logger.error("Erreur lors du traitement de la notification de transfert: {}", e.getMessage());
         }
     }
-
-    @RabbitListener(queues = "account.notification.queue")
-    public void handleAccountNotification(AccountEvent event) {
-        try {
-            // Préparation des données pour le template
-            Map<String, Object> data = new HashMap<>();
-            data.put("cardNumber", event.getCardNumber());
-            data.put("holderName", event.getHolderName());
-            data.put("customerId", event.getCustomerId());
-            data.put("cardType", event.getCardType());
-            data.put("expiryDate", event.getExpiryDate());
-            data.put("cvv", event.getCvv());
-            data.put("creditLimit", event.getCreditLimit());
-            // Message pour la base de données
-            String message = String.format(
-                "Carte %s (%s) au nom de %s créée. Limite de crédit initiale: %.2f, Expire le: %s",
-                event.getCardNumber(),
-                event.getCardType(),
-                event.getHolderName(),
-                event.getCreditLimit(),
-                event.getExpiryDate()
-            );
-            // Création et sauvegarde de la notification
-            Notification notification = new Notification();
-            notification.setEmail(event.getEmail());
-            notification.setTitle("Notification de compte");
-            notification.setMessage(message);
-            notification.setType(NotificationType.CONFIRMATION_INSCRIPTION);
-            notification.setServiceEmetteur(ServiceEmetteur.BANK_SERVICE);
-
-            notificationService.saveNotification(notification);
-
-            // Envoi de l'email avec le template
-            emailService.sendNotification(
-                    event.getEmail(),
-                    EmailSender.NotificationType.ACCOUNT,
-                    data);
-
-            logger.info("Notification de compte traitée pour l'utilisateur: {}", event.getUserId());
-        } catch (MessagingException | IOException e) {
-            logger.error("Erreur lors de l'envoi de la notification de compte: {}", e.getMessage());
-        }
-    }
-
     @RabbitListener(queues = "recharge.notification.queue")
     public void handleRechargeNotification(RechargeEvent event) {
         logger.info("=== Nouvelle notification de recharge reçue ===");

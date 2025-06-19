@@ -1,0 +1,51 @@
+scalar DateTime
+
+enum OperationType {
+    RECHARGE
+    RETRAIT
+}
+
+enum TransactionStatus {
+    SUCCESS
+    FAILED
+    PENDING
+}
+
+type RechargeRetrait {
+    id: ID!
+    accountId: ID!
+    cardId: ID!
+    amount: Float!
+    operationType: OperationType!
+    status: TransactionStatus!
+    createdAt: DateTime!
+    updatedAt: DateTime
+}
+
+input RechargeRequest {
+    accountId: ID!
+    cardId: ID!
+    amount: Float!
+}
+
+input RetraitRequest {
+    cardId: ID!
+    accountId: ID!
+    amount: Float!
+}
+
+type Query {
+    getAllOperations: [RechargeRetrait!]!
+    getOperationsByAccount(accountId: ID!): [RechargeRetrait!]!
+    getOperationsByCard(cardId: ID!): [RechargeRetrait!]!
+    getOperationsByType(operationType: OperationType!): [RechargeRetrait!]!
+    getRecharges: [RechargeRetrait!]!
+    getRetraits: [RechargeRetrait!]!
+}
+
+type Mutation {
+    recharge(accountId: ID!, cardId: ID!, amount: Float!): RechargeRetrait!
+    rechargeWithRequest(request: RechargeRequest!): RechargeRetrait!
+    retrait(cardId: ID!, accountId: ID!, amount: Float!): RechargeRetrait!
+    retraitWithRequest(request: RetraitRequest!): RechargeRetrait!
+}

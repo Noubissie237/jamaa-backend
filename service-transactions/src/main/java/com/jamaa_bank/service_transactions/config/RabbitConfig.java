@@ -8,7 +8,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 
 
@@ -45,12 +44,16 @@ public class RabbitConfig {
     
     @Bean
     public Queue retraitDoneQueue() {
-        return new Queue("retraitDoneQueue", true, false, false);
+        return new Queue("retrait.queue", true, false, false);
     }
 
     @Bean
     public Queue rechargeByAgenceDoneQueue() {
         return new Queue("rechargeByAgenceDoneQueue", true, false, false);
     }
-}
 
+    @Bean
+    public Queue rechargeDoneQueue() {
+        return new Queue("recharge.queue", true, false, false);
+    }
+}

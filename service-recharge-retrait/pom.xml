@@ -8,11 +8,11 @@
 		<version>3.4.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.jamaa</groupId>
-	<artifactId>service-users</artifactId>
+	<groupId>com.jamaa-bank</groupId>
+	<artifactId>service-recharge-retrait</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>service-users</name>
-	<description>Service de gestion des utilisateurs</description>
+	<name>service-recharge-retrait</name>
+	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -92,22 +92,28 @@
 			<artifactId>spring-rabbit-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- Pour aws -->
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
-			<version>2.20.68</version>
-		</dependency>
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>auth</artifactId>
-			<version>2.20.68</version>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.graphql</groupId>
 			<artifactId>spring-graphql-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Pour les requetes graph -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20231013</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jbcrypt</artifactId>
+			<version>0.4</version>
+		</dependency>
+		<!-- Fin -->
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -149,5 +155,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	
 </project>

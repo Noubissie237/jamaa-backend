@@ -21,7 +21,7 @@ jobs:
 
       # Service config
       - name: Build Docker image for service-config
-        run: docker build -t noubissie237/jamaa-project/service-config:latest ./service-config/.
+        run: docker build -t noubissie237/jamaa-project-service-config:latest ./service-config/.
 
       - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project/service-config:latest
+        run: docker push noubissie237/jamaa-project-service-config:latest

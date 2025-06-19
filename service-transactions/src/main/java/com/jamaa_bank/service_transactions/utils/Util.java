@@ -1,6 +1,8 @@
 package com.jamaa_bank.service_transactions.utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -63,6 +65,40 @@ public class Util {
         JSONObject response = executeGraphQLQuery(query);
         return parseAccountFromResponse(response, "getAccount");
     }
+
+    public List<Long> getAccountIdsByUserId(Long userId) throws AccountServiceException {
+        String query = String.format("""
+            {
+                getAccountByUserId(userId: %s) {
+                    id
+                }
+            }
+        """, userId);
+
+        JSONObject response = executeGraphQLQuery(query);
+
+        try {
+            if (response.has("errors")) {
+                throw new AccountServiceException("Erreur GraphQL: " + response.getJSONArray("errors").toString());
+            }
+
+            JSONObject data = response.getJSONObject("data");
+            if (!data.has("getAccountByUserId") || data.isNull("getAccountByUserId")) {
+                return new ArrayList<>();
+            }
+
+            // Récupération de l'objet compte unique
+            JSONObject account = data.getJSONObject("getAccountByUserId");
+            Long accountId = account.getLong("id");
+
+            // Retourner une liste avec cet unique ID
+            return List.of(accountId);
+
+        } catch (Exception e) {
+            throw new AccountServiceException("Erreur lors de la lecture des comptes utilisateur", e);
+        }
+    }
+
 
     private JSONObject executeGraphQLQuery(String query) throws AccountServiceException {
         JSONObject jsonRequest = new JSONObject();

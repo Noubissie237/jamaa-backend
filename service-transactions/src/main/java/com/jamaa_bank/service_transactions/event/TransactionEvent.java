@@ -15,6 +15,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TransactionEvent {
+
+    @JsonProperty("transactionId")
+    private String transactionId;
     
     @JsonProperty("transactionType")
     private TransactionType transactionType;

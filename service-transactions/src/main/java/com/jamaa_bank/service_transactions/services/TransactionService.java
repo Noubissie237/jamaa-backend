@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -19,24 +21,28 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jamaa_bank.service_transactions.event.TransactionEvent;
+import com.jamaa_bank.service_transactions.utils.Util;
+
 
 @Service
 public class TransactionService {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
-    private static final String TRANSACTION_STREAM = "jamaaTransactionStream1";
+    private static final String TRANSACTION_STREAM = "jamaaTransactionStream2";
 
     private final EventStoreDBClient eventStoreDBClient;
     private final ObjectMapper objectMapper;
+    private final Util util;
 
-    public TransactionService(EventStoreDBClient eventStoreDBClient) {
+    public TransactionService(EventStoreDBClient eventStoreDBClient, Util util) {
+        this.util = util;
         this.eventStoreDBClient = eventStoreDBClient;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
         logger.info("TransactionService initialized with EventStoreDBClient");
     }
 
-    public CompletableFuture<Void> saveTransaction(TransactionEvent event) {
+    public CompletableFuture<String> saveTransaction(TransactionEvent event) {
         logger.info("Saving transaction: type={}, sender={}, receiver={}, amount={}",
                 event.getTransactionType(), event.getIdAccountSender(),
                 event.getIdAccountReceiver(), event.getAmount());
@@ -50,12 +56,22 @@ public class TransactionService {
         transactionEvent.setTransactionType(event.getTransactionType());
         transactionEvent.setCreatedAt(event.getCreatedAt());
 
-        return writeEvent(TRANSACTION_STREAM, transactionEvent.getTransactionType().toString(), transactionEvent);
+        String transactionId = UUID.randomUUID().toString(); 
+        return writeEvent(TRANSACTION_STREAM, transactionEvent.getTransactionType().toString(), transactionId, transactionEvent).thenApply(v -> transactionId);
     }
 
-    private CompletableFuture<Void> writeEvent(String streamName, String type, TransactionEvent event) {
+
+    private CompletableFuture<Void> writeEvent(String streamName, String type, String transactionId, TransactionEvent event) {
         try {
-            String data = objectMapper.writeValueAsString(event);
+            // Inclure transactionId dans les métadonnées ou dans le payload
+            Map<String, Object> eventMap = objectMapper.convertValue(
+                event, 
+                new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {}
+            );
+
+            eventMap.put("transactionId", transactionId);
+
+            String data = objectMapper.writeValueAsString(eventMap);
             EventData eventData = EventData.builderAsJson(type, data).build();
 
             logger.debug("Writing event to stream {}: {}", streamName, type);
@@ -71,6 +87,7 @@ public class TransactionService {
             return CompletableFuture.failedFuture(new RuntimeException("Failed to serialize event", e));
         }
     }
+
 
     public List<TransactionEvent> getAllTransactions() {
         logger.info("Fetching all transactions");
@@ -106,6 +123,26 @@ public class TransactionService {
             logger.error("Failed to fetch transactions for account ID {}: {}", idAccount, e.getMessage(), e);
             return new ArrayList<>();
         }
+    }
+
+    public List<TransactionEvent> getTransactionsByUserId(Long userId) {
+        logger.info("Fetching transactions for user ID: {}", userId);
+        List<TransactionEvent> allTransactions = new ArrayList<>();
+
+        try {
+            List<Long> accountIds = util.getAccountIdsByUserId(userId);
+
+            for (Long accountId : accountIds) {
+                List<TransactionEvent> transactions = getTransactionByIdAccount(accountId);
+                allTransactions.addAll(transactions);
+            }
+
+            logger.info("Found total {} transactions for user ID: {}", allTransactions.size(), userId);
+        } catch (Exception e) {
+            logger.error("Failed to fetch transactions for user ID {}: {}", userId, e.getMessage(), e);
+        }
+
+        return allTransactions;
     }
 
     private TransactionEvent deserializeEvent(ResolvedEvent resolvedEvent) {

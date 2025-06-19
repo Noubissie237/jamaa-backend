@@ -28,4 +28,9 @@ public class TransactionQueryResolver {
     public List<TransactionEvent> getTransactionByIdAccount(@Argument Long idAccount) {
         return transactionService.getTransactionByIdAccount(idAccount);
     }
+
+    @QueryMapping
+    public List<TransactionEvent> getTransactionsByUserId(@Argument Long userId) {
+        return transactionService.getTransactionsByUserId(userId);
+    }
 }

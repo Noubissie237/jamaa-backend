@@ -38,9 +38,11 @@ import static org.mockito.Mockito.*;
 @DisplayName("Tests d'Intégration - Service de Notifications")
 public class NotificationIntegrationTest {
 
+    @SuppressWarnings("removal")
     @MockBean
     private NotificationService notificationService;
 
+    @SuppressWarnings("removal")
     @MockBean
     private EmailSender emailSender;
 

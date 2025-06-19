@@ -216,7 +216,7 @@ public class CardServiceImpl  implements CardService{
     @Override
     @Transactional(readOnly = true)
     public CardResponse getCardByBankId(Long bankId) {
-        Card card = cardRepository.findByBankId(bankId)
+        Card card = cardRepository.findById(bankId)
                 .orElseThrow(() -> new CardNotFoundException("Aucune carte trouvée pour la banque ID: " + bankId));
         return mapToResponse(card);
     }

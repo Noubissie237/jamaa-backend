@@ -52,7 +52,7 @@ public class CardGraphController {
     @QueryMapping
     public CardResponse cardByBankId(@Argument Long bankId) {
         log.info("Requête GraphQL: récupération de la carte par bankId {}", bankId);
-        return cardService.getCardByBankId(bankId);
+        return cardService.getCardById(bankId);
     }
     
     // === MUTATIONS ===

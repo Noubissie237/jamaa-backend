@@ -11,5 +11,11 @@ type BankAccount {
 
 type Query {
     getBankAccountByBankId(bankId: ID!): BankAccount
+    bankAccountByBankId(bankId: ID!): BankAccount
     getAllBankAccounts: [BankAccount!]!
+}
+
+type Mutation {
+    addInternalTransferFees(id: ID!, amount: Float!): BankAccount!
+    addExternalTransferFees(id: ID!, amount: Float!): BankAccount!
 }

@@ -19,7 +19,6 @@ public interface CardRepository extends JpaRepository<Card , Long>{
     List<Card> findByCustomerId(Long customerId);
     List<Card> findByCustomerIdAndStatus(Long customerId , CardStatus status);
 
-
     @Query("SELECT c FROM Card c WHERE c.customerId = :customerId AND c.status = :status")
     List<Card> findActiveCardsByCustomer(@Param("customerId") Long customerId, 
                                        @Param("status") CardStatus status);

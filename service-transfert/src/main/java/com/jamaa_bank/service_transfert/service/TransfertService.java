@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jamaa_bank.service_transfert.dto.AccountDTO;
+import com.jamaa_bank.service_transfert.dto.BankAccountDTO;
+import com.jamaa_bank.service_transfert.dto.BankDTO;
 import com.jamaa_bank.service_transfert.dto.CardDTO;
 import com.jamaa_bank.service_transfert.events.TransfertEvent;
 import com.jamaa_bank.service_transfert.exception.InsufficientBalanceException;
@@ -20,6 +22,8 @@ import com.jamaa_bank.service_transfert.exception.TransfertException;
 import com.jamaa_bank.service_transfert.model.TransactionStatus;
 import com.jamaa_bank.service_transfert.model.Transfert;
 import com.jamaa_bank.service_transfert.repository.TransfertRepository;
+import com.jamaa_bank.service_transfert.utils.BankAccountUtil;
+import com.jamaa_bank.service_transfert.utils.BankUtil;
 import com.jamaa_bank.service_transfert.utils.CardUtil;
 import com.jamaa_bank.service_transfert.utils.Util;
 
@@ -39,6 +43,12 @@ public class TransfertService {
 
     @Autowired
     private CardUtil cardUtil;
+
+    @Autowired
+    private BankUtil bankUtil;
+
+    @Autowired
+    private BankAccountUtil bankAccountUtil;
 
     @Transactional(rollbackFor = { IOException.class, RuntimeException.class })
     public Transfert transfertAppAccounts(Long idSenderAccount, Long idReceiverAccount, BigDecimal amount) {
@@ -141,12 +151,6 @@ public class TransfertService {
                 throw new TransfertException("Carte de la banque émettrice introuvable");
             }
 
-            if (senderCard.getCurrentBalance().compareTo(amount) < 0) {
-                logger.error("Transfert bancaire impossible: solde insuffisant sur la carte de la banque {} (solde: {}, montant demandé: {})", 
-                            idSenderBank, senderCard.getCurrentBalance(), amount);
-                throw new InsufficientBalanceException("Solde insuffisant pour effectuer le transfert bancaire");
-            }
-
             logger.debug("Récupération de la carte de la banque destinataire {}", idReceiverBank);
             CardDTO receiverCard = cardUtil.getCardByBankId(idReceiverBank);
             if (receiverCard == null) {
@@ -154,11 +158,45 @@ public class TransfertService {
                 throw new TransfertException("Carte de la banque destinataire introuvable");
             }
 
-            logger.debug("Débit de la carte {} (banque {}) d'un montant de {}", senderCard.getId(), idSenderBank, amount);
-            cardUtil.decrementCardBalance(senderCard.getId(), amount);
+            // Déterminer le type de transfert et calculer les frais
+            boolean isSameBank = senderCard.getBankId().equals(receiverCard.getBankId());
+            logger.debug("Type de transfert: {} (même banque: {})", isSameBank ? "INTERNE" : "EXTERNE", isSameBank);
             
-            logger.debug("Crédit de la carte {} (banque {}) d'un montant de {}", receiverCard.getId(), idReceiverBank, amount);
+            // Récupérer les informations de la banque émettrice pour les frais
+            BankDTO senderBankInfo = bankUtil.getBankById(senderCard.getBankId());
+            BigDecimal feeRate = isSameBank ? senderBankInfo.getInternalTransferFees() : senderBankInfo.getExternalTransferFees();
+            BigDecimal feeAmount = amount.multiply(feeRate).divide(BigDecimal.valueOf(100));
+            BigDecimal totalAmountWithFees = amount.add(feeAmount);
+            
+            logger.debug("Frais calculés: taux={}%, montant des frais={}, montant total={}", 
+                        feeRate, feeAmount, totalAmountWithFees);
+
+            if (senderCard.getCurrentBalance().compareTo(totalAmountWithFees) < 0) {
+                logger.error("Transfert bancaire impossible: solde insuffisant sur la carte de la banque {} (solde: {}, montant total requis: {})", 
+                            idSenderBank, senderCard.getCurrentBalance(), totalAmountWithFees);
+                throw new InsufficientBalanceException("Solde insuffisant pour effectuer le transfert bancaire (frais inclus)");
+            }
+
+            // Effectuer le transfert principal
+            logger.debug("Débit de la carte {} (banque {}) d'un montant de {} (montant + frais)", 
+                        senderCard.getId(), idSenderBank, totalAmountWithFees);
+            cardUtil.decrementCardBalance(senderCard.getId(), totalAmountWithFees);
+            
+            logger.debug("Crédit de la carte {} (banque {}) d'un montant de {}", 
+                        receiverCard.getId(), idReceiverBank, amount);
             cardUtil.incrementCardBalance(receiverCard.getId(), amount);
+
+            // Verser les frais dans le compte bancaire approprié
+            BankAccountDTO senderBankAccount = bankAccountUtil.getBankAccountByBankId(senderCard.getBankId());
+            if (isSameBank) {
+                logger.debug("Versement des frais internes ({}) dans le compte bancaire ID: {}", 
+                            feeAmount, senderBankAccount.getId());
+                bankAccountUtil.addInternalTransferFees(senderBankAccount.getId(), feeAmount);
+            } else {
+                logger.debug("Versement des frais externes ({}) dans le compte bancaire ID: {}", 
+                            feeAmount, senderBankAccount.getId());
+                bankAccountUtil.addExternalTransferFees(senderBankAccount.getId(), feeAmount);
+            }
 
             Transfert transfert = new Transfert();
             transfert.setSenderAccountId(idSenderBank); // Utilise bankId comme identifiant
@@ -169,8 +207,8 @@ public class TransfertService {
             logger.debug("Enregistrement du transfert bancaire en base de données");
             transfert = transfertRepository.save(transfert);
 
-            logger.info("Transfert bancaire réussi: ID={}, de banque {} vers banque {}, montant: {}", 
-                        transfert.getId(), idSenderBank, idReceiverBank, amount);
+            logger.info("Transfert bancaire réussi: ID={}, de banque {} vers banque {}, montant: {}, frais: {}, type: {}", 
+                        transfert.getId(), idSenderBank, idReceiverBank, amount, feeAmount, isSameBank ? "INTERNE" : "EXTERNE");
             
             logger.debug("Publication des événements de transfert bancaire réussi");
             publishTransfertEvents(idSenderBank, idReceiverBank, amount, TransactionStatus.SUCCESS, "BANK");

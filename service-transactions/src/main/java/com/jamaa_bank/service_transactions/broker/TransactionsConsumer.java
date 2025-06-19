@@ -32,4 +32,20 @@ public class TransactionsConsumer {
 
         transactionService.saveTransaction(transac);
     }
+
+    @RabbitListener(queues = "virementDoneQueue")
+    public void receiveVirementEvent(TransactionTemplate event) {
+
+        TransactionEvent transac = new TransactionEvent();
+
+        transac.setIdAccountSender(event.getIdAccountSender());
+        transac.setIdAccountReceiver(event.getIdAccountReceiver());
+        transac.setAmount(event.getAmount());
+        transac.setCreatedAt(event.getCreatedAt());
+        transac.setStatus(event.getStatus());
+        transac.setTransactionType(TransactionType.VIREMENT);
+        transac.setDateEvent(LocalDateTime.now());
+
+        transactionService.saveTransaction(transac);
+    }
 }

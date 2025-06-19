@@ -56,6 +56,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue virementDoneQueue() {
+        return new Queue("virementDoneQueue", true, false, false);
+    }
+
+    @Bean
     public Binding binding(TopicExchange AccountExchange, Queue notificationQueue) {
         return BindingBuilder.bind(notificationQueue).to(AccountExchange).with("notification.transfer.done");
     }
@@ -65,4 +70,8 @@ public class RabbitConfig {
         return BindingBuilder.bind(transfertDoneQueue).to(TransactionExchange).with("transactions.transfer.done");
     }
 
+    @Bean
+    public Binding binding3(TopicExchange TransactionExchange, Queue virementDoneQueue) {
+        return BindingBuilder.bind(virementDoneQueue).to(TransactionExchange).with("transactions.virement.done");
+    }
 }

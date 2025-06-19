@@ -1,5 +1,6 @@
 package com.jmaaa_bank.service_card.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -48,12 +49,18 @@ public class CardGraphController {
         return cardService.getAllCards();
     }
     
+    @QueryMapping
+    public CardResponse cardByBankId(@Argument Long bankId) {
+        log.info("Requête GraphQL: récupération de la carte par bankId {}", bankId);
+        return cardService.getCardByBankId(bankId);
+    }
+    
     // === MUTATIONS ===
     
     @MutationMapping
-    public void createCard(@Argument CustomerDTO input) {
+    public CardResponse createCard(@Argument CustomerDTO input) {
         log.info("Mutation GraphQL: création d'une carte pour le client {}", input.getCustomerId());
-        cardService.createCard(input);
+        return cardService.createCard(input);
     }
     
     @MutationMapping
@@ -63,10 +70,9 @@ public class CardGraphController {
     }
     
     @MutationMapping
-    public Boolean deleteCard(@Argument Long id) {
+    public CardResponse deleteCard(@Argument Long id) {
         log.info("Mutation GraphQL: suppression de la carte {}", id);
-        cardService.deleteCard(id);
-        return true;
+        return cardService.deleteCard(id);
     }
     
     @MutationMapping
@@ -79,6 +85,18 @@ public class CardGraphController {
     public CardResponse blockCard(@Argument Long id) {
         log.info("Mutation GraphQL: blocage de la carte {}", id);
         return cardService.blockCard(id);
+    }
+
+    @MutationMapping
+    public CardResponse decrementBalance(@Argument Long id, @Argument BigDecimal amount) {
+        log.info("Mutation GraphQL: diminution du solde de la carte {}", id);
+        return cardService.decrementBalance(id, amount);
+    }
+
+    @MutationMapping
+    public CardResponse incrementBalance(@Argument Long id, @Argument BigDecimal amount) {
+        log.info("Mutation GraphQL: augmentation du solde de la carte {}", id);
+        return cardService.incrementBalance(id, amount);
     }
     
 }

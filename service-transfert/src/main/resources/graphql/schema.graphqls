@@ -25,6 +25,11 @@ type Mutation {
     idReceiverAccount: ID!,
     amount: Float!
   ): Transfert
+  makeBankTransfert(
+    idSenderBank: ID!,
+    idReceiverBank: ID!,
+    amount: Float!
+  ): Transfert
   transfer(request: TransferRequest!): Boolean
 }
 

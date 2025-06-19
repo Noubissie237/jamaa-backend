@@ -15,6 +15,7 @@ import com.jmaaa_bank.service_card.model.Card;
 public interface CardRepository extends JpaRepository<Card , Long>{
 
     Optional<Card> findByCardNumber(String cardNumber);
+    Optional<Card> findByBankId(Long bankId);
     List<Card> findByCustomerId(Long customerId);
     List<Card> findByCustomerIdAndStatus(Long customerId , CardStatus status);
 

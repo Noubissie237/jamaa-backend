@@ -26,6 +26,11 @@ public class TransfertMutationResolver {
     }
 
     @MutationMapping
+    public Transfert makeBankTransfert(@Argument Long idSenderBank, @Argument Long idReceiverBank, @Argument BigDecimal amount) {
+        return transfertService.transfertBank(idSenderBank, idReceiverBank, amount);
+    }
+
+    @MutationMapping
     public Boolean transfer(@Argument TransferRequest request) {
         transferService.transfer(request);
         return true;

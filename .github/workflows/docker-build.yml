@@ -25,3 +25,19 @@ jobs:
 
       - name: Push Docker image to Docker Hub
         run: docker push noubissie237/jamaa-project-service-config:latest
+
+
+      # Service register
+      - name: Build Docker image for service-register
+        run: docker build -t noubissie237/jamaa-project-service-register:latest ./service-register/.
+
+      - name: Push Docker image to Docker Hub
+        run: docker push noubissie237/jamaa-project-service-register:latest
+        
+
+      # Service proxy
+      - name: Build Docker image for service-proxy
+        run: docker build -t noubissie237/jamaa-project-service-proxy:latest ./service-proxy/.
+
+      - name: Push Docker image to Docker Hub
+        run: docker push noubissie237/jamaa-project-service-proxy:latest

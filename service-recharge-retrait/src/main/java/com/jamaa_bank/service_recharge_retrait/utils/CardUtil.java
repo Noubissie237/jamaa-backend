@@ -163,7 +163,7 @@ public class CardUtil {
             JSONObject cardData = data.getJSONObject(operationName);
             CardDTO card = new CardDTO();
             card.setId(cardData.getLong("id"));
-            card.setCurrentBalance(new BigDecimal(cardData.getString("currentBalance")));
+            card.setCurrentBalance(new BigDecimal(cardData.getFloat("currentBalance")));
             card.setBankId(cardData.getLong("bankId"));
             card.setBankName(cardData.getString("bankName"));
 

@@ -197,6 +197,7 @@ public class RechargeRetraitService {
         }
     }
 
+    
     public List<RechargeRetrait> getAllOperations() {
         logger.info("Récupération de toutes les opérations recharge/retrait");
         List<RechargeRetrait> operations = rechargeRetraitRepository.findAll();

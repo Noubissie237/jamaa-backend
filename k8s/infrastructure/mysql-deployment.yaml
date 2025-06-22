@@ -5,7 +5,7 @@ metadata:
   namespace: jamaa
 data:
   MYSQL_ROOT_PASSWORD: "rootpassword"
-  MYSQL_DATABASE: "jamaa_db"
+  MYSQL_DATABASE: "jamaa_db"  
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -65,6 +65,22 @@ spec:
         persistentVolumeClaim:
           claimName: mysql-pvc
 ---
+# Service externe avec NodePort pour accès depuis l'extérieur
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service-external
+  namespace: jamaa
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+    nodePort: 30306  # Port accessible depuis l'extérieur (30000-32767)
+  type: NodePort
+---
+# Service interne pour les autres services du cluster
 apiVersion: v1
 kind: Service
 metadata:

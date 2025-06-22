@@ -26,11 +26,18 @@ spec:
         - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
           value: "http://service-register:8761/eureka/"
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://mysql-service:3306/jamaa_banks_db?createDatabaseIfNotExist=true"
+          value: "jdbc:mysql://mysql-service:3306/jamaa_db?createDatabaseIfNotExist=true"
         - name: SPRING_DATASOURCE_USERNAME
           value: "root"
         - name: SPRING_DATASOURCE_PASSWORD
           value: "rootpassword"
+        # Configuration JPA ajoutée
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "true"
+        - name: SPRING_JPA_DATABASE_PLATFORM
+          value: "org.hibernate.dialect.MySQL8Dialect"
         - name: SPRING_RABBITMQ_HOST
           value: "rabbitmq-service"
         - name: SPRING_RABBITMQ_PORT

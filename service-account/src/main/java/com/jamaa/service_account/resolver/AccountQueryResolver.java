@@ -28,6 +28,11 @@ public class AccountQueryResolver {
     }
 
     @QueryMapping
+    public Optional<Account> getAccountByAccountNumber(@Argument String accountNumber) {
+        return accountService.getByAccountNumber(accountNumber);
+    }
+
+    @QueryMapping
     public Optional<Account> getAccount(@Argument Long id) {
         return accountService.getAccount(id);
     }

@@ -76,6 +76,9 @@ public class AccountService {
         rabbitTemplate.convertAndSend("AccountExchange", "account.create", event);
     }
 
+    public Optional<Account> getByAccountNumber(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber);
+    }
 
     private String generateUniqueAccountNumber() {
         logger.debug("Génération d'un numéro de compte unique");

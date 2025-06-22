@@ -7,6 +7,33 @@ data:
   MYSQL_ROOT_PASSWORD: "rootpassword"
   MYSQL_DATABASE: "jamaa_db"  
 ---
+# Configuration MySQL personnalisée pour augmenter les connexions
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-custom-config
+  namespace: jamaa
+data:
+  custom.cnf: |
+    [mysqld]
+    # Augmenter le nombre de connexions
+    max_connections = 200
+    
+    # Timeout pour les connexions inactives (en secondes)
+    wait_timeout = 600
+    interactive_timeout = 600
+    
+    # Optimisations générales
+    innodb_buffer_pool_size = 256M
+    key_buffer_size = 32M
+    max_allowed_packet = 64M
+    
+    # Logs (optionnel, pour debug)
+    general_log = 0
+    slow_query_log = 1
+    slow_query_log_file = /var/lib/mysql/slow.log
+    long_query_time = 2
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -53,6 +80,9 @@ spec:
         volumeMounts:
         - name: mysql-storage
           mountPath: /var/lib/mysql
+        # Ajout du volume pour la configuration personnalisée
+        - name: mysql-config-volume
+          mountPath: /etc/mysql/conf.d
         resources:
           requests:
             memory: "512Mi"
@@ -64,6 +94,10 @@ spec:
       - name: mysql-storage
         persistentVolumeClaim:
           claimName: mysql-pvc
+      # Volume pour la configuration personnalisée
+      - name: mysql-config-volume
+        configMap:
+          name: mysql-custom-config
 ---
 # Service externe avec NodePort pour accès depuis l'extérieur
 apiVersion: v1
@@ -77,7 +111,7 @@ spec:
   ports:
   - port: 3306
     targetPort: 3306
-    nodePort: 30306  # Port accessible depuis l'extérieur (30000-32767)
+    nodePort: 30306
   type: NodePort
 ---
 # Service interne pour les autres services du cluster

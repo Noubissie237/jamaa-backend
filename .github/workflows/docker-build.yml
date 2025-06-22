@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build and Push - Hybrid Fast
 
 on:
   push:
@@ -8,67 +8,69 @@ on:
     branches:
       - main
 
-env:
-  REGISTRY: docker.io
-  IMAGE_PREFIX: noubissie237/jamaa-project
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        service:
-          - service-config
-          - service-register
-          - service-proxy
-          - service-users
-          - service-auth
-          - service-banks
-          - service-banks-account
-          - service-card
-          - service-notifications
-          - service-recharge-retrait
-          - service-transactions
-          - service-transfert
-          - service-account
-      fail-fast: false
-      max-parallel: 4
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Log in to Docker Hub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.MY_DOCKER_HUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+      # Construction en parallèle avec des commandes simples
+      - name: Build all Docker images
+        run: |
+          # Construire tous les services en parallèle en arrière-plan
+          docker build -t noubissie237/jamaa-project-service-config:latest ./service-config/. &
+          docker build -t noubissie237/jamaa-project-service-register:latest ./service-register/. &
+          docker build -t noubissie237/jamaa-project-service-proxy:latest ./service-proxy/. &
+          docker build -t noubissie237/jamaa-project-service-users:latest ./service-users/. &
+          docker build -t noubissie237/jamaa-project-service-auth:latest ./service-auth/. &
+          docker build -t noubissie237/jamaa-project-service-banks:latest ./service-banks/. &
+          docker build -t noubissie237/jamaa-project-service-banks-account:latest ./service-banks-account/. &
+          docker build -t noubissie237/jamaa-project-service-card:latest ./service-card/. &
+          
+          # Attendre les 8 premiers
+          wait
+          
+          # Construire les 5 restants
+          docker build -t noubissie237/jamaa-project-service-notifications:latest ./service-notifications/. &
+          docker build -t noubissie237/jamaa-project-service-recharge-retrait:latest ./service-recharge-retrait/. &
+          docker build -t noubissie237/jamaa-project-service-transactions:latest ./service-transactions/. &
+          docker build -t noubissie237/jamaa-project-service-transfert:latest ./service-transfert/. &
+          docker build -t noubissie237/jamaa-project-service-account:latest ./service-account/. &
+          
+          # Attendre la fin de tous les builds
+          wait
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./${{ matrix.service }}
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
+      - name: Push all Docker images
+        if: github.event_name != 'pull_request'
+        run: |
+          # Push tous les services en parallèle
+          docker push noubissie237/jamaa-project-service-config:latest &
+          docker push noubissie237/jamaa-project-service-register:latest &
+          docker push noubissie237/jamaa-project-service-proxy:latest &
+          docker push noubissie237/jamaa-project-service-users:latest &
+          docker push noubissie237/jamaa-project-service-auth:latest &
+          docker push noubissie237/jamaa-project-service-banks:latest &
+          docker push noubissie237/jamaa-project-service-banks-account:latest &
+          docker push noubissie237/jamaa-project-service-card:latest &
+          
+          # Attendre les 8 premiers
+          wait
+          
+          # Push les 5 restants
+          docker push noubissie237/jamaa-project-service-notifications:latest &
+          docker push noubissie237/jamaa-project-service-recharge-retrait:latest &
+          docker push noubissie237/jamaa-project-service-transactions:latest &
+          docker push noubissie237/jamaa-project-service-transfert:latest &
+          docker push noubissie237/jamaa-project-service-account:latest &
+          
+          # Attendre la fin de tous les push
+          wait

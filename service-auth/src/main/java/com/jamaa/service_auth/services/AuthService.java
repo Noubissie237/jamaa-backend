@@ -35,7 +35,7 @@ public class AuthService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    private final String graphqlUsersEndpoint = "http://service-proxy:8079/SERVICE-USERS/graphql";
+    private final String graphqlUsersEndpoint = "http://service-proxy:8079/service-users/graphql";
     private final OkHttpClient client = new OkHttpClient();
 
     public AuthService(RestTemplate restTemplate) {

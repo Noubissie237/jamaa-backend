@@ -26,11 +26,9 @@ public class S3StorageService implements StorageService {
     @Value("${aws.s3.region}")
     private String region;
 
-    @Value("${aws.s3.access-key}")
-    private String accessKey;
+    private String accessKey = "AKIAQS7P6FWIA2BCUKPW";
 
-    @Value("${aws.s3.secret-key}")
-    private String secretKey;
+    private String secretKey = "ldTlfrUO9NZGk6ToWHvq5QxpVqqenPuinPKF1SeA";
 
     private S3Client s3Client;
     private boolean configLogged = false;

@@ -4,110 +4,71 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  REGISTRY: docker.io
+  IMAGE_PREFIX: noubissie237/jamaa-project
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        service:
+          - service-config
+          - service-register
+          - service-proxy
+          - service-users
+          - service-auth
+          - service-banks
+          - service-banks-account
+          - service-card
+          - service-notifications
+          - service-recharge-retrait
+          - service-transactions
+          - service-transfert
+          - service-account
+      fail-fast: false
+      max-parallel: 4
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
         with:
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.MY_DOCKER_HUB_TOKEN }}
 
-      # Service config
-      - name: Build Docker image for service-config
-        run: docker build -t noubissie237/jamaa-project-service-config:latest ./service-config/.
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-config:latest
-
-
-      # Service register
-      - name: Build Docker image for service-register
-        run: docker build -t noubissie237/jamaa-project-service-register:latest ./service-register/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-register:latest
-        
-
-      # Service proxy
-      - name: Build Docker image for service-proxy
-        run: docker build -t noubissie237/jamaa-project-service-proxy:latest ./service-proxy/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-proxy:latest
-
-      # Service users
-      - name: Build Docker image for service-users
-        run: docker build -t noubissie237/jamaa-project-service-users:latest ./service-users/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-users:latest
-      
-      # Service auth
-      - name: Build Docker image for service-auth
-        run: docker build -t noubissie237/jamaa-project-service-auth:latest ./service-auth/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-auth:latest
-      
-      # Service banks
-      - name: Build Docker image for service-banks
-        run: docker build -t noubissie237/jamaa-project-service-banks:latest ./service-banks/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-banks:latest
-      
-      # Service banks account
-      - name: Build Docker image for service-banks-account
-        run: docker build -t noubissie237/jamaa-project-service-banks-account:latest ./service-banks-account/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-banks-account:latest
-      
-      # Service card
-      - name: Build Docker image for service-card
-        run: docker build -t noubissie237/jamaa-project-service-card:latest ./service-card/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-card:latest
-      
-      # Service notifications
-      - name: Build Docker image for service-notifications
-        run: docker build -t noubissie237/jamaa-project-service-notifications:latest ./service-notifications/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-notifications:latest
-      
-      # Service recharge-retrait
-      - name: Build Docker image for service-recharge-retrait
-        run: docker build -t noubissie237/jamaa-project-service-recharge-retrait:latest ./service-recharge-retrait/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-recharge-retrait:latest
-      
-      # Service transactions
-      - name: Build Docker image for service-transactions
-        run: docker build -t noubissie237/jamaa-project-service-transactions:latest ./service-transactions/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-transactions:latest
-      
-      # Service transfert
-      - name: Build Docker image for service-transfert
-        run: docker build -t noubissie237/jamaa-project-service-transfert:latest ./service-transfert/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-transfert:latest
-      
-      # Service account
-      - name: Build Docker image for service-account
-        run: docker build -t noubissie237/jamaa-project-service-account:latest ./service-account/.
-
-      - name: Push Docker image to Docker Hub
-        run: docker push noubissie237/jamaa-project-service-account:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false

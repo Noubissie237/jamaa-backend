@@ -14,7 +14,7 @@ echo "📁 Création du namespace..."
 kubectl apply -f infrastructure/namespace.yaml
 
 # Attendre que le namespace soit créé
-kubectl wait --for=condition=Ready namespace/jamaa --timeout=2s
+kubectl wait --for=condition=Ready namespace/jamaa --timeout=30s
 
 # Déployer l'infrastructure
 echo "🏗️ Déploiement de l'infrastructure..."

@@ -59,4 +59,6 @@ type Mutation {
     createCustomer(input: CustomerInput!): Customer!
     deleteCustomer(id: ID!): [Customer]!
     createSuperAdmin(input: SuperAdminInput!): SuperAdmin!
+    updateCustomerPassword(id: ID!, password: String!): Customer!
+    updateCustomer(id: ID!, email: String!, phone: String!, cniNumber: String!, firstName: String!, lastName: String!): Customer!
 }

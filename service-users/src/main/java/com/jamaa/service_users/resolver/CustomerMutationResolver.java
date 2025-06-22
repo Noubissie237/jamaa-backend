@@ -37,5 +37,15 @@ public class CustomerMutationResolver {
     public SuperAdmin createSuperAdmin(@Argument SuperAdmin input) {
         return customerService.createSuperAdmin(input);
     }
+
+    @MutationMapping
+    public Customer updateCustomer(@Argument Long id, @Argument String email, @Argument String phone, @Argument String cniNumber, @Argument String firstName, @Argument String lastName) {
+        return customerService.updateCustomer(id, email, phone, cniNumber, firstName, lastName);
+    }
+
+    @MutationMapping
+    public Customer updateCustomerPassword(@Argument Long id, @Argument String password) {
+        return customerService.updatePasswCustomer(id, password);
+    }
     
 }

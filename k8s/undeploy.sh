@@ -1,5 +1,5 @@
 #!/bin/bash
-export KUBECONFIG=/var/lib/jenkins/.kube/config
+# export KUBECONFIG=/var/lib/jenkins/.kube/config
 
 # Script de suppression du déploiement Kubernetes pour Jamaa Backend
 echo "🗑️ Suppression du déploiement Jamaa Backend"

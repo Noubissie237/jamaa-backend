@@ -1,4 +1,5 @@
 #!/bin/bash
+export KUBECONFIG=/var/lib/jenkins/.kube/config
 
 # Script de déploiement Kubernetes pour Jamaa Backend
 echo "🚀 Déploiement de Jamaa Backend sur Kubernetes"

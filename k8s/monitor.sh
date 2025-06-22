@@ -1,4 +1,5 @@
 #!/bin/bash
+export KUBECONFIG=/var/lib/jenkins/.kube/config
 
 # Script de monitoring pour Jamaa Backend
 echo "📊 Monitoring Jamaa Backend sur Kubernetes"

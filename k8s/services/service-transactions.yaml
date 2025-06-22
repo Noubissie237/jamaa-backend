@@ -25,12 +25,6 @@ spec:
           value: "configserver:http://service-config:2370"
         - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
           value: "http://service-register:8761/eureka/"
-        - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://mysql-service:3306/jamaa_transactions_db?createDatabaseIfNotExist=true"
-        - name: SPRING_DATASOURCE_USERNAME
-          value: "root"
-        - name: SPRING_DATASOURCE_PASSWORD
-          value: "rootpassword"
         - name: SPRING_RABBITMQ_HOST
           value: "rabbitmq-service"
         - name: SPRING_RABBITMQ_PORT

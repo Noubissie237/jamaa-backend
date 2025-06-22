@@ -29,7 +29,7 @@ kubectl get ingress -n jamaa
 
 # Ou port-forward pour tester localement
 kubectl port-forward service/service-proxy 8079:8079 -n jamaa
-# Puis aller sur http://localhost:8079
+# Puis aller sur http://service-proxy:8079
 ```
 
 ## 🔧 Configuration rapide

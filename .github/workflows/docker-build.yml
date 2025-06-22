@@ -1,4 +1,4 @@
-name: Docker Build and Push - Hybrid Fast
+name: Docker Build and Push - Optimized Conditional
 
 on:
   push:
@@ -9,8 +9,77 @@ on:
       - main
 
 jobs:
-  build:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      service-config: ${{ steps.changes.outputs.service-config }}
+      service-register: ${{ steps.changes.outputs.service-register }}
+      service-proxy: ${{ steps.changes.outputs.service-proxy }}
+      service-users: ${{ steps.changes.outputs.service-users }}
+      service-auth: ${{ steps.changes.outputs.service-auth }}
+      service-banks: ${{ steps.changes.outputs.service-banks }}
+      service-banks-account: ${{ steps.changes.outputs.service-banks-account }}
+      service-card: ${{ steps.changes.outputs.service-card }}
+      service-notifications: ${{ steps.changes.outputs.service-notifications }}
+      service-recharge-retrait: ${{ steps.changes.outputs.service-recharge-retrait }}
+      service-transactions: ${{ steps.changes.outputs.service-transactions }}
+      service-transfert: ${{ steps.changes.outputs.service-transfert }}
+      service-account: ${{ steps.changes.outputs.service-account }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Nécessaire pour détecter les changements
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            service-config:
+              - 'service-config/**'
+            service-register:
+              - 'service-register/**'
+            service-proxy:
+              - 'service-proxy/**'
+            service-users:
+              - 'service-users/**'
+            service-auth:
+              - 'service-auth/**'
+            service-banks:
+              - 'service-banks/**'
+            service-banks-account:
+              - 'service-banks-account/**'
+            service-card:
+              - 'service-card/**'
+            service-notifications:
+              - 'service-notifications/**'
+            service-recharge-retrait:
+              - 'service-recharge-retrait/**'
+            service-transactions:
+              - 'service-transactions/**'
+            service-transfert:
+              - 'service-transfert/**'
+            service-account:
+              - 'service-account/**'
+
+  build:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: |
+      needs.changes.outputs.service-config == 'true' || 
+      needs.changes.outputs.service-register == 'true' || 
+      needs.changes.outputs.service-proxy == 'true' || 
+      needs.changes.outputs.service-users == 'true' || 
+      needs.changes.outputs.service-auth == 'true' || 
+      needs.changes.outputs.service-banks == 'true' || 
+      needs.changes.outputs.service-banks-account == 'true' || 
+      needs.changes.outputs.service-card == 'true' || 
+      needs.changes.outputs.service-notifications == 'true' || 
+      needs.changes.outputs.service-recharge-retrait == 'true' || 
+      needs.changes.outputs.service-transactions == 'true' || 
+      needs.changes.outputs.service-transfert == 'true' || 
+      needs.changes.outputs.service-account == 'true'
 
     steps:
       - name: Checkout code
@@ -23,54 +92,113 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.MY_DOCKER_HUB_TOKEN }}
 
-      # Construction en parallèle avec des commandes simples
-      - name: Build all Docker images
+      - name: Build and Push Modified Services
         run: |
-          # Construire tous les services en parallèle en arrière-plan
-          docker build -t noubissie237/jamaa-project-service-config:latest ./service-config/. &
-          docker build -t noubissie237/jamaa-project-service-register:latest ./service-register/. &
-          docker build -t noubissie237/jamaa-project-service-proxy:latest ./service-proxy/. &
-          docker build -t noubissie237/jamaa-project-service-users:latest ./service-users/. &
-          docker build -t noubissie237/jamaa-project-service-auth:latest ./service-auth/. &
-          docker build -t noubissie237/jamaa-project-service-banks:latest ./service-banks/. &
-          docker build -t noubissie237/jamaa-project-service-banks-account:latest ./service-banks-account/. &
-          docker build -t noubissie237/jamaa-project-service-card:latest ./service-card/. &
+          # Fonction pour construire et pusher un service
+          build_and_push() {
+            local service_name=$1
+            local service_path=$2
+            local image_name=$3
+            
+            echo "Building $service_name..."
+            docker build -t $image_name ./service-$service_path/.
+            
+            # Push seulement si ce n'est pas une PR
+            if [ "${{ github.event_name }}" != "pull_request" ]; then
+              echo "Pushing $service_name..."
+              docker push $image_name
+            fi
+          }
           
-          # Attendre les 8 premiers
-          wait
+          # Stocker les PIDs des processus en arrière-plan
+          pids=()
           
-          # Construire les 5 restants
-          docker build -t noubissie237/jamaa-project-service-notifications:latest ./service-notifications/. &
-          docker build -t noubissie237/jamaa-project-service-recharge-retrait:latest ./service-recharge-retrait/. &
-          docker build -t noubissie237/jamaa-project-service-transactions:latest ./service-transactions/. &
-          docker build -t noubissie237/jamaa-project-service-transfert:latest ./service-transfert/. &
-          docker build -t noubissie237/jamaa-project-service-account:latest ./service-account/. &
+          # Construire seulement les services modifiés
+          if [ "${{ needs.changes.outputs.service-config }}" == "true" ]; then
+            build_and_push "service-config" "config" "noubissie237/jamaa-project-service-config:latest" &
+            pids+=($!)
+          fi
           
-          # Attendre la fin de tous les builds
-          wait
+          if [ "${{ needs.changes.outputs.service-register }}" == "true" ]; then
+            build_and_push "service-register" "register" "noubissie237/jamaa-project-service-register:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-proxy }}" == "true" ]; then
+            build_and_push "service-proxy" "proxy" "noubissie237/jamaa-project-service-proxy:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-users }}" == "true" ]; then
+            build_and_push "service-users" "users" "noubissie237/jamaa-project-service-users:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-auth }}" == "true" ]; then
+            build_and_push "service-auth" "auth" "noubissie237/jamaa-project-service-auth:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-banks }}" == "true" ]; then
+            build_and_push "service-banks" "banks" "noubissie237/jamaa-project-service-banks:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-banks-account }}" == "true" ]; then
+            build_and_push "service-banks-account" "banks-account" "noubissie237/jamaa-project-service-banks-account:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-card }}" == "true" ]; then
+            build_and_push "service-card" "card" "noubissie237/jamaa-project-service-card:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-notifications }}" == "true" ]; then
+            build_and_push "service-notifications" "notifications" "noubissie237/jamaa-project-service-notifications:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-recharge-retrait }}" == "true" ]; then
+            build_and_push "service-recharge-retrait" "recharge-retrait" "noubissie237/jamaa-project-service-recharge-retrait:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-transactions }}" == "true" ]; then
+            build_and_push "service-transactions" "transactions" "noubissie237/jamaa-project-service-transactions:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-transfert }}" == "true" ]; then
+            build_and_push "service-transfert" "transfert" "noubissie237/jamaa-project-service-transfert:latest" &
+            pids+=($!)
+          fi
+          
+          if [ "${{ needs.changes.outputs.service-account }}" == "true" ]; then
+            build_and_push "service-account" "account" "noubissie237/jamaa-project-service-account:latest" &
+            pids+=($!)
+          fi
+          
+          # Attendre que tous les processus se terminent
+          for pid in "${pids[@]}"; do
+            wait $pid
+          done
+          
+          echo "All modified services have been built and pushed successfully!"
 
-      - name: Push all Docker images
-        if: github.event_name != 'pull_request'
+      - name: Summary
         run: |
-          # Push tous les services en parallèle
-          docker push noubissie237/jamaa-project-service-config:latest &
-          docker push noubissie237/jamaa-project-service-register:latest &
-          docker push noubissie237/jamaa-project-service-proxy:latest &
-          docker push noubissie237/jamaa-project-service-users:latest &
-          docker push noubissie237/jamaa-project-service-auth:latest &
-          docker push noubissie237/jamaa-project-service-banks:latest &
-          docker push noubissie237/jamaa-project-service-banks-account:latest &
-          docker push noubissie237/jamaa-project-service-card:latest &
-          
-          # Attendre les 8 premiers
-          wait
-          
-          # Push les 5 restants
-          docker push noubissie237/jamaa-project-service-notifications:latest &
-          docker push noubissie237/jamaa-project-service-recharge-retrait:latest &
-          docker push noubissie237/jamaa-project-service-transactions:latest &
-          docker push noubissie237/jamaa-project-service-transfert:latest &
-          docker push noubissie237/jamaa-project-service-account:latest &
-          
-          # Attendre la fin de tous les push
-          wait
+          echo "Services modified and processed:"
+          if [ "${{ needs.changes.outputs.service-config }}" == "true" ]; then echo "✅ service-config"; fi
+          if [ "${{ needs.changes.outputs.service-register }}" == "true" ]; then echo "✅ service-register"; fi
+          if [ "${{ needs.changes.outputs.service-proxy }}" == "true" ]; then echo "✅ service-proxy"; fi
+          if [ "${{ needs.changes.outputs.service-users }}" == "true" ]; then echo "✅ service-users"; fi
+          if [ "${{ needs.changes.outputs.service-auth }}" == "true" ]; then echo "✅ service-auth"; fi
+          if [ "${{ needs.changes.outputs.service-banks }}" == "true" ]; then echo "✅ service-banks"; fi
+          if [ "${{ needs.changes.outputs.service-banks-account }}" == "true" ]; then echo "✅ service-banks-account"; fi
+          if [ "${{ needs.changes.outputs.service-card }}" == "true" ]; then echo "✅ service-card"; fi
+          if [ "${{ needs.changes.outputs.service-notifications }}" == "true" ]; then echo "✅ service-notifications"; fi
+          if [ "${{ needs.changes.outputs.service-recharge-retrait }}" == "true" ]; then echo "✅ service-recharge-retrait"; fi
+          if [ "${{ needs.changes.outputs.service-transactions }}" == "true" ]; then echo "✅ service-transactions"; fi
+          if [ "${{ needs.changes.outputs.service-transfert }}" == "true" ]; then echo "✅ service-transfert"; fi
+          if [ "${{ needs.changes.outputs.service-account }}" == "true" ]; then echo "✅ service-account"; fi

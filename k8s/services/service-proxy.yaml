@@ -25,23 +25,6 @@ spec:
           value: "configserver:http://service-config:2370"
         - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
           value: "http://service-register:8761/eureka/"
-        # Configuration pour utiliser les services Kubernetes au lieu des pods Eureka
-        - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED
-          value: "true"
-        - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER_CASE_SERVICE_ID
-          value: "true"
-        - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
-          value: "false"
-        - name: EUREKA_INSTANCE_HOSTNAME
-          value: "service-proxy"
-        # Force l'utilisation du load balancer Kubernetes
-        - name: SPRING_CLOUD_LOADBALANCER_RIBBON_ENABLED
-          value: "false"
-        - name: SPRING_CLOUD_KUBERNETES_ENABLED
-          value: "true"
-        # Configuration spécifique pour résoudre les noms de services K8s
-        - name: SPRING_CLOUD_LOADBALANCER_USE_SERVICE_NAME
-          value: "true"
         resources:
           requests:
             memory: "512Mi"
@@ -53,13 +36,13 @@ spec:
           httpGet:
             path: /actuator/health
             port: 8079
-          initialDelaySeconds: 60  # Augmenté pour laisser plus de temps
+          initialDelaySeconds: 45
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /actuator/health
             port: 8079
-          initialDelaySeconds: 120  # Augmenté pour laisser plus de temps
+          initialDelaySeconds: 90
           periodSeconds: 30
 ---
 apiVersion: v1

@@ -43,6 +43,7 @@ public class CustomerService {
             String encodedPassword = passwordEncoder.encode(customer.getPassword());
             String initialPassword = customer.getPassword();
             customer.setPassword(encodedPassword);
+            customer.setIsVerified(false);
 
             CustomerEvent event = new CustomerEvent();
             event.setFirstName(customer.getFirstName());

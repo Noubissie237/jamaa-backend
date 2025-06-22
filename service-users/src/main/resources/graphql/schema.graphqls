@@ -16,6 +16,7 @@ type Customer implements Person {
     cniNumber: String!
     cniRecto: String!
     cniVerso: String!
+    isVerified: Boolean!
 }
 
 type SuperAdmin implements Person {
@@ -49,7 +50,6 @@ type Query {
     getCustomerById(id: ID!): Customer
     getCustomerByEmail(email: String!): Customer
     getCustomerByPhone(phone: String!): Customer
-    
     getAllSuperAdmins: [SuperAdmin!]
     getSuperAdminById(id: ID!): SuperAdmin
     getSuperAdminByUsername(username: String!): SuperAdmin

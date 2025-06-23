@@ -98,7 +98,7 @@ kubectl logs <pod-name> -n jamaa
 
 ### Base de données
 ```bash
-kubectl exec -it deployment/mysql -n jamaa -- mysql -u root -prootpassword
+kubectl exec -it deployment/mysql -n jamaa -- mysql -u root -pJamaaAdmin-123
 ```
 
 ### Supprimer et redéployer

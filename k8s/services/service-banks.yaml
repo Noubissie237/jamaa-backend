@@ -25,12 +25,16 @@ spec:
           value: "configserver:http://service-config:2370"
         - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
           value: "http://service-register:8761/eureka/"
+          # Configuration RDS AWS
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://mysql-service:3306/jamaa_db?createDatabaseIfNotExist=true"
+          value: "jdbc:mysql://jamaa-database.cvkqiow2srth.eu-north-1.rds.amazonaws.com:3306/jamaa_db?createDatabaseIfNotExist=true"
         - name: SPRING_DATASOURCE_USERNAME
-          value: "root"
+          value: "admin"
         - name: SPRING_DATASOURCE_PASSWORD
-          value: "rootpassword"
+          valueFrom:
+            secretKeyRef:
+              name: rds-secret
+              key: password
         # Configuration JPA ajoutée
         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
           value: "update"
@@ -78,3 +82,12 @@ spec:
   - port: 8084
     targetPort: 8084
   type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rds-secret
+  namespace: jamaa
+type: Opaque
+data:
+  password: JamaaAdmin-123

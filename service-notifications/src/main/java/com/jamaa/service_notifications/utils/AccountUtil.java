@@ -179,8 +179,10 @@ public class AccountUtil {
             String userEmail = accountData.optString("userEmail", null);
             logger.debug("Informations utilisateur récupérées avec succès - ID: {}, Email: {}", userId, userEmail);
             
-            return new UserInfoResponse(userId, userEmail);
-            
+            return new UserInfoResponse(
+                userId,
+                userEmail
+            );
         } catch (AccountServiceException | AccountNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -216,7 +218,10 @@ public class AccountUtil {
             String userId = accountData.getString("userId");
             String userEmail = accountData.optString("userEmail", null);
             
-            return new UserInfoResponse(userId, userEmail);
+            return new UserInfoResponse(
+                userId,
+                userEmail
+            );
             
         } catch (Exception e) {
             logger.error("Erreur lors de la récupération des infos utilisateur pour le compte ID: " + accountId, e);

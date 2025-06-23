@@ -234,7 +234,62 @@ public class NotificationConsumer {
             logger.error("Erreur lors du traitement de la notification de transfert: {}", e.getMessage());
         }
     }
-    
+   
+    @RabbitListener(queues = "notification.recharge.done")
+    public void handleRechargeDone(RechargeEvent event) {
+        try {
+            logger.info("=== Notification de recharge reçue ===");
+            logger.info("Account ID: {}, Card ID: {}, Montant: {}", 
+                      event.getAccountId(), event.getCardId(), event.getAmount());
+
+             // Récupération des détails de la carte avant suppression si possible
+            logger.debug("Récupération des informations de la carte {}", event.getCardId());
+            CardDTO cardDetails = cardUtil.getCard(event.getCardId());
+             
+
+            // Préparer les données pour le template
+            Map<String, Object> data = new HashMap<>();
+            data.put("amount", event.getAmount());
+            data.put("operationType", "recharge");
+            data.put("status", event.getStatus());
+            data.put("transactionDate", event.getCreatedAt());
+            
+            if (cardDetails != null) {
+                data.put("cardLastFour", cardDetails.getCardNumber() != null && cardDetails.getCardNumber().length() > 4 ? 
+                    cardDetails.getCardNumber().substring(cardDetails.getCardNumber().length() - 4) : "••••");
+                data.put("cardType", cardDetails.getCardType());
+                data.put("holderName", cardDetails.getHolderName());
+                data.put("bankName", cardDetails.getBankName() != null ? cardDetails.getBankName() : "Jamaa Bank");
+            }
+
+            // Création de la notification
+            Notification notification = new Notification();
+            notification.setTitle("Confirmation de recharge");
+            notification.setMessage(String.format("Recharge effectuée avec succès\n\nMontant : %s FCFA\nDate : %s\nStatut : Complété", event.getAmount(), event.getCreatedAt()));
+            UserInfoResponse userInfo = accountUtil.getUserInfoByAccountId(event.getAccountId());
+        notification.setUserId(userInfo.getUserId());
+            notification.setType(NotificationType.CONFIRMATION_RECHARGE);
+            notification.setServiceEmetteur(ServiceEmetteur.RECHARGE_SERVICE);
+            notification.setCanal(Notification.CanalNotification.IN_APP);
+
+            // Sauvegarder la notification
+            notificationService.saveNotification(notification);
+             // Traiter la notification (sauvegarde + envoi si nécessaire)
+             traiterNotification(notification);
+            // Envoyer l'email
+            logger.info("Envoi de l'email de confirmation de recharge...");
+            emailService.sendNotification(
+                userInfo.getUserEmail(),
+                EmailSender.NotificationType.RECHARGE,
+                data
+            );
+
+            logger.info("Notification de recharge traitée pour le compte: {}", event.getAccountId());
+        } catch (Exception e) {
+            logger.error("Erreur lors du traitement de la notification de recharge: {}", e.getMessage(), e);
+        }
+    }
+
     @RabbitListener(queues = "card.created.notification")
     public void handleCardCreated(AccountEvent event) {
         try {
@@ -297,10 +352,10 @@ public class NotificationConsumer {
             
             
             // // Envoi de l'email avec le template
-            // emailService.sendNotification(
-            //         ,
-            //         EmailSender.NotificationType.CARD_CREATED,
-            //         data);
+            emailService.sendNotification(
+                    event.getCustomerEmail(),
+                    EmailSender.NotificationType.CARD_CREATED,
+                    data);
 
             logger.info("Notification de création de carte traitée pour l'utilisateur: {}", event.getCustomerId());
         } catch (Exception e) {
@@ -357,10 +412,11 @@ public class NotificationConsumer {
             traiterNotification(notification);
 
             // // Envoi de l'email avec le template
-            // emailService.sendNotification(
-            //         event.getEmail(),
-            //         EmailSender.NotificationType.CARD_UPDATED,
-            //         data);
+            emailService.sendNotification(
+                    event.getCustomerEmail(),
+                    EmailSender.NotificationType.CARD_CREATED,
+                    data);
+
             logger.info("Notification de mise à jour de carte traitée pour la carte: {}", event.getCardNumber());
         } catch (Exception e) {
             logger.error("Erreur lors de l'envoi de la notification de mise à jour de carte: {}", e.getMessage());
@@ -419,11 +475,11 @@ public class NotificationConsumer {
 
             notificationService.saveNotification(notification);             // Traiter la notification (sauvegarde + envoi si nécessaire)
             traiterNotification(notification);
-            // Envoi de l'email avec le template
-            // emailService.sendNotification(
-            //         event.getEmail(),
-            //         EmailSender.NotificationType.CARD_ACTIVATED,
-            //         data);
+            emailService.sendNotification(
+                event.getCustomerEmail(),
+                EmailSender.NotificationType.CARD_CREATED,
+                data);
+
 
             logger.info("Notification d'activation de carte traitée pour la carte: {}", 
                        getLastFourDigits(event.getCardNumber()));
@@ -486,11 +542,11 @@ public class NotificationConsumer {
 
             notificationService.saveNotification(notification);             // Traiter la notification (sauvegarde + envoi si nécessaire)
             traiterNotification(notification);
-            // Envoi de l'email avec le template
-            // emailService.sendNotification(
-            //         event.getEmail(),
-            //         EmailSender.NotificationType.CARD_BLOCKED,
-            //         data);
+            emailService.sendNotification(
+                    event.getCustomerEmail(),
+                    EmailSender.NotificationType.CARD_CREATED,
+                    data);
+
 
             logger.info("Notification de blocage de carte traitée pour la carte: {}", 
                       event.getCardNumber() != null ? 
@@ -558,10 +614,11 @@ public class NotificationConsumer {
             notificationService.saveNotification(notification);             // Traiter la notification (sauvegarde + envoi si nécessaire)
             traiterNotification(notification);
             // Envoi de l'email avec le template
-            // emailService.sendNotification(
-            //         event.getEmail(),
-            //         EmailSender.NotificationType.CARD_ERROR,
-            //         data);
+            emailService.sendNotification(
+                event.getCustomerEmail(),
+                EmailSender.NotificationType.CARD_CREATED,
+                data);
+
 
             logger.info("Notification d'erreur de carte traitée");
         } catch (Exception e) {
@@ -623,10 +680,11 @@ public class NotificationConsumer {
             notificationService.saveNotification(notification);             // Traiter la notification (sauvegarde + envoi si nécessaire)
             traiterNotification(notification);
             // Envoi de l'email avec le template
-            // emailService.sendNotification(
-            //         event.getEmail(),
-            //         EmailSender.NotificationType.CARD_DELETED,
-            //         data);
+            emailService.sendNotification(
+                event.getCustomerEmail(),
+                EmailSender.NotificationType.CARD_CREATED,
+                data);
+
 
             logger.info("Notification de suppression de carte traitée pour la carte: {}", event.getCardNumber());
         } catch (Exception e) {
@@ -634,61 +692,6 @@ public class NotificationConsumer {
         }
     }
     
-    @RabbitListener(queues = "notification.recharge.done")
-    public void handleRechargeDone(RechargeEvent event) {
-        try {
-            logger.info("=== Notification de recharge reçue ===");
-            logger.info("Account ID: {}, Card ID: {}, Montant: {}", 
-                      event.getAccountId(), event.getCardId(), event.getAmount());
-
-             // Récupération des détails de la carte avant suppression si possible
-            logger.debug("Récupération des informations de la carte {}", event.getCardId());
-            CardDTO cardDetails = cardUtil.getCard(event.getCardId());
-             
-
-            // Préparer les données pour le template
-            Map<String, Object> data = new HashMap<>();
-            data.put("amount", event.getAmount());
-            data.put("operationType", "recharge");
-            data.put("status", event.getStatus());
-            data.put("transactionDate", event.getCreatedAt());
-            
-            if (cardDetails != null) {
-                data.put("cardLastFour", cardDetails.getCardNumber() != null && cardDetails.getCardNumber().length() > 4 ? 
-                    cardDetails.getCardNumber().substring(cardDetails.getCardNumber().length() - 4) : "••••");
-                data.put("cardType", cardDetails.getCardType());
-                data.put("holderName", cardDetails.getHolderName());
-                data.put("bankName", cardDetails.getBankName() != null ? cardDetails.getBankName() : "Jamaa Bank");
-            }
-
-            // Création de la notification
-            Notification notification = new Notification();
-            notification.setTitle("Confirmation de recharge");
-            notification.setMessage(String.format("Recharge effectuée avec succès\n\nMontant : %s FCFA\nDate : %s\nStatut : Complété", event.getAmount(), event.getCreatedAt()));
-            UserInfoResponse userInfo = accountUtil.getUserInfoByAccountId(event.getAccountId());
-        notification.setUserId(userInfo.getUserId());
-            notification.setType(NotificationType.CONFIRMATION_RECHARGE);
-            notification.setServiceEmetteur(ServiceEmetteur.RECHARGE_SERVICE);
-            notification.setCanal(Notification.CanalNotification.IN_APP);
-
-            // Sauvegarder la notification
-            notificationService.saveNotification(notification);
-             // Traiter la notification (sauvegarde + envoi si nécessaire)
-             traiterNotification(notification);
-            // Envoyer l'email
-            logger.info("Envoi de l'email de confirmation de recharge...");
-            emailService.sendNotification(
-                userInfo.getUserEmail(),
-                EmailSender.NotificationType.RECHARGE,
-                data
-            );
-
-            logger.info("Notification de recharge traitée pour le compte: {}", event.getAccountId());
-        } catch (Exception e) {
-            logger.error("Erreur lors du traitement de la notification de recharge: {}", e.getMessage(), e);
-        }
-    }
-
     // Ajout de deux nouveaux listeners pour les notifications supplémentaires
     @RabbitListener(queues = "accountCreateQueue")
     public void handleRegistrationNotification(CustomerEvent event) {

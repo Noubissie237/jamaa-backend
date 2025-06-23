@@ -42,6 +42,9 @@ public class AccountEvent extends BaseEvent {
     
     @JsonProperty("cardType")
     private String cardType;
+
+    @JsonProperty("customerEmail")
+    private String customerEmail;
     
     @JsonProperty("creditLimit")
     private BigDecimal creditLimit;

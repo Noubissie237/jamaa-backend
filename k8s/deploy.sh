@@ -19,11 +19,13 @@ kubectl wait --for=condition=Ready namespace/jamaa --timeout=30s
 
 # Déployer l'infrastructure
 echo "🏗️ Déploiement de l'infrastructure..."
+kubectl apply -f infrastructure/mysql-deployment.yaml
 kubectl apply -f infrastructure/rabbitmq-deployment.yaml
 kubectl apply -f infrastructure/eventstore-deployment.yaml
 
-# Attendre que RabbitMQ et EventStore soient prêts
-echo "⏳ Attente RabbitMQ et EventStore..."
+# Attendre que MySQL, RabbitMQ et EventStore soient prêts
+echo "⏳ Attente de MySQL, RabbitMQ et EventStore..."
+kubectl wait --for=condition=available --timeout=300s deployment/mysql -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/rabbitmq -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/eventstore -n jamaa
 
@@ -67,6 +69,7 @@ kubectl wait --for=condition=available --timeout=300s deployment/service-account
 kubectl wait --for=condition=available --timeout=300s deployment/service-banks -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/service-card -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/service-transfert -n jamaa
+# kubectl wait --for=condition=available --timeout=300s deployment/service-transactions -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/service-notifications -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/service-banks-account -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/service-recharge-retrait -n jamaa

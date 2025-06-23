@@ -28,7 +28,7 @@ public class Notification implements Serializable {
 
     private String title;
     private String message;
-    // private String email;
+    private String userId; // Identifiant unique de l'utilisateur
     private LocalDateTime dateEnvoi;
 
     @Enumerated(EnumType.STRING)

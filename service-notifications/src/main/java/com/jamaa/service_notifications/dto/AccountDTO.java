@@ -11,5 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AccountDTO {
     private Long id;
+    private String userId;
+    private String userEmail;
     private BigDecimal balance;
 }

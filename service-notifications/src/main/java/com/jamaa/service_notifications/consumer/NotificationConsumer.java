@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.jamaa.service_notifications.dto.CardDTO;
+import com.jamaa.service_notifications.dto.UserInfoResponse;
 import com.jamaa.service_notifications.events.AccountEvent;
 import com.jamaa.service_notifications.events.CustomerEvent;
 import com.jamaa.service_notifications.events.RechargeEvent;
@@ -147,6 +148,8 @@ public class NotificationConsumer {
             // notification.setEmail(event.getAccountId() + "@jamaa.com");
             notification.setTitle("Confirmation de retrait");
             notification.setMessage(String.format("Retrait effectué avec succès\n\nMontant : %s FCFA\nDate : %s\nStatut : Complété", event.getAmount(), event.getCreatedAt()));
+            UserInfoResponse userInfo = accountUtil.getUserInfoByAccountId(event.getAccountId());
+            notification.setUserId(userInfo.getUserId());
             notification.setType(NotificationType.CONFIRMATION_RETRAIT);
             notification.setServiceEmetteur(ServiceEmetteur.WITHDRAWAL_SERVICE);
             
@@ -156,14 +159,14 @@ public class NotificationConsumer {
             notificationService.saveNotification(notification);
              // Traiter la notification (sauvegarde + envoi si nécessaire)
              traiterNotification(notification);
-
+           
             // Envoyer l'email avec le template
-            // logger.info("Envoi de l'email de confirmation de retrait...");
-            // emailService.sendNotification(
-            //     notification.getEmail(),
-            //     EmailSender.NotificationType.WITHDRAWAL,
-            //     data
-            // );
+            logger.info("Envoi de l'email de confirmation de retrait...");
+            emailService.sendNotification(
+                userInfo.getUserEmail(),
+                EmailSender.NotificationType.WITHDRAWAL,
+                data
+            );
 
             logger.info("Notification de retrait traitée pour le compte: {}", event.getAccountId());
         } catch (Exception e) {
@@ -193,22 +196,38 @@ public class NotificationConsumer {
             Notification notification = new Notification();
             notification.setTitle("Notification de Transfert");
             notification.setMessage(message);
+            UserInfoResponse userInfo = accountUtil.getUserInfoByAccountId(event.getIdAccountSender());
+            notification.setUserId(userInfo.getUserId());
             notification.setType(NotificationType.CONFIRMATION_TRANSFERT);
             notification.setServiceEmetteur(ServiceEmetteur.TRANSFER_SERVICE);
             notification.setCanal(Notification.CanalNotification.IN_APP);
             notificationService.saveNotification(notification);
              // Traiter la notification (sauvegarde + envoi si nécessaire)
             traiterNotification(notification);
+
+            // notification receveur
+
+            Notification notification2 = new Notification();
+            notification2.setTitle("Notification de Transfert");
+            notification2.setMessage(message);
+            UserInfoResponse userInfo2 = accountUtil.getUserInfoByAccountId(event.getIdAccountReceiver());
+            notification2.setUserId(userInfo2.getUserId());
+            notification2.setType(NotificationType.CONFIRMATION_TRANSFERT);
+            notification2.setServiceEmetteur(ServiceEmetteur.TRANSFER_SERVICE);
+            notification2.setCanal(Notification.CanalNotification.IN_APP);
+            notificationService.saveNotification(notification2);
+             // Traiter la notification (sauvegarde + envoi si nécessaire)
+            traiterNotification(notification2);
+
             // Envoi de l'email avec le template
-        //    EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
                     
            // Envoyer l'email
-        //    logger.info("Envoi de l'email...");
-        //    emailService.sendNotification(
-        //        notification.getEmail(),
-        //        emailType,
-        //        data
-        //    );
+           logger.info("Envoi de l'email...");
+           emailService.sendNotification(
+               userInfo2.getUserEmail(),
+               EmailSender.NotificationType.TRANSFER,
+               data
+           );
     
             // emailService.sendNotification(..., data, ...); // à adapter selon ta logique d'email
         } catch (Exception e) {
@@ -266,6 +285,8 @@ public class NotificationConsumer {
             Notification notification = new Notification();
             notification.setTitle("Nouvelle carte créée");
             notification.setMessage(message);
+            String userId = cardDetails.getCustomerId().toString();
+            notification.setUserId(userId);
             notification.setType(Notification.NotificationType.CONFIRMATION_CREATION_CARTE);
             notification.setServiceEmetteur(Notification.ServiceEmetteur.CARD_SERVICE);
 
@@ -273,11 +294,11 @@ public class NotificationConsumer {
             notificationService.saveNotification(notification);
              // Traiter la notification (sauvegarde + envoi si nécessaire)
             traiterNotification(notification);
-
-
+            
+            
             // // Envoi de l'email avec le template
             // emailService.sendNotification(
-            //         event.getEmail(),
+            //         ,
             //         EmailSender.NotificationType.CARD_CREATED,
             //         data);
 
@@ -327,6 +348,8 @@ public class NotificationConsumer {
             Notification notification = new Notification();
              notification.setTitle("Mise à jour de carte");
             notification.setMessage(message);
+            String userId = cardDetails.getCustomerId().toString();
+            notification.setUserId(userId);
             notification.setType(Notification.NotificationType.MISE_A_JOUR_CARTE);
             notification.setServiceEmetteur(Notification.ServiceEmetteur.CARD_SERVICE);
             notification.setCanal(Notification.CanalNotification.IN_APP);
@@ -388,6 +411,8 @@ public class NotificationConsumer {
             Notification notification = new Notification();
             notification.setTitle("Carte activée");
             notification.setMessage(message);
+            String userId = cardDetails.getCustomerId().toString();
+            notification.setUserId(userId);
             notification.setType(Notification.NotificationType.ACTIVATION_CARTE);
             notification.setServiceEmetteur(Notification.ServiceEmetteur.CARD_SERVICE);
             notification.setCanal(Notification.CanalNotification.IN_APP);
@@ -453,6 +478,8 @@ public class NotificationConsumer {
             Notification notification = new Notification();
             notification.setTitle("Carte bloquée");
             notification.setMessage(message);
+            String userId = cardDetails.getCustomerId().toString();
+            notification.setUserId(userId);
             notification.setType(Notification.NotificationType.BLOCAGE_CARTE);
             notification.setServiceEmetteur(Notification.ServiceEmetteur.CARD_SERVICE);
             notification.setCanal(Notification.CanalNotification.IN_APP);
@@ -522,6 +549,8 @@ public class NotificationConsumer {
             Notification notification = new Notification();
             notification.setTitle("Erreur avec votre carte");
             notification.setMessage(message);
+            String userId = cardDetails.getCustomerId().toString();
+            notification.setUserId(userId);
             notification.setType(Notification.NotificationType.ERREUR_CARTE);
             notification.setServiceEmetteur(Notification.ServiceEmetteur.CARD_SERVICE);
             notification.setCanal(Notification.CanalNotification.IN_APP);
@@ -585,6 +614,8 @@ public class NotificationConsumer {
             Notification notification = new Notification();
             notification.setTitle("Carte supprimée");
             notification.setMessage(message);
+            String userId = cardDetails.getCustomerId().toString();
+            notification.setUserId(userId);
             notification.setType(Notification.NotificationType.SUPPRESSION_CARTE);
             notification.setServiceEmetteur(Notification.ServiceEmetteur.CARD_SERVICE);
             notification.setCanal(Notification.CanalNotification.IN_APP);
@@ -634,6 +665,8 @@ public class NotificationConsumer {
             Notification notification = new Notification();
             notification.setTitle("Confirmation de recharge");
             notification.setMessage(String.format("Recharge effectuée avec succès\n\nMontant : %s FCFA\nDate : %s\nStatut : Complété", event.getAmount(), event.getCreatedAt()));
+            UserInfoResponse userInfo = accountUtil.getUserInfoByAccountId(event.getAccountId());
+        notification.setUserId(userInfo.getUserId());
             notification.setType(NotificationType.CONFIRMATION_RECHARGE);
             notification.setServiceEmetteur(ServiceEmetteur.RECHARGE_SERVICE);
             notification.setCanal(Notification.CanalNotification.IN_APP);
@@ -643,12 +676,12 @@ public class NotificationConsumer {
              // Traiter la notification (sauvegarde + envoi si nécessaire)
              traiterNotification(notification);
             // Envoyer l'email
-            // logger.info("Envoi de l'email de confirmation de recharge...");
-            // emailService.sendNotification(
-            //     notification.getEmail(),
-            //     EmailSender.NotificationType.RECHARGE,
-            //     data
-            // );
+            logger.info("Envoi de l'email de confirmation de recharge...");
+            emailService.sendNotification(
+                userInfo.getUserEmail(),
+                EmailSender.NotificationType.RECHARGE,
+                data
+            );
 
             logger.info("Notification de recharge traitée pour le compte: {}", event.getAccountId());
         } catch (Exception e) {
@@ -706,15 +739,18 @@ public class NotificationConsumer {
           //data.put("verificationToken", event.getVerificationToken());
            data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
            data.put("year", LocalDate.now().getYear());
-   
+           UserInfoResponse userInfo = accountUtil.getUserInfoByAccountNumber(event.getAccountNumber());
+        
            // Création de la notification
            Notification notification = new Notification();
            notification.setTitle("Confirmation d'inscription");
-            notification.setMessage(String.format("Bienvenue chez Jamaa Bank\n\nCompte créé avec succès\n\nNom du client : %s\nNuméro de compte : %s\nDate de création : %s", 
-                event.getFirstName() + " " + event.getLastName(),
-                event.getAccountNumber() != null ? event.getAccountNumber() : "N/A",
-                LocalDate.now()
-            ));
+           notification.setMessage(String.format(
+            "Cher(e) client(e), votre compte a été créé avec succès. " +
+            "Un email de confirmation a été envoyé à %s",
+            userInfo.getUserEmail()
+        ));
+            
+            notification.setUserId(userInfo.getUserId());
            notification.setType(NotificationType.CONFIRMATION_CREATION_COMPTE_JAMAA);
            notification.setServiceEmetteur(ServiceEmetteur.ACCOUNT);
            notification.setCanal(Notification.CanalNotification.IN_APP);

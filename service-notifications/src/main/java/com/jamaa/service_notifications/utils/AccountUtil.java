@@ -13,6 +13,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.jamaa.service_notifications.dto.AccountDTO;
+import com.jamaa.service_notifications.dto.UserInfoResponse;
 import com.jamaa.service_notifications.exception.AccountNotFoundException;
 import com.jamaa.service_notifications.exception.AccountServiceException;
 
@@ -141,6 +142,87 @@ public class AccountUtil {
         }
     }
 
+    public UserInfoResponse getUserInfoByAccountNumber(String accountNumber) throws AccountServiceException, AccountNotFoundException {
+        try {
+            logger.debug("Récupération du userId pour le compte: {}", accountNumber);
+            String query = String.format("""
+                {
+                    account(accountNumber: \"%s\") {
+                        userId
+                        userEmail
+                    }
+                }
+                """, accountNumber);
+
+            JSONObject response = executeGraphQLQuery(query);
+            logger.debug("Réponse reçue pour la récupération du userId: {}", response);
+
+            if (response.has("errors")) {
+                logger.error("Erreurs GraphQL lors de la récupération du userId: {}", response.getJSONArray("errors"));
+                throw new AccountServiceException("Erreur lors de la récupération du userId: " + 
+                    response.getJSONArray("errors"));
+            }
+
+            JSONObject data = response.getJSONObject("data");
+            if (data.isNull("account")) {
+                logger.warn("Aucun compte trouvé avec le numéro: {}", accountNumber);
+                throw new AccountNotFoundException("Compte non trouvé: " + accountNumber);
+            }
+
+            JSONObject accountData = data.getJSONObject("account");
+            if (accountData.isNull("userId")) {
+                logger.warn("Le compte {} n'a pas de userId associé", accountNumber);
+                throw new AccountServiceException("Aucun userId trouvé pour le compte: " + accountNumber);
+            }
+
+            String userId = accountData.getString("userId");
+            String userEmail = accountData.optString("userEmail", null);
+            logger.debug("Informations utilisateur récupérées avec succès - ID: {}, Email: {}", userId, userEmail);
+            
+            return new UserInfoResponse(userId, userEmail);
+            
+        } catch (AccountServiceException | AccountNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération du userId pour le compte " + accountNumber, e);
+            throw new AccountServiceException("Erreur lors de la récupération du userId: " + e.getMessage(), e);
+        }
+    }
+    public UserInfoResponse getUserInfoByAccountId(Long accountId) throws AccountServiceException, AccountNotFoundException {
+        try {
+            logger.debug("Récupération des infos utilisateur pour l'ID de compte: {}", accountId);
+            String query = String.format("""
+                {
+                    accountById(id: %d) {
+                        userId
+                        userEmail
+                        accountNumber
+                    }
+                }
+                """, accountId);
+    
+            JSONObject response = executeGraphQLQuery(query);
+            
+            if (response.has("errors")) {
+                throw new AccountServiceException("Erreur GraphQL: " + response.getJSONArray("errors"));
+            }
+    
+            JSONObject data = response.getJSONObject("data");
+            if (data.isNull("accountById")) {
+                throw new AccountNotFoundException("Compte non trouvé avec l'ID: " + accountId);
+            }
+    
+            JSONObject accountData = data.getJSONObject("accountById");
+            String userId = accountData.getString("userId");
+            String userEmail = accountData.optString("userEmail", null);
+            
+            return new UserInfoResponse(userId, userEmail);
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération des infos utilisateur pour le compte ID: " + accountId, e);
+            throw new AccountServiceException("Erreur lors de la récupération des informations du compte", e);
+        }
+    }
     private AccountDTO parseAccountFromResponse(JSONObject response, String operationName) throws AccountServiceException, AccountNotFoundException {
         try {
             if (response.has("errors")) {

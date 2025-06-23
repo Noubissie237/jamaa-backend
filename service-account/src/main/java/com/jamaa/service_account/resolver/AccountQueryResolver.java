@@ -7,6 +7,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import com.jamaa.service_account.DTO.CustomerDTO;
 import com.jamaa.service_account.model.Account;
 import com.jamaa.service_account.service.AccountService;
 
@@ -35,5 +36,10 @@ public class AccountQueryResolver {
     @QueryMapping
     public Optional<Account> getAccount(@Argument Long id) {
         return accountService.getAccount(id);
+    }
+
+    @QueryMapping
+    public CustomerDTO getCustomerByAccountId(@Argument Long accountId) {
+        return accountService.getCustomerByAccountId(accountId);
     }
 }

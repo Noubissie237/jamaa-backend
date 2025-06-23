@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.jamaa.service_account.model.Account;
 import com.jamaa.service_account.repository.AccountRepository;
 import com.jamaa.service_account.utils.Util;
+import com.jamaa.service_account.DTO.CustomerDTO;
 import com.jamaa.service_account.events.CustomerAccountEvent;
 import com.jamaa.service_account.events.CustomerEvent;
 import com.jamaa.service_account.exception.AccountNotFoundException;
@@ -215,4 +216,16 @@ public class AccountService {
         accountRepository.save(toAccount);
         logger.info("Transfert réussi de {} à {} du montant {}", fromAccountId, toAccountId, amount);
     }
+
+    public CustomerDTO getCustomerByAccountId(Long accountId) {
+        logger.debug("Récupération du client par numéro de compte {}", accountId);
+        Account account = accountRepository.findById(accountId).orElse(null);
+        CustomerDTO customer = new CustomerDTO();
+
+        customer.setCustomerId(account.getUserId());
+        customer.setEmail(util.getCustomerEmail(account.getUserId()));
+
+        return customer;
+    }
+
 }

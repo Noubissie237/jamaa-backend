@@ -66,4 +66,43 @@ public class Util {
         }
     }
 
+    public String getCustomerEmail(Long userId) {
+        String query = String.format("""
+            {
+                getCustomerById(id: %s) {
+                    email
+                }
+            }
+        """, userId);
+
+        JSONObject jsonRequest = new JSONObject();
+        jsonRequest.put("query", query);
+
+        RequestBody body = RequestBody.create(
+            jsonRequest.toString(),
+            MediaType.parse("application/json")
+        );
+
+        Request request = new Request.Builder()
+            .url(graphqlUsersEndpoint)
+            .post(body)
+            .build();
+        
+        try (Response response = client.newCall(request).execute()) {
+            if(!response.isSuccessful()) {
+                throw new RuntimeException("Erreur lors de la requête GraphQL");
+            }
+
+            String responseBody = response.body().string();
+
+            JSONObject jsonResponse = new JSONObject(responseBody);
+            JSONObject data = jsonResponse.getJSONObject("data");
+            JSONObject customer = data.optJSONObject("getCustomerById");
+
+            return customer.getString("email");
+        
+        } catch (Exception e) {
+            return "";
+        }
+    }
 }

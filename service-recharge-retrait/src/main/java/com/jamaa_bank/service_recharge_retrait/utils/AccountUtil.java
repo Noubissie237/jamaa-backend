@@ -23,7 +23,7 @@ public class AccountUtil {
     
     private static final Logger logger = LoggerFactory.getLogger(AccountUtil.class);
     
-    @Value("${service.account.endpoint:http://service-proxy:8079/SERVICE-ACCOUNT/graphql}")
+    @Value("${service.account.endpoint:http://service-proxy:8079/service-account/graphql}")
     private String accountServiceEndpoint;
     
     @Value("${service.account.timeout.connect:30}")

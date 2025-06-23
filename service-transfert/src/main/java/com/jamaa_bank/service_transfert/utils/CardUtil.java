@@ -19,7 +19,7 @@ import okhttp3.*;
 
 @Component
 public class CardUtil {
-    @Value("${service.account.endpoint:http://service-proxy:8079/SERVICE-CARD/graphql}")
+    @Value("${service.account.endpoint:http://service-proxy:8079/service-card/graphql}")
     private String accountServiceEndpoint;
     
     @Value("${service.account.timeout.connect:5}")

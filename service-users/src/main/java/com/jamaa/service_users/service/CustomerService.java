@@ -81,7 +81,7 @@ public class CustomerService {
     }
 
     public String login(String email, String password) {
-        String url = "http://service-proxy:8079/SERVICE-AUTH/auth/login";
+        String url = "http://service-proxy:8079/service-auth/auth/login";
         LoginRequest loginRequest = new LoginRequest();
 
         loginRequest.setLogin(email);

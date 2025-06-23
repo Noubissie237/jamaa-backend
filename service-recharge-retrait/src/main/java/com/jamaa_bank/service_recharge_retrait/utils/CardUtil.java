@@ -23,7 +23,7 @@ public class CardUtil {
     
     private static final Logger logger = LoggerFactory.getLogger(CardUtil.class);
     
-    @Value("${service.card.endpoint:http://service-proxy:8079/SERVICE-CARD/graphql}")
+    @Value("${service.card.endpoint:http://service-proxy:8079/service-card/graphql}")
     private String cardServiceEndpoint;
     
     @Value("${service.card.timeout.connect:30}")

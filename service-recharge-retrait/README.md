@@ -88,8 +88,8 @@ getRetraits: [RechargeRetrait!]!
 - **Eureka** : http://127.0.0.1:8761/eureka/
 
 ### Services externes
-- **Service Account** : http://localhost:8080/SERVICE-ACCOUNT/graphql
-- **Service Card** : http://localhost:8081/SERVICE-CARD/graphql
+- **Service Account** : http://localhost:8080/service-account/graphql
+- **Service Card** : http://localhost:8081/service-card/graphql
 
 ### RabbitMQ
 - **Host** : 127.0.0.1:5672

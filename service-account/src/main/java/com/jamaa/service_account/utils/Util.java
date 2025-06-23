@@ -11,7 +11,7 @@ import okhttp3.*;
 @Component
 public class Util {
 
-    private final String graphqlUsersEndpoint = "http://127.0.0.1:8079/SERVICE-USERS/graphql";
+    private final String graphqlUsersEndpoint = "http://service-proxy:8079/service-users/graphql";
     private final OkHttpClient client = new OkHttpClient();
     private final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private final int CODE_LENGTH = 6;
@@ -66,4 +66,43 @@ public class Util {
         }
     }
 
+    public String getCustomerEmail(Long userId) {
+        String query = String.format("""
+            {
+                getCustomerById(id: %s) {
+                    email
+                }
+            }
+        """, userId);
+
+        JSONObject jsonRequest = new JSONObject();
+        jsonRequest.put("query", query);
+
+        RequestBody body = RequestBody.create(
+            jsonRequest.toString(),
+            MediaType.parse("application/json")
+        );
+
+        Request request = new Request.Builder()
+            .url(graphqlUsersEndpoint)
+            .post(body)
+            .build();
+        
+        try (Response response = client.newCall(request).execute()) {
+            if(!response.isSuccessful()) {
+                throw new RuntimeException("Erreur lors de la requête GraphQL");
+            }
+
+            String responseBody = response.body().string();
+
+            JSONObject jsonResponse = new JSONObject(responseBody);
+            JSONObject data = jsonResponse.getJSONObject("data");
+            JSONObject customer = data.optJSONObject("getCustomerById");
+
+            return customer.getString("email");
+        
+        } catch (Exception e) {
+            return "";
+        }
+    }
 }

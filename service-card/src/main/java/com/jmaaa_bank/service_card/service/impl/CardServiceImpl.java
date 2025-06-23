@@ -18,6 +18,7 @@ import com.jmaaa_bank.service_card.model.Card;
 import com.jmaaa_bank.service_card.repository.CardRepository;
 import com.jmaaa_bank.service_card.service.CardService;
 import com.jmaaa_bank.service_card.utils.CardNumberGenerator;
+import com.jmaaa_bank.service_card.utils.Util;
 import com.jmaaa_bank.service_card.messaging.CardEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +32,16 @@ public class CardServiceImpl  implements CardService{
     private final CardRepository cardRepository;
     private final CardEventPublisher eventPublisher;
     private final CardNumberGenerator cardNumberGenerator;
+    private final Util util;
     
     @Override
     public CardResponse createCard(CustomerDTO request) {
         log.info("Création d'une nouvelle carte pour le client: {}", request.getCustomerId());
         
+        String email = util.getEmail(request.getCustomerId());
+        
+        log.info("Email du client: {}", email);
+
         // Générer un numéro de carte unique
         String cardNumber = cardNumberGenerator.generateCardNumber(CardType.VISA);
         
@@ -62,7 +68,7 @@ public class CardServiceImpl  implements CardService{
         
         Card savedCard = cardRepository.save(card);
         log.info("Publication de l'événement de création de carte pour la carte: {}", savedCard.getId());
-        eventPublisher.publishCardCreated(savedCard);
+        eventPublisher.publishCardCreated(savedCard, email);
         log.info("Carte créée avec succès: {}", savedCard.getId());
         
         return mapToResponse(savedCard);
@@ -154,7 +160,7 @@ public class CardServiceImpl  implements CardService{
         if (updated) {
             Card savedCard = cardRepository.save(card);
             log.info("Publication de l'événement de mise à jour de carte pour la carte: {}", savedCard.getId());
-            eventPublisher.publishCardUpdated(savedCard);
+            eventPublisher.publishCardUpdated(savedCard, util.getEmail(card.getCustomerId()));
             log.info("Carte mise à jour: {}", id);
             return mapToResponse(savedCard);
         } else {
@@ -171,7 +177,7 @@ public class CardServiceImpl  implements CardService{
         CardResponse response = mapToResponse(card);
         cardRepository.delete(card);
         log.info("Publication de l'événement de suppression de carte pour la carte: {}", card.getId());
-        eventPublisher.publishCardDeleted(card);
+        eventPublisher.publishCardDeleted(card, util.getEmail(card.getCustomerId()));
         log.info("Carte supprimée: {}", id);
         return response;
     }
@@ -184,7 +190,7 @@ public class CardServiceImpl  implements CardService{
         card.setStatus(CardStatus.ACTIVE);
         Card savedCard = cardRepository.save(card);
         log.info("Publication de l'événement d'activation de carte pour la carte: {}", savedCard.getId());
-        eventPublisher.publishCardActivated(savedCard);
+        eventPublisher.publishCardActivated(savedCard, util.getEmail(card.getCustomerId()));
         log.info("Carte activée: {}", id);
         
         return mapToResponse(savedCard);
@@ -198,7 +204,7 @@ public class CardServiceImpl  implements CardService{
         card.setStatus(CardStatus.BLOCKED);
         Card savedCard = cardRepository.save(card);
         log.info("Publication de l'événement de blocage de carte pour la carte: {}", savedCard.getId());
-        eventPublisher.publishCardBlocked(savedCard);
+        eventPublisher.publishCardBlocked(savedCard, util.getEmail(card.getCustomerId()));
         log.info("Carte bloquée: {}", id);
         
         return mapToResponse(savedCard);

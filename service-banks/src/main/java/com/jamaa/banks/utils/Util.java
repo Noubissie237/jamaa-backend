@@ -12,7 +12,7 @@ import okhttp3.*;
 @Component
 public class Util {
 
-    private final String graphqlUsersEndpoint = "http://127.0.0.1:8079/SERVICE-USERS/graphql";
+    private final String graphqlUsersEndpoint = "http://service-proxy:8079/service-users/graphql";
     private final OkHttpClient client = new OkHttpClient();
 
     public CustomerDTO getCustomer(Long id) {

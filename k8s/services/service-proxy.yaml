@@ -56,31 +56,5 @@ spec:
   ports:
   - port: 8079
     targetPort: 8079
-  type: ClusterIP
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: jamaa-ingress
-  namespace: jamaa
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-spec:
-  tls:
-  - hosts:
-    - api.jamaa.com  # Remplacez par votre domaine
-    secretName: jamaa-tls
-  rules:
-  - host: api.jamaa.com  # Remplacez par votre domaine
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: service-proxy
-            port:
-              number: 8079
+    nodePort: 30079
+  type: NodePort

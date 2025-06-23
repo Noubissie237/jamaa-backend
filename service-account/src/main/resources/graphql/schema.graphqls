@@ -25,6 +25,11 @@ input CustomerInput {
   cniNumber: String!
 }
 
+type CustomerDTO {
+  id: ID!
+  email: String!
+}
+
 
 type Mutation {
     createAccount(customer: CustomerInput!): Account
@@ -41,4 +46,5 @@ type Query {
     getAccountByUserId(userId: ID!): Account
     getAccountByAccountNumber(accountNumber: String): Account
     getWallet(userId: String!): Wallet
+    getCustomerByAccountId(id: ID!): CustomerDTO
 }

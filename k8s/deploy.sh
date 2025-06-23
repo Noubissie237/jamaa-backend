@@ -1,4 +1,5 @@
 #!/bin/bash
+# export KUBECONFIG=/var/lib/jenkins/.kube/config
 
 # Script de déploiement Kubernetes pour Jamaa Backend
 echo "🚀 Déploiement de Jamaa Backend sur Kubernetes"
@@ -35,12 +36,13 @@ kubectl apply -f configs/aws-secrets.yaml
 # Déployer les services de base (Config Server et Eureka)
 echo "🔧 Déploiement des services de base..."
 kubectl apply -f services/service-config.yaml
+
+kubectl wait --for=condition=available --timeout=300s deployment/service-config -n jamaa
+
 kubectl apply -f services/service-register.yaml
 
-# Attendre que les services de base soient prêts
-echo "⏳ Attente des services de base..."
-kubectl wait --for=condition=available --timeout=300s deployment/service-config -n jamaa
 kubectl wait --for=condition=available --timeout=300s deployment/service-register -n jamaa
+
 
 # Déployer les microservices
 echo "🚀 Déploiement des microservices..."
@@ -61,7 +63,17 @@ kubectl apply -f configs/hpa-config.yaml
 
 # Attendre que les microservices soient prêts
 echo "⏳ Attente des microservices..."
-sleep 30
+kubectl wait --for=condition=available --timeout=300s deployment/service-auth -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-users -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-account -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-banks -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-card -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-transfert -n jamaa
+# kubectl wait --for=condition=available --timeout=300s deployment/service-transactions -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-notifications -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-banks-account -n jamaa
+kubectl wait --for=condition=available --timeout=300s deployment/service-recharge-retrait -n jamaa
+
 
 # Déployer le proxy (Gateway)
 echo "🌐 Déploiement du service proxy..."
@@ -77,12 +89,3 @@ kubectl get deployments -n jamaa
 echo ""
 echo "🔗 Services:"
 kubectl get services -n jamaa
-echo ""
-echo "🌐 Ingress:"
-kubectl get ingress -n jamaa
-echo ""
-echo "🎉 Jamaa Backend est maintenant déployé!"
-echo "📝 N'oubliez pas de:"
-echo "   1. Configurer votre domaine DNS"
-echo "   2. Installer cert-manager pour HTTPS"
-echo "   3. Mettre à jour les secrets AWS avec vos vraies clés"

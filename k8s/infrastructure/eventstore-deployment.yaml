@@ -48,6 +48,8 @@ spec:
           value: "true"
         - name: EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP
           value: "true"
+        - name: EVENTSTORE_ALLOW_UNKNOWN_OPTIONS
+          value: "true"
         volumeMounts:
         - name: eventstore-storage
           mountPath: /var/lib/eventstore

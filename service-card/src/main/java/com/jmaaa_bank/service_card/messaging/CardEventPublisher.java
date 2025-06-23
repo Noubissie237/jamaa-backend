@@ -14,12 +14,12 @@ public class CardEventPublisher {
 
      private final RabbitTemplate rabbitTemplate;
     
-    public void publishCardCreated(Card card) {
+    public void publishCardCreated(Card card, String customerEmail) {
         try {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.CARD_EXCHANGE,
                     RabbitMQConfig.CARD_CREATED_KEY,
-                    createCardEvent(card, "CARD_CREATED")
+                    createCardEvent(card, "CARD_CREATED", customerEmail)
             );
             log.info("Événement CARD_CREATED publié pour la carte: {}", card.getId());
         } catch (Exception e) {
@@ -27,12 +27,12 @@ public class CardEventPublisher {
         }
     }
     
-    public void publishCardUpdated(Card card) {
+    public void publishCardUpdated(Card card, String customerEmail) {
         try {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.CARD_EXCHANGE,
                     RabbitMQConfig.CARD_UPDATED_KEY,
-                    createCardEvent(card, "CARD_UPDATED")
+                    createCardEvent(card, "CARD_UPDATED", customerEmail)
             );
             log.info("Événement CARD_UPDATED publié pour la carte: {}", card.getId());
         } catch (Exception e) {
@@ -40,12 +40,12 @@ public class CardEventPublisher {
         }
     }
     
-    public void publishCardDeleted(Card card) {
+    public void publishCardDeleted(Card card, String customerEmail) {
         try {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.CARD_EXCHANGE,
                     RabbitMQConfig.CARD_DELETED_KEY,
-                    createCardEvent(card, "CARD_DELETED")
+                    createCardEvent(card, "CARD_DELETED", customerEmail)
             );
             log.info("Événement CARD_DELETED publié pour la carte: {}", card.getId());
         } catch (Exception e) {
@@ -53,12 +53,12 @@ public class CardEventPublisher {
         }
     }
     
-    public void publishCardActivated(Card card) {
+    public void publishCardActivated(Card card, String customerEmail) {
         try {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.CARD_EXCHANGE,
                     RabbitMQConfig.CARD_ACTIVATED_KEY,
-                    createCardEvent(card, "CARD_ACTIVATED")
+                    createCardEvent(card, "CARD_ACTIVATED", customerEmail)
             );
             log.info("Événement CARD_ACTIVATED publié pour la carte: {}", card.getId());
         } catch (Exception e) {
@@ -66,12 +66,12 @@ public class CardEventPublisher {
         }
     }
     
-    public void publishCardBlocked(Card card) {
+    public void publishCardBlocked(Card card, String customerEmail) {
         try {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.CARD_EXCHANGE,
                     RabbitMQConfig.CARD_BLOCKED_KEY,
-                    createCardEvent(card, "CARD_BLOCKED")
+                    createCardEvent(card, "CARD_BLOCKED", customerEmail)
             );
             log.info("Événement CARD_BLOCKED publié pour la carte: {}", card.getId());
         } catch (Exception e) {
@@ -79,12 +79,13 @@ public class CardEventPublisher {
         }
     }
     
-    private CardEvent createCardEvent(Card card, String eventType) {
+    private CardEvent createCardEvent(Card card, String eventType, String customerEmail) {
         return CardEvent.builder()
                 .eventType(eventType)
                 .cardId(card.getId())
                 .cardNumber(card.getCardNumber())
                 .customerId(card.getCustomerId())
+                .customerEmail(customerEmail)
                 .status(card.getStatus().toString())
                 .timestamp(java.time.LocalDateTime.now())
                 .build();
@@ -98,6 +99,7 @@ public class CardEventPublisher {
         private Long cardId;
         private String cardNumber;
         private Long customerId;
+        private String customerEmail;
         private String status;
         private java.time.LocalDateTime timestamp;
     }

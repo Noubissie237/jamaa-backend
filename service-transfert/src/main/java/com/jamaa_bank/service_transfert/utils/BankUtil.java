@@ -17,7 +17,7 @@ import okhttp3.*;
 
 @Component
 public class BankUtil {
-    @Value("${service.bank.endpoint:http://127.0.0.1:8079/SERVICE-BANKS/graphql}")
+    @Value("${service.bank.endpoint:http://service-proxy:8079/service-banks/graphql}")
     private String bankServiceEndpoint;
     
     @Value("${service.bank.timeout.connect:5}")

@@ -31,10 +31,7 @@ spec:
         - name: SPRING_DATASOURCE_USERNAME
           value: "admin"
         - name: SPRING_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: rds-secret
-              key: password
+          value: "JamaaAdmin-123"
         # Configuration JPA
         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
           value: "update"
@@ -83,13 +80,3 @@ spec:
   - port: 8082
     targetPort: 8082
   type: ClusterIP
----
-# Secret pour stocker le mot de passe RDS de manière sécurisée
-apiVersion: v1
-kind: Secret
-metadata:
-  name: rds-secret
-  namespace: jamaa
-type: Opaque
-data:
-  password: JamaaAdmin-123

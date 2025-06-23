@@ -755,7 +755,7 @@ public class NotificationConsumer {
            notification.setMessage(String.format(
             "Cher(e) client(e), votre compte a été créé avec succès. " +
             "Un email de confirmation a été envoyé à %s",
-            userInfo.getUserEmail()
+            event.getEmail()
         ));
             
             notification.setUserId(userInfo.getUserId());

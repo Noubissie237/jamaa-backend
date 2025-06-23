@@ -192,7 +192,8 @@ public class NotificationConsumer {
                 event.getCreatedAt(),
                 event.getStatus()
             );
-    
+            
+            //notif de emetteur
             Notification notification = new Notification();
             notification.setTitle("Notification de Transfert");
             notification.setMessage(message);
@@ -206,7 +207,6 @@ public class NotificationConsumer {
             traiterNotification(notification);
 
             // notification receveur
-
             Notification notification2 = new Notification();
             notification2.setTitle("Notification de Transfert");
             notification2.setMessage(message);
@@ -225,6 +225,11 @@ public class NotificationConsumer {
            logger.info("Envoi de l'email...");
            emailService.sendNotification(
                userInfo2.getUserEmail(),
+               EmailSender.NotificationType.TRANSFER,
+               data
+           );
+           emailService.sendNotification(
+               userInfo.getUserEmail(),
                EmailSender.NotificationType.TRANSFER,
                data
            );

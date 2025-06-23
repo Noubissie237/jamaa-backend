@@ -198,7 +198,6 @@ public class AccountUtil {
                     accountById(id: %d) {
                         userId
                         userEmail
-                        accountNumber
                     }
                 }
                 """, accountId);

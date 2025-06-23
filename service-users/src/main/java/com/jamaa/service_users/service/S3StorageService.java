@@ -11,8 +11,13 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -31,6 +36,7 @@ public class S3StorageService implements StorageService {
     private String secretKey = "ldTlfrUO9NZGk6ToWHvq5QxpVqqenPuinPKF1SeA";
 
     private S3Client s3Client;
+    private S3Presigner s3Presigner;
     private boolean configLogged = false;
 
     private void logConfigurationOnce() {
@@ -67,6 +73,25 @@ public class S3StorageService implements StorageService {
             }
         }
         return s3Client;
+    }
+
+    private S3Presigner getS3Presigner() {
+        if (s3Presigner == null) {
+            logConfigurationOnce();
+            logger.info("🔌 Création du presigner S3...");
+            try {
+                AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
+                s3Presigner = S3Presigner.builder()
+                        .region(Region.of(region))
+                        .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                        .build();
+                logger.info("✅ Presigner S3 créé avec succès pour la région: {}", region);
+            } catch (Exception e) {
+                logger.error("❌ Erreur lors de la création du presigner S3: {}", e.getMessage(), e);
+                throw new RuntimeException("Erreur lors de l'initialisation du presigner S3", e);
+            }
+        }
+        return s3Presigner;
     }
 
     @Override
@@ -132,6 +157,107 @@ public class S3StorageService implements StorageService {
             }
             
             throw new IOException("Erreur lors de l'upload vers S3: " + e.getMessage(), e);
+        }
+    }
+
+
+    public String generatePresignedUrl(String s3Url, int expirationHours) {
+        if (s3Url == null || s3Url.isEmpty()) {
+            logger.warn("⚠️ URL S3 vide fournie pour la génération d'URL pré-signée");
+            return null;
+        }
+
+        try {
+            // Extraire la clé du fichier depuis l'URL S3
+            String key = extractKeyFromS3Url(s3Url);
+            if (key == null) {
+                logger.error("❌ Impossible d'extraire la clé de l'URL S3: {}", s3Url);
+                return null;
+            }
+
+            logger.info("🔗 Génération d'URL pré-signée:");
+            logger.info("   📦 Bucket: {}", bucketName);
+            logger.info("   🔑 Key: {}", key);
+            logger.info("   ⏰ Expiration: {} heures", expirationHours);
+
+            // Créer la requête de pré-signature
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofHours(expirationHours))
+                    .getObjectRequest(getObjectRequest)
+                    .build();
+
+            // Générer l'URL pré-signée
+            PresignedGetObjectRequest presignedRequest = getS3Presigner().presignGetObject(presignRequest);
+            String presignedUrl = presignedRequest.url().toString();
+
+            logger.info("✅ URL pré-signée générée avec succès");
+            logger.debug("🔗 URL: {}", presignedUrl);
+
+            return presignedUrl;
+
+        } catch (Exception e) {
+            logger.error("❌ Erreur lors de la génération de l'URL pré-signée:");
+            logger.error("   🔍 Message: {}", e.getMessage());
+            logger.error("   📋 Type: {}", e.getClass().getSimpleName());
+            if (logger.isDebugEnabled()) {
+                logger.debug("   📊 Stack trace complète:", e);
+            }
+            return null;
+        }
+    }
+    public String generatePresignedUrl(String s3Url) {
+        return generatePresignedUrl(s3Url, 170);
+    }
+
+    private String extractKeyFromS3Url(String s3Url) {
+        try {
+            if (s3Url == null || s3Url.isEmpty()) {
+                return null;
+            }
+
+            // Format attendu: https://bucket.s3.region.amazonaws.com/key
+            if (s3Url.contains(bucketName + ".s3." + region + ".amazonaws.com/")) {
+                int keyStartIndex = s3Url.indexOf(bucketName + ".s3." + region + ".amazonaws.com/") 
+                                    + (bucketName + ".s3." + region + ".amazonaws.com/").length();
+                return s3Url.substring(keyStartIndex);
+            }
+
+            // Format alternatif: https://s3.region.amazonaws.com/bucket/key
+            if (s3Url.contains("s3." + region + ".amazonaws.com/" + bucketName + "/")) {
+                int keyStartIndex = s3Url.indexOf("s3." + region + ".amazonaws.com/" + bucketName + "/") 
+                                    + ("s3." + region + ".amazonaws.com/" + bucketName + "/").length();
+                return s3Url.substring(keyStartIndex);
+            }
+
+            logger.warn("⚠️ Format d'URL S3 non reconnu: {}", s3Url);
+            return null;
+
+        } catch (Exception e) {
+            logger.error("❌ Erreur lors de l'extraction de la clé depuis l'URL: {}", s3Url, e);
+            return null;
+        }
+    }
+
+    public boolean fileExists(String s3Url) {
+        String key = extractKeyFromS3Url(s3Url);
+        if (key == null) return false;
+
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            getS3Client().getObject(getObjectRequest);
+            return true;
+        } catch (Exception e) {
+            logger.debug("Fichier non trouvé: {}", s3Url);
+            return false;
         }
     }
 }

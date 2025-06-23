@@ -12,6 +12,7 @@ enum TransactionStatus {
 }
 
 type Transaction {
+    transactionId: ID!
     transactionType: TransactionType!
     idAccountSender: ID!
     idAccountReceiver: ID!
@@ -24,6 +25,7 @@ type Transaction {
 type Query {
     getAllTransactions: [Transaction!]
     getTransactionByIdAccount(idAccount: ID!): [Transaction!]
+    getTransactionsByUserId(userId: ID!): [Transaction!]
 }
 
 type Mutation {

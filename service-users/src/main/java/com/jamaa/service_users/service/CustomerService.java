@@ -43,6 +43,7 @@ public class CustomerService {
             String encodedPassword = passwordEncoder.encode(customer.getPassword());
             String initialPassword = customer.getPassword();
             customer.setPassword(encodedPassword);
+            customer.setIsVerified(false);
 
             CustomerEvent event = new CustomerEvent();
             event.setFirstName(customer.getFirstName());
@@ -141,6 +142,59 @@ public class CustomerService {
         }
 
         throw new IllegalStateException("Impossible de générer un username unique");
+    }
+
+    public Customer updatePasswCustomer(Long id, String password) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setPassword(passwordEncoder.encode(password));
+        return customerRepository.save(customer);
+    }
+
+    public Customer updateCniNumbCustomer(Long id, String cniNumber) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setCniNumber(cniNumber);
+        return customerRepository.save(customer);
+    }
+
+    public Customer updatePhoneCustomer(Long id, String phone) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setPhone(phone);
+        return customerRepository.save(customer);
+    }
+
+    public Customer updateEmailCustomer(Long id, String email) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setEmail(email);
+        return customerRepository.save(customer);
+    }
+
+    public Customer updateFirstNameCustomer(Long id, String firstName) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setFirstName(firstName);
+        return customerRepository.save(customer);
+    }
+
+    public Customer updateLastNameCustomer(Long id, String lastName) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setLastName(lastName);
+        return customerRepository.save(customer);
+    }
+
+    public Customer updateIsVerifiedCustomer(Long id, Boolean isVerified) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setIsVerified(isVerified);
+        return customerRepository.save(customer);
+    }
+
+    public Customer updateCustomer(Long id, String email, String phone, String cniNumber, String firstName, String lastName) {
+        Customer customer = customerRepository.findById(id).orElse(null);
+        customer.setEmail(email);
+        customer.setPhone(phone);
+        customer.setCniNumber(cniNumber);
+        customer.setFirstName(firstName);
+        customer.setLastName(lastName);
+
+        return customerRepository.save(customer);
     }
 
 }

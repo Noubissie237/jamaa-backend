@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmation de transfert</title>
+    <title>Confirmation de recharge</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f6f6f6; color: #333333;">
     <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; border-collapse: collapse;">
@@ -22,7 +22,7 @@
                                         <img src="cid:logoImage" alt="Jamaa Bank" width="70" style="display: block;">
                                     </td>
                                     <td width="75%" align="right" style="color: #0A5D32; font-size: 18px; font-weight: bold;">
-                                        Transfert confirmé
+                                        Recharge confirmée
                                     </td>
                                 </tr>
                             </table>
@@ -38,16 +38,16 @@
                 <table border="0" cellpadding="0" cellspacing="0" width="100%">
                     <tr>
                         <td>
-                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">Bonjour,</p>
-                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">Nous vous confirmons que votre transfert a été effectué avec succès.</p>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">Bonjour ${holderName ? holderName : 'Cher client'},</p>
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">Nous vous confirmons que votre recharge de carte a été effectuée avec succès.</p>
                             
-                            <!-- INFORMATION DU TRANSFERT -->
+                            <!-- INFORMATION DE LA RECHARGE -->
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #f9f9f9; border-radius: 4px;">
                                 <tr>
                                     <td style="padding: 15px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Montant transféré</td>
+                                                <td style="font-size: 14px; color: #666666;">Montant rechargé</td>
                                                 <td style="font-size: 18px; font-weight: bold; text-align: right; color: #0A5D32;">${amount} FCFA</td>
                                             </tr>
                                         </table>
@@ -57,8 +57,8 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Frais de transfert</td>
-                                                <td style="font-size: 14px; text-align: right;">${transferFees} FCFA</td>
+                                                <td style="font-size: 14px; color: #666666;">Date et heure</td>
+                                                <td style="font-size: 14px; text-align: right;">${transactionDate ? transactionDate : 'N/A'}</td>
                                             </tr>
                                         </table>
                                     </td>
@@ -67,8 +67,10 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Référence</td>
-                                                <td style="font-size: 14px; text-align: right; font-family: monospace; background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px;">${referenceNumber}</td>
+                                                <td style="font-size: 14px; color: #666666;">Carte</td>
+                                                <td style="font-size: 14px; text-align: right;">
+                                                    ${cardType ? cardType : 'Carte'} •••• ${cardLastFour ? cardLastFour : '••••'}
+                                                </td>
                                             </tr>
                                         </table>
                                     </td>
@@ -77,8 +79,8 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Compte débiteur</td>
-                                                <td style="font-size: 14px; text-align: right;">${senderAccount}</td>
+                                                <td style="font-size: 14px; color: #666666;">Titulaire</td>
+                                                <td style="font-size: 14px; text-align: right;">${holderName ? holderName : 'N/A'}</td>
                                             </tr>
                                         </table>
                                     </td>
@@ -87,8 +89,8 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Bénéficiaire</td>
-                                                <td style="font-size: 14px; text-align: right; font-weight: bold;">${beneficiaryName}</td>
+                                                <td style="font-size: 14px; color: #666666;">Banque</td>
+                                                <td style="font-size: 14px; text-align: right;">${bankName ? bankName : 'Jamaa Bank'}</td>
                                             </tr>
                                         </table>
                                     </td>
@@ -97,8 +99,10 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Compte créditeur</td>
-                                                <td style="font-size: 14px; text-align: right;">${receiverAccount}</td>
+                                                <td style="font-size: 14px; color: #666666;">Statut</td>
+                                                <td style="font-size: 14px; text-align: right; color: #0A5D32; font-weight: bold;">
+                                                    ${status ? status : 'Terminé'}
+                                                </td>
                                             </tr>
                                         </table>
                                     </td>
@@ -131,6 +135,17 @@
                                                 <td style="font-size: 14px; text-align: right;">${date}</td>
                                             </tr>
                                         </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- MESSAGE DE CONFIRMATION -->
+                            <table style="width: 100%; border-collapse: collapse; margin: 25px 0;">
+                                <tr>
+                                    <td style="padding: 15px 20px; background-color: #E8F5E8; border-radius: 4px; border-left: 4px solid #0A5D32;">
+                                        <p style="margin: 0; color: #0A5D32; font-size: 14px; line-height: 1.5;">
+                                            Votre carte a été rechargée avec succès. Le montant de <strong>${amount} FCFA</strong> a été crédité sur votre compte.
+                                        </p>
                                     </td>
                                 </tr>
                             </table>

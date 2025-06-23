@@ -16,6 +16,7 @@ type Customer implements Person {
     cniNumber: String!
     cniRecto: String!
     cniVerso: String!
+    isVerified: Boolean!
 }
 
 type SuperAdmin implements Person {
@@ -49,7 +50,6 @@ type Query {
     getCustomerById(id: ID!): Customer
     getCustomerByEmail(email: String!): Customer
     getCustomerByPhone(phone: String!): Customer
-    
     getAllSuperAdmins: [SuperAdmin!]
     getSuperAdminById(id: ID!): SuperAdmin
     getSuperAdminByUsername(username: String!): SuperAdmin
@@ -59,4 +59,6 @@ type Mutation {
     createCustomer(input: CustomerInput!): Customer!
     deleteCustomer(id: ID!): [Customer]!
     createSuperAdmin(input: SuperAdminInput!): SuperAdmin!
+    updateCustomerPassword(id: ID!, password: String!): Customer!
+    updateCustomer(id: ID!, email: String!, phone: String!, cniNumber: String!, firstName: String!, lastName: String!): Customer!
 }

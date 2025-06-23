@@ -33,7 +33,7 @@ public class CardServiceImpl  implements CardService{
     private final CardNumberGenerator cardNumberGenerator;
     
     @Override
-    public void createCard(CustomerDTO request) {
+    public CardResponse createCard(CustomerDTO request) {
         log.info("Création d'une nouvelle carte pour le client: {}", request.getCustomerId());
         
         // Générer un numéro de carte unique
@@ -50,9 +50,12 @@ public class CardServiceImpl  implements CardService{
                 .holderName(request.getHolderName())
                 .customerId(request.getCustomerId())
                 .cardType(CardType.VISA)
+                .status(CardStatus.PENDING_ACTIVATION)
                 .expiryDate(expiryDate)
                 .cvv(cvv)
                 .creditLimit(BigDecimal.valueOf(1000))
+                .currentBalance(BigDecimal.ZERO)
+                .isVirtual(true)
                 .bankId(request.getBankId())
                 .bankName(request.getBankName())
                 .build();
@@ -61,6 +64,8 @@ public class CardServiceImpl  implements CardService{
         log.info("Publication de l'événement de création de carte pour la carte: {}", savedCard.getId());
         eventPublisher.publishCardCreated(savedCard);
         log.info("Carte créée avec succès: {}", savedCard.getId());
+        
+        return mapToResponse(savedCard);
     }
     
     @Override
@@ -71,6 +76,47 @@ public class CardServiceImpl  implements CardService{
         return mapToResponse(card);
     }
     
+    @Override
+    public CardResponse incrementBalance(Long id, BigDecimal amount) {
+        log.info("Début de l'incrémentation du solde pour la carte ID: {} avec montant: {}", id, amount);
+
+        Card card = cardRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Carte non trouvée pour l'ID: {}", id);
+                    return new CardNotFoundException("Carte non trouvée avec l'ID: " + id);
+                });
+
+        BigDecimal oldBalance = card.getCurrentBalance();
+        BigDecimal newBalance = oldBalance.add(amount);
+
+        card.setCurrentBalance(newBalance);
+        Card savedCard = cardRepository.save(card);
+
+        log.info("Solde mis à jour avec succès pour la carte ID: {} — Ancien solde: {}, Nouveau solde: {}", id, oldBalance, newBalance);
+        return mapToResponse(savedCard);
+    }
+
+    @Override
+    public CardResponse decrementBalance(Long id, BigDecimal amount) {
+        log.info("Début de la décrémentation du solde pour la carte ID: {} avec montant: {}", id, amount);
+
+        Card card = cardRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Carte non trouvée pour l'ID: {}", id);
+                    return new CardNotFoundException("Carte non trouvée avec l'ID: " + id);
+                });
+
+        BigDecimal oldBalance = card.getCurrentBalance();
+        BigDecimal newBalance = oldBalance.subtract(amount);
+
+        card.setCurrentBalance(newBalance);
+        Card savedCard = cardRepository.save(card);
+
+        log.info("Solde mis à jour avec succès pour la carte ID: {} — Ancien solde: {}, Nouveau solde: {}", id, oldBalance, newBalance);
+        return mapToResponse(savedCard);
+    }
+
+
     @Override
     @Transactional(readOnly = true)
     public CardResponse getCardByNumber(String cardNumber) {
@@ -118,14 +164,16 @@ public class CardServiceImpl  implements CardService{
     }
     
     @Override
-    public void deleteCard(Long id) {
+    public CardResponse deleteCard(Long id) {
         Card card = cardRepository.findById(id)
                 .orElseThrow(() -> new CardNotFoundException("Carte non trouvée avec l'ID: " + id));
         
+        CardResponse response = mapToResponse(card);
         cardRepository.delete(card);
         log.info("Publication de l'événement de suppression de carte pour la carte: {}", card.getId());
         eventPublisher.publishCardDeleted(card);
         log.info("Carte supprimée: {}", id);
+        return response;
     }
     
     @Override
@@ -163,6 +211,14 @@ public class CardServiceImpl  implements CardService{
         return cards.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public CardResponse getCardByBankId(Long bankId) {
+        Card card = cardRepository.findById(bankId)
+                .orElseThrow(() -> new CardNotFoundException("Aucune carte trouvée pour la banque ID: " + bankId));
+        return mapToResponse(card);
     }
     
     private CardResponse mapToResponse(Card card) {

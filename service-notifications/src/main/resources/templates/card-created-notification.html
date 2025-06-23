@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Carte Créée</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f6f6f6; color: #333333;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; border-collapse: collapse;">
+        <!-- HEADER -->
+        <tr>
+            <td style="padding: 0;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td style="background-color: #0A5D32; height: 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 15px 20px; border-bottom: 1px solid #eeeeee;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="25%" align="left">
+                                        <img src="cid:logoImage" alt="Jamaa Bank" width="70" style="display: block;">
+                                    </td>
+                                    <td width="75%" align="right" style="color: #0A5D32; font-size: 18px; font-weight: bold;">
+                                        Votre Nouvelle Carte
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- MAIN CONTENT -->
+        <tr>
+            <td style="background-color: #ffffff; padding: 30px 30px 20px 30px; border-radius: 0px 0px 4px 4px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;" th:if="${holderName != null}">
+                                Bonjour <span th:text="${holderName}"></span>,
+                            </p>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;" th:unless="${holderName != null}">
+                                Bonjour,
+                            </p>
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">
+                                Votre nouvelle carte a été créée avec succès. Voici les détails :
+                            </p>
+                            
+                            <!-- CARD INFORMATION -->
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #f9f9f9; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <!-- Informations du titulaire -->
+                                            <tr th:if="${holderName != null}">
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Titulaire</td>
+                                                <td style="font-size: 14px; text-align: right; font-weight: 500;" th:text="${holderName}">
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${bankName != null}">
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Banque</td>
+                                                <td style="font-size: 14px; text-align: right; font-weight: 500;" th:text="${bankName}">
+                                                </td>
+                                            </tr>
+                                            
+                                            <tr th:if="${cardNumber != null}">
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Numéro de carte</td>
+                                                <td style="font-size: 14px; text-align: right; font-family: monospace; font-weight: bold;">
+                                                    •••• •••• •••• 
+                                                    <span th:if="${#strings.length(cardNumber) > 4}" 
+                                                          th:text="${cardNumber.substring(#strings.length(cardNumber) - 4)}">
+                                                    </span>
+                                                    <span th:if="${#strings.length(cardNumber) <= 4}">••••</span>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${cardType != null}">
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Type de carte</td>
+                                                <td style="font-size: 14px; text-align: right;" th:text="${cardType}">
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${expiryDate != null}">
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Date d'expiration</td>
+                                                <td style="font-size: 14px; text-align: right;" th:text="${expiryDate}">
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${creditLimit != null}">
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Limite de crédit</td>
+                                                <td style="font-size: 15px; text-align: right; font-weight: 600; color: #0A5D32;" 
+                                                    th:text="${#numbers.formatDecimal(creditLimit, 0, 'POINT', 2, 'COMMA') + ' FCFA'}">
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${availableCredit != null}">
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Crédit disponible</td>
+                                                <td style="font-size: 15px; text-align: right; font-weight: 600; color: #0A5D32;"
+                                                    th:text="${#numbers.formatDecimal(availableCredit, 0, 'POINT', 2, 'COMMA') + ' FCFA'}">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666; padding: 8px 0;">Statut</td>
+                                                <td style="font-size: 14px; text-align: right;">
+                                                    <span style="background-color: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;"
+                                                          th:if="${cardStatus != null}" 
+                                                          th:text="${#strings.toUpperCase(#strings.substring(cardStatus, 0, 1)) + #strings.toLowerCase(#strings.substring(cardStatus, 1))}">
+                                                        En attente d'activation
+                                                    </span>
+                                                    <span style="background-color: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;"
+                                                          th:unless="${cardStatus != null}">
+                                                        En attente d'activation
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- INSTRUCTIONS -->
+                            <!-- <div style="background-color: #f0f7ff; border-left: 4px solid #1976d2; padding: 16px; border-radius: 4px; margin-bottom: 25px;">
+                                <p style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600; color: #0d47a1;">Prochaines étapes :</p>
+                                <ul style="margin: 0; padding-left: 20px; color: #37474f; line-height: 1.6;">
+                                    <li>Vous recevrez votre carte physique sous 5-7 jours ouvrables</li>
+                                    <li>Activez votre carte dès réception via l'application mobile</li>
+                                    <li>Votre code PIN vous sera envoyé par SMS séparément</li>
+                                </ul>
+                            </div> -->
+                            
+                            <!-- SECURITY NOTE -->
+                            <div style="background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 12px 15px; margin-bottom: 20px; border-radius: 4px;">
+                                <p style="margin: 0; font-size: 13px; color: #5d4037; line-height: 1.5;">
+                                    <strong>Note de sécurité :</strong> Ne partagez jamais vos informations de carte ou vos codes confidentiels. Jamaa ne vous demandera jamais ces informations par email ou téléphone.
+                                </p>
+                            </div>
+
+                            <!-- IMPORTANT NOTES -->
+                            <div style="background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 12px 15px; margin-bottom: 20px; border-radius: 4px;">
+                                <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #5d4037;">
+                                    <span style="color: #ff9800;">ℹ</span> Important
+                                </p>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #5d4037;">
+                                    <li>Votre carte arrivera par courrier sous 5 à 7 jours ouvrés</li>
+                                    <li>Activez votre carte dès réception via l'application mobile</li>
+                                    <li>Conservez vos informations confidentielles en sécurité</li>
+                                </ul>
+                            </div>
+
+                            <!-- CALL TO ACTION -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 25px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${appUrl}/mes-cartes" style="background-color: #0A5D32; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
+                                            Voir ma carte dans l'application
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 20px 0 0 0; font-size: 14px; color: #666666; line-height: 1.5;">
+                                Si vous n'êtes pas à l'origine de cette demande, veuillez contacter immédiatement notre service client.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="padding: 20px 30px; text-align: center; font-size: 12px; color: #888888; background-color: #f6f6f6;">
+                <p style="margin: 0 0 10px 0;">© ${currentYear} Jamaa Bank. Tous droits réservés.</p>
+                <p style="margin: 0 0 5px 0; font-size: 11px; color: #aaaaaa;">
+                    Cet email a été envoyé à ${email}. Pour garantir la réception de nos emails, veuillez ajouter noreply@jamaa-bank.com à votre carnet d'adresses.
+                </p>
+                <p style="margin: 10px 0 0 0; font-size: 11px; color: #aaaaaa;">
+                    <a href="${appUrl}/confidentialite" style="color: #0A5D32; text-decoration: none;">Politique de confidentialité</a> | 
+                    <a href="${appUrl}/conditions" style="color: #0A5D32; text-decoration: none; margin: 0 8px;">Conditions d'utilisation</a> | 
+                    <a href="${appUrl}/contact" style="color: #0A5D32; text-decoration: none;">Contact</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-transactions
+  namespace: jamaa
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-transactions
+  template:
+    metadata:
+      labels:
+        app: service-transactions
+    spec:
+      containers:
+      - name: service-transactions
+        image: noubissie237/jamaa-project-service-transactions:latest
+        ports:
+        - containerPort: 8086
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_CONFIG_IMPORT
+          value: "configserver:http://service-config:2370"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://service-register:8761/eureka/"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service:3306/jamaa_transactions_db?createDatabaseIfNotExist=true"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "rootpassword"
+        - name: SPRING_RABBITMQ_HOST
+          value: "rabbitmq-service"
+        - name: SPRING_RABBITMQ_PORT
+          value: "5672"
+        - name: SPRING_RABBITMQ_USERNAME
+          value: "guest"
+        - name: SPRING_RABBITMQ_PASSWORD
+          value: "guest"
+        - name: EVENTSTORE_CONNECTION_STRING
+          value: "esdb://eventstore-service:2113?tls=false"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
+          limits:
+            memory: "1Gi"
+            cpu: "600m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8086
+          initialDelaySeconds: 45
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8086
+          initialDelaySeconds: 90
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-transactions
+  namespace: jamaa
+spec:
+  selector:
+    app: service-transactions
+  ports:
+  - port: 8086
+    targetPort: 8086
+  type: ClusterIP

@@ -28,7 +28,7 @@ public class Notification implements Serializable {
 
     private String title;
     private String message;
-    private String email;
+    // private String email;
     private LocalDateTime dateEnvoi;
 
     @Enumerated(EnumType.STRING)
@@ -50,32 +50,36 @@ public class Notification implements Serializable {
     }
 
     public enum NotificationType {
+        // Notifications générales
         CONFIRMATION_DEPOT,
         CONFIRMATION_RETRAIT,
         CONFIRMATION_TRANSFERT,
         CONFIRMATION_INSCRIPTION,
         MOT_DE_PASSE_REINITIALISE,
-        CONFIRMATION_SOUSCRIPTION_BANQUE,
-        TRANSACTION_REUSSIE,
-        AUTHENTIFICATION,
-        ALERTE_SOLDE,
+        CONFIRMATION_CREATION_COMPTE_JAMAA,
         CONFIRMATION_RECHARGE,
         RECHARGE,
         SUPPRESSION_COMPTE,
         ACCOUNT_DELETION,
         ERREUR_CREATION_COMPTE,
         ACCOUNT_CREATION_ERROR,
+        
+        // Notifications pour les cartes
+        CONFIRMATION_CREATION_CARTE,
+        MISE_A_JOUR_CARTE,
+        ACTIVATION_CARTE,
+        BLOCAGE_CARTE,
+        SUPPRESSION_CARTE,
+        ERREUR_CARTE,
     }
 
     public enum ServiceEmetteur {
-        DEPOSIT_SERVICE,
         WITHDRAWAL_SERVICE,
         TRANSFER_SERVICE,
-        AUTH_SERVICE,
         BANK_SERVICE,
-        TRANSACTION_SERVICE,
-        RECHARGE_SERVICE
-        
+        RECHARGE_SERVICE,
+        CARD_SERVICE,
+        ACCOUNT
     }
     
     public enum CanalNotification {

@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-server-config
+  namespace: jamaa
+data:
+  GIT_URI: "https://github.com/Noubissie237/jamaa-configurations.git"
+  GIT_USERNAME: "Noubissie237"
+  # Note: En production, utilisez un Secret pour le token
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: config-server-secret
+  namespace: jamaa
+type: Opaque
+data:
+  # Base64 encoded GitHub token - À remplacer par votre token
+  git-password: Z2hwX1Uzc1BxRG9CNWhZcGlXQXhxbFFrR0pST1FvNTN2RDNCbXNSag==
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-config
+  namespace: jamaa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-config
+  template:
+    metadata:
+      labels:
+        app: service-config
+    spec:
+      containers:
+      - name: service-config
+        image: noubissie237/jamaa-project-service-config:latest
+        ports:
+        - containerPort: 2370
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-config
+              key: GIT_URI
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-config
+              key: GIT_USERNAME
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: config-server-secret
+              key: git-password
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 2370
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 2370
+          initialDelaySeconds: 60
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-config
+  namespace: jamaa
+spec:
+  selector:
+    app: service-config
+  ports:
+  - port: 2370
+    targetPort: 2370
+  type: ClusterIP

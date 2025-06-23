@@ -1,6 +1,7 @@
 type Query {
     card(id: ID!): Card
     cardByNumber(cardNumber: String!): Card
+    cardByBankId(bankId: ID!): Card
     cardsByCustomer(customerId: ID!): [Card!]!
     allCards: [Card!]!
 }
@@ -8,9 +9,11 @@ type Query {
 type Mutation {
     createCard(input: CardCreateInput!): Card!
     updateCard(id: ID!, input: CardUpdateInput!): Card!
-    deleteCard(id: ID!): Boolean!
+    deleteCard(id: ID!): Card!
     activateCard(id: ID!): Card!
     blockCard(id: ID!): Card!
+    incrementBalance(id: ID!, amount: Float!): Card!
+    decrementBalance(id: ID!, amount: Float!): Card!
 }
 
 type Card {

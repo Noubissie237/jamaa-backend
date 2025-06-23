@@ -1,6 +1,4 @@
-
 package com.jamaa.service_banks_account.service;
-
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -80,6 +78,30 @@ public class BankAccountService {
 
     public List<BankAccount> getAllBankAccounts() {
         return bankAccountRepository.findAll();
+    }
+
+    @Transactional
+    public BankAccount addInternalTransferFees(Long id, BigDecimal amount) {
+        BankAccount bankAccount = bankAccountRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Compte bancaire non trouvé avec l'ID: " + id));
+        
+        bankAccount.setTotalInternalTransferFees(
+            bankAccount.getTotalInternalTransferFees().add(amount)
+        );
+        
+        return bankAccountRepository.save(bankAccount);
+    }
+
+    @Transactional
+    public BankAccount addExternalTransferFees(Long id, BigDecimal amount) {
+        BankAccount bankAccount = bankAccountRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Compte bancaire non trouvé avec l'ID: " + id));
+        
+        bankAccount.setTotalExternalTransferFees(
+            bankAccount.getTotalExternalTransferFees().add(amount)
+        );
+        
+        return bankAccountRepository.save(bankAccount);
     }
 
 }

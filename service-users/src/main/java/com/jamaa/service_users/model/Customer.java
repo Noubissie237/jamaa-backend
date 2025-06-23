@@ -19,4 +19,5 @@ public class Customer extends Person {
     private String cniRecto;
     @Column(nullable = false)
     private String cniVerso;
+    private Boolean isVerified;
 }

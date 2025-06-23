@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de suppression de carte - Jamaa</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+        .header { background-color: #616161; padding: 25px 0; text-align: center; }
+        .logo { max-width: 150px; height: auto; }
+        .content { padding: 30px; }
+        .deleted-icon { 
+            width: 90px; height: 90px; 
+            background-color: #f5f5f5; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: #757575;
+        }
+        .card { background-color: #f9f9f9; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #e0e0e0; }
+        .info-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .info-item:last-child { border-bottom: none; }
+        .info-label { color: #616161; font-weight: 500; }
+        .info-value { font-weight: 600; text-align: right; }
+        .footer { text-align: center; padding: 20px; background-color: #f5f5f5; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+        .btn { 
+            display: inline-block; 
+            padding: 12px 25px; 
+            background-color: #616161; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            font-weight: 600; 
+            margin: 10px 0; 
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .btn:hover { background-color: #757575; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-deleted { background-color: #e0e0e0; color: #424242; }
+        .note { 
+            background-color: #f5f5f5; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0; 
+            border-left: 4px solid #9e9e9e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <div class="header">
+            <img src="https://jamaa.com/logo-white.png" alt="Jamaa" class="logo">
+        </div>
+        
+        <!-- Contenu principal -->
+        <div class="content">
+            <div class="deleted-icon">
+                <span style="font-size: 40px;">✂️</span>
+            </div>
+            <h1 style="color: #424242; text-align: center; margin-top: 0; margin-bottom: 10px;">
+                Votre carte a été supprimée
+            </h1>
+            <p style="text-align: center; color: #666; margin-top: 0; margin-bottom: 30px;">
+                La suppression de votre carte a été effectuée avec succès.
+            </p>
+            
+            <!-- Détails de la carte supprimée -->
+            <div class="card">
+                <h3 style="margin-top: 0; color: #333; font-size: 18px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0;">
+                    Détails de la carte supprimée
+                </h3>
+                
+                <!-- Informations du titulaire -->
+                <div class="info-item" th:if="${holderName != null}">
+                    <span class="info-label">Titulaire</span>
+                    <span class="info-value" th:text="${holderName}">-</span>
+                </div>
+                <div class="info-item" th:if="${bankName != null}">
+                    <span class="info-label">Banque</span>
+                    <span class="info-value" th:text="${bankName}">-</span>
+                </div>
+                
+                
+                <div class="info-item" th:if="${cardNumber != null}">
+                    <span class="info-label">Numéro de carte</span>
+                    <span class="info-value" style="font-family: monospace; font-weight: bold;">
+                        •••• •••• •••• 
+                        <span th:if="${#strings.length(cardNumber) > 4}" 
+                              th:text="${cardNumber.substring(#strings.length(cardNumber) - 4)}">
+                        </span>
+                        <span th:if="${#strings.length(cardNumber) <= 4}">••••</span>
+                    </span>
+                </div>
+                
+                <div class="info-item" th:if="${cardType != null}">
+                    <span class="info-label">Type de carte</span>
+                    <span class="info-value" th:text="${cardType}">-</span>
+                </div>
+                
+                <div class="info-item" th:if="${expiryDate != null}">
+                    <span class="info-label">Date d'expiration</span>
+                    <span class="info-value" th:text="${expiryDate}">-</span>
+                </div>
+                
+                <div class="info-item" th:if="${lastStatus != null}">
+                    <span class="info-label">Dernier statut</span>
+                    <span class="info-value">
+                        <span th:with="statusClass=${#strings.toLowerCase(lastStatus) == 'active' ? 'success' : 'warning'}"
+                              class="status-badge status-${statusClass}"
+                              th:text="${#strings.toUpperCase(#strings.substring(lastStatus, 0, 1)) + #strings.toLowerCase(#strings.substring(lastStatus, 1))}">
+                            Statut
+                        </span>
+                    </span>
+                </div>
+                
+                <div class="info-item" th:if="${creditLimit != null}">
+                    <span class="info-label">Dernière limite de crédit</span>
+                    <span class="info-value" th:text="${#numbers.formatDecimal(creditLimit, 0, 'POINT', 2, 'COMMA') + ' FCFA'}">-</span>
+                </div>
+                
+                <div class="info-item" th:if="${availableCredit != null}">
+                    <span class="info-label">Solde disponible avant suppression</span>
+                    <span class="info-value" th:text="${#numbers.formatDecimal(availableCredit, 0, 'POINT', 2, 'COMMA') + ' FCFA'}">-</span>
+                </div>
+                
+                <div class="info-item" th:if="${deletionDate != null}">
+                    <span class="info-label">Date de suppression</span>
+                    <span class="info-value" th:text="${#temporals.format(deletionDate, 'dd/MM/yyyy HH:mm')}">-</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Date de suppression</span>
+                    <span class="info-value" th:text="${#temporals.format(deletionDate, 'dd/MM/yyyy')}">-</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Date de suppression</span>
+                    <span class="info-value">
+                        ${#temporals.format(deletionDate ?: #temporals.createNow(), 'dd/MM/yyyy à HH\'h\'mm')}
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Statut</span>
+                    <span class="info-value">
+                        <span class="status-badge status-deleted">
+                            Supprimée définitivement
+                        </span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Note importante -->
+            <div class="note">
+                <h3 style="margin-top: 0; color: #424242; font-size: 16px; margin-bottom: 10px;">
+                    <span style="color: #616161;">ℹ️</span> À noter
+                </h3>
+                <p style="margin: 0; color: #616161; font-size: 14px; line-height: 1.5;">
+                    Votre carte a été définitivement supprimée de notre système. Aucune opération ne pourra plus être effectuée avec cette carte.
+                </p>
+            </div>
+            
+            <!-- Prochaines étapes -->
+            <div style="background-color: #f5f5f5; border-radius: 8px; padding: 20px; margin: 30px 0;">
+                <h3 style="margin-top: 0; color: #333; font-size: 16px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0;">
+                    Prochaines étapes
+                </h3>
+                
+                <div style="display: flex; margin-bottom: 15px;">
+                    <div style="width: 30px; height: 30px; background-color: #757575; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">1</div>
+                    <div>
+                        <p style="margin: 0 0 5px 0; font-weight: 600; color: #333;">Suppression des données</p>
+                        <p style="margin: 0; color: #666; font-size: 14px;">
+                            Les données de votre carte seront définitivement effacées de nos systèmes dans les 30 jours, conformément à notre politique de conservation des données.
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; margin-bottom: 15px;">
+                    <div style="width: 30px; height: 30px; background-color: #757575; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">2</div>
+                    <div>
+                        <p style="margin: 0 0 5px 0; font-weight: 600; color: #333;">Confirmation par email</p>
+                        <p style="margin: 0; color: #666; font-size: 14px;">
+                            Vous recevrez un email de confirmation une fois la suppression complètement finalisée.
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="display: flex;">
+                    <div style="width: 30px; height: 30px; background-color: #757575; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">3</div>
+                    <div>
+                        <p style="margin: 0 0 5px 0; font-weight: 600; color: #333;">Nouvelle carte</p>
+                        <p style="margin: 0; color: #666; font-size: 14px;">
+                            Si vous souhaitez commander une nouvelle carte, vous pouvez le faire depuis votre espace client.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bouton d'action -->
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${dashboardUrl ?: 'https://app.jamaa.com/dashboard'}" class="btn">
+                    Accéder à mon espace client
+                </a>
+                <p style="font-size: 13px; color: #666; margin-top: 15px;">
+                    Référence de suppression : <strong>${deletionReference ?: 'N/A'}</strong>
+                </p>
+            </div>
+            
+            <!-- Contact -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 14px; color: #666; line-height: 1.6;">
+                <p style="margin: 0 0 10px 0;">Besoin d'aide ? Notre équipe est à votre disposition :</p>
+                <!-- <p style="margin: 5px 0;">📞 <a href="tel:+221338000000" style="color: #0A5D32; text-decoration: none;">+221 33 800 00 00</a></p>
+                <p style="margin: 5px 0 0 0;">✉️ <a href="mailto:support@jamaa.com" style="color: #0A5D32; text-decoration: none;">support@jamaa.com</a></p>
+            </div> -->
+        </div>
+        
+        <!-- Pied de page -->
+        <div class="footer">
+            <p style="margin: 0 0 10px 0;">© ${#temporals.year(#temporals.createNow())} Jamaa. Tous droits réservés.</p>
+            <p style="margin: 0; font-size: 11px; color: #999;">
+                Ceci est un email automatique, merci de ne pas y répondre.
+            </p>
+        </div>
+    </div>
+
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="padding: 20px 30px; text-align: center; font-size: 12px; color: #888888; background-color: #f6f6f6;">
+                <p style="margin: 0 0 10px 0;">© ${currentYear} Jamaa Bank. Tous droits réservés.</p>
+                <p style="margin: 0 0 5px 0; font-size: 11px; color: #aaaaaa;">
+                    Cet email a été envoyé à ${email}. Pour garantir la réception de nos emails, veuillez ajouter noreply@jamaa-bank.com à votre carnet d'adresses.
+                </p>
+                <p style="margin: 10px 0 0 0; font-size: 11px; color: #aaaaaa;">
+                    <a href="${appUrl}/confidentialite" style="color: #0A5D32; text-decoration: none;">Politique de confidentialité</a> | 
+                    <a href="${appUrl}/conditions" style="color: #0A5D32; text-decoration: none; margin: 0 8px;">Conditions d'utilisation</a> | 
+                    <a href="${appUrl}/contact" style="color: #0A5D32; text-decoration: none;">Contact</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

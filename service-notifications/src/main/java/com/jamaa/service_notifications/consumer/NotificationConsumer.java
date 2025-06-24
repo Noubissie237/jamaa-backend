@@ -152,9 +152,7 @@ public class NotificationConsumer {
             notification.setCanal(Notification.CanalNotification.IN_APP);
             // Sauvegarder la notification
             notificationService.saveNotification(notification);
-             // Traiter la notification (sauvegarde + envoi si nécessaire)
-             traiterNotification(notification);
-           
+             // Traiter la notification (sauvegarde + envoi si nécessaire)           
             // Envoyer l'email avec le template
             logger.info("Envoi de l'email de confirmation de retrait...");
             emailService.sendNotification(
@@ -751,8 +749,7 @@ public class NotificationConsumer {
         ));
             
            notificationService.saveNotification(notification);
-           // Traitement de la notification (sauvegarde + envoi si nécessaire)
-           traiterNotification(notification);
+
            // Envoi de l'email avec le template
            EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
                     

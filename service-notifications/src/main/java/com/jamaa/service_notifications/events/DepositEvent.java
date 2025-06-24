@@ -13,12 +13,12 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class WithdrawalEvent extends TransactionEvent {
-    @JsonProperty("withdrawal_method")
-    private String withdrawalMethod;  // Carte, Virement, etc.
+public class DepositEvent extends TransactionEvent {
+    @JsonProperty("deposit_method")
+    private String depositMethod;  // Carte, Virement, etc.
     
-    @JsonProperty("destination_account")
-    private String destinationAccount;
+    @JsonProperty("reference_number")
+    private String referenceNumber;
     
     @JsonProperty("bank_name")
     private String bankName;
@@ -27,20 +27,20 @@ public class WithdrawalEvent extends TransactionEvent {
     private String accountNumber;
 
     // Getters and Setters
-    public String getWithdrawalMethod() {
-        return withdrawalMethod;
+    public String getDepositMethod() {
+        return depositMethod;
     }
 
-    public void setWithdrawalMethod(String withdrawalMethod) {
-        this.withdrawalMethod = withdrawalMethod;
+    public void setDepositMethod(String depositMethod) {
+        this.depositMethod = depositMethod;
     }
 
-    public String getDestinationAccount() {
-        return destinationAccount;
+    public String getReferenceNumber() {
+        return referenceNumber;
     }
 
-    public void setDestinationAccount(String destinationAccount) {
-        this.destinationAccount = destinationAccount;
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
     }
 
     public String getBankName() {

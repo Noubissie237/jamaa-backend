@@ -3,61 +3,97 @@ package com.jamaa.service_notifications.events;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 @Data
-@Setter
+@AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class AccountEvent extends BaseEvent {
+    @JsonProperty("account_id")
+    private String accountId;
     
-    @JsonProperty("eventType")
-    private String eventType;
-
-    @JsonProperty("cardId")
-    private Long cardId;
-
-    @JsonProperty("cardNumber")
-    private String cardNumber;
-
-    @JsonProperty("customerId")
-    private Long customerId;
-
-    @JsonProperty("status")
-    private String status;
-
-    @JsonProperty("timestamp")
-    private LocalDateTime timestamp;
+    @JsonProperty("account_type")
+    private String accountType;  // Courant, Épargne, etc.
     
-    @JsonProperty("holderName")
-    private String holderName;
+    @JsonProperty("account_status")
+    private String accountStatus;
     
-    @JsonProperty("cardType")
-    private String cardType;
+    @JsonProperty("balance")
+    private double balance;
+    
+    @JsonProperty("currency")
+    private String currency;
+    
+    @JsonProperty("opening_date")
+    private String openingDate;
+    
+    @JsonProperty("last_activity_date")
+    private String lastActivityDate;
 
-    @JsonProperty("customerEmail")
-    private String customerEmail;
-    
-    @JsonProperty("creditLimit")
-    private BigDecimal creditLimit;
-    
-    @JsonProperty("expiryDate")
-    private LocalDate expiryDate;
-    
-    // Champs spécifiques aux événements de carte
+    private LocalDateTime accountCreationDate;
+    private String bankName;
+    private String branchCode;
 
-    // Méthode utilitaire pour extraire les 4 derniers chiffres
-    public String getLastFourDigits() {
-        return cardNumber != null && cardNumber.length() > 4 
-            ? cardNumber.substring(cardNumber.length() - 4)
-            : cardNumber;
+    // Getters and Setters
+    public String getAccountId() {
+        return accountId;
     }
-}
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
+    }
+
+    public String getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(String accountStatus) {
+        this.accountStatus = accountStatus;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getOpeningDate() {
+        return openingDate;
+    }
+
+    public void setOpeningDate(String openingDate) {
+        this.openingDate = openingDate;
+    }
+
+    public String getLastActivityDate() {
+        return lastActivityDate;
+    }
+
+    public void setLastActivityDate(String lastActivityDate) {
+        this.lastActivityDate = lastActivityDate;
+    }
+} 

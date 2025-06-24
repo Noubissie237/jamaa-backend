@@ -12,12 +12,12 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByUserId(String userId);
-    List<Notification> findByUserIdAndType(String userId, NotificationType type);
-    List<Notification> findByUserIdAndServiceEmetteur(String userId, ServiceEmetteur service);
+    List<Notification> findByEmail(String email);
+    List<Notification> findByEmailAndType(String email, NotificationType type);
+    List<Notification> findByEmailAndServiceEmetteur(String email, ServiceEmetteur service);
     
-    List<Notification> findByUserIdAndLuFalse(String userId);
+    List<Notification> findByEmailAndLuFalse(String email);
 
     @Transactional
-    void deleteByUserId(String userId);
+    void deleteByEmail(String email);
 } 

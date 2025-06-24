@@ -13,8 +13,6 @@ import com.jamaa.service_notifications.events.RechargeEvent;
 import com.jamaa.service_notifications.events.TransfertEvent;
 import com.jamaa.service_notifications.events.WithdrawalEvent;
 import com.jamaa.service_notifications.model.Notification;
-import com.jamaa.service_notifications.dto.AccountDTO;
-import com.jamaa.service_notifications.dto.CardDTO;
 import com.jamaa.service_notifications.model.Notification.NotificationType;
 import com.jamaa.service_notifications.model.Notification.ServiceEmetteur;
 import com.jamaa.service_notifications.service.EmailSender;
@@ -22,11 +20,8 @@ import com.jamaa.service_notifications.service.NotificationService;
 import com.jamaa.service_notifications.utils.CardUtil;
 
 import jakarta.mail.MessagingException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -743,11 +738,8 @@ public class NotificationConsumer {
            data.put("lastName", event.getLastName());
            data.put("accountNumber", event.getAccountNumber());
            data.put("registrationDate", LocalDate.now());
-           // À remplacer par
-          //data.put("verificationToken", event.getVerificationToken());
-           data.put("verificationToken", "lXZxIoGzJvnl/Eh9AvMnkjptA3nIMSK6DmFJgWd3Pc8=");
+           data.put("fullName", fullName);
            data.put("year", LocalDate.now().getYear());
-           UserInfoResponse userInfo = accountUtil.getUserInfoByAccountNumber(event.getAccountNumber());
         
            // Création de la notification
            Notification notification = new Notification();
@@ -758,12 +750,6 @@ public class NotificationConsumer {
             event.getEmail()
         ));
             
-            notification.setUserId(userInfo.getUserId());
-           notification.setType(NotificationType.CONFIRMATION_CREATION_COMPTE_JAMAA);
-           notification.setServiceEmetteur(ServiceEmetteur.ACCOUNT);
-           notification.setCanal(Notification.CanalNotification.IN_APP);
-           
-
            notificationService.saveNotification(notification);
            // Traitement de la notification (sauvegarde + envoi si nécessaire)
            traiterNotification(notification);

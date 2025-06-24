@@ -47,5 +47,10 @@ public class CustomerMutationResolver {
     public Customer updateCustomerPassword(@Argument Long id, @Argument String password) {
         return customerService.updatePasswCustomer(id, password);
     }
+
+    @MutationMapping
+    public Customer updateStatus(@Argument Long id, @Argument Boolean isVerified) {
+        return customerService.updateIsVerifiedCustomer(id, isVerified);
+    }
     
 }

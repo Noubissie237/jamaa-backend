@@ -742,6 +742,7 @@ public class NotificationConsumer {
            // Création de la notification
            Notification notification = new Notification();
            notification.setTitle("Confirmation d'inscription");
+           notification.setType(NotificationType.CONFIRMATION_INSCRIPTION);
            notification.setMessage(String.format(
             "Cher(e) client(e), votre compte a été créé avec succès. " +
             "Un email de confirmation a été envoyé à %s",

@@ -89,6 +89,10 @@ public class BankAccountService {
             bankAccount.getTotalInternalTransferFees().add(amount)
         );
         
+        bankAccount.setTotalBalance(
+            bankAccount.getTotalBalance().add(amount)
+        );
+
         return bankAccountRepository.save(bankAccount);
     }
 
@@ -99,6 +103,10 @@ public class BankAccountService {
         
         bankAccount.setTotalExternalTransferFees(
             bankAccount.getTotalExternalTransferFees().add(amount)
+        );
+
+        bankAccount.setTotalBalance(
+            bankAccount.getTotalBalance().add(amount)
         );
         
         return bankAccountRepository.save(bankAccount);

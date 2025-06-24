@@ -17,6 +17,7 @@ enum NotificationType {
     BLOCAGE_CARTE
     SUPPRESSION_CARTE
     ERREUR_CARTE
+}
 
 enum ServiceEmetteur {
     DEPOSIT_SERVICE
@@ -27,6 +28,7 @@ enum ServiceEmetteur {
     TRANSACTION_SERVICE
     CARD_SERVICE
     RECHARGE_SERVICE
+}
 
 type Notification {
     id: ID!

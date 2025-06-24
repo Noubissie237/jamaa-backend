@@ -104,17 +104,17 @@ public class RechargeRetraitService {
             
             // Publication de l'événement
             logger.debug("Publication de l'événement de recharge réussie");
-            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RECHARGE, TransactionStatus.SUCCESS);
+            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RECHARGE, TransactionStatus.SUCCESS, card.getBankId());
             
             return recharge;
 
         } catch (Exception e) {
             logger.error("Erreur lors de la recharge du compte {} vers carte {}, montant: {}: {}", 
                         accountId, cardId, amount, e.getMessage(), e);
-            
+            CardDTO card = cardUtil.getCard(cardId);
             // Publication de l'événement d'échec
             logger.debug("Publication de l'événement de recharge échouée");
-            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RECHARGE, TransactionStatus.FAILED);
+            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RECHARGE, TransactionStatus.FAILED, card.getBankId());
             throw e; 
         }
     }
@@ -182,17 +182,17 @@ public class RechargeRetraitService {
             
             // Publication de l'événement
             logger.debug("Publication de l'événement de retrait réussi");
-            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RETRAIT, TransactionStatus.SUCCESS);
+            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RETRAIT, TransactionStatus.SUCCESS, card.getBankId());
             
             return retrait;
 
         } catch (Exception e) {
             logger.error("Erreur lors du retrait de la carte {} vers compte {}, montant: {}: {}", 
                         cardId, accountId, amount, e.getMessage(), e);
-            
+            CardDTO card = cardUtil.getCard(cardId);
             // Publication de l'événement d'échec
             logger.debug("Publication de l'événement de retrait échoué");
-            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RETRAIT, TransactionStatus.FAILED);
+            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RETRAIT, TransactionStatus.FAILED, card.getBankId());
             throw e; 
         }
     }
@@ -227,7 +227,7 @@ public class RechargeRetraitService {
     }
 
     private void publishRechargeRetraitEvent(Long accountId, Long cardId, BigDecimal amount,
-            OperationType operationType, TransactionStatus status) {
+            OperationType operationType, TransactionStatus status, Long bankId) {
         logger.debug("Préparation de l'événement: compte {} <-> carte {}, montant: {}, type: {}, statut: {}", 
                     accountId, cardId, amount, operationType, status);
         
@@ -238,13 +238,28 @@ public class RechargeRetraitService {
         event.setOperationType(operationType);
         event.setStatus(status);
         event.setCreatedAt(LocalDateTime.now());
-
-        String routingKey = operationType == OperationType.RECHARGE ? 
+        event.setBankId(bankId);
+        String routingKeyNotification = operationType == OperationType.RECHARGE ? 
             "notification.recharge.done" : "notification.retrait.done";
 
+        String routingKeyTransaction = operationType == OperationType.RECHARGE ? 
+            "transactions.recharge.done" : "transactions.retrait.done";
+
+        
+            
+
         try {
-            logger.debug("Envoi de l'événement à la queue notification avec routing key: {}", routingKey);
-            rabbitTemplate.convertAndSend("AccountExchange", routingKey, event);
+            logger.debug("Envoi de l'événement à la queue notification avec routing key: {}", routingKeyNotification);
+            rabbitTemplate.convertAndSend("AccountExchange", routingKeyNotification, event);
+            logger.debug("Événement envoyé avec succès");
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'envoi de l'événement: {}", e.getMessage(), e);
+            // Ne pas faire échouer la transaction pour un problème de notification
+        }
+
+        try {
+            logger.debug("Envoi de l'événement à la queue transactions avec routing key: {}", routingKeyTransaction);
+            rabbitTemplate.convertAndSend("TransactionExchange", routingKeyTransaction, event);
             logger.debug("Événement envoyé avec succès");
         } catch (Exception e) {
             logger.error("Erreur lors de l'envoi de l'événement: {}", e.getMessage(), e);

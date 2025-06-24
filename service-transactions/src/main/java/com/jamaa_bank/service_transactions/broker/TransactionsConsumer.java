@@ -29,6 +29,7 @@ public class TransactionsConsumer {
         transac.setAmount(event.getAmount());
         transac.setCreatedAt(event.getCreatedAt());
         transac.setStatus(event.getStatus());
+        transac.setIdBankSender(event.getIdBankSender());
         transac.setTransactionType(TransactionType.TRANSFERT);
         transac.setDateEvent(LocalDateTime.now());
 
@@ -45,13 +46,14 @@ public class TransactionsConsumer {
         transac.setAmount(event.getAmount());
         transac.setCreatedAt(event.getCreatedAt());
         transac.setStatus(event.getStatus());
+        transac.setIdBankSender(event.getIdBankSender());
         transac.setTransactionType(TransactionType.VIREMENT);
         transac.setDateEvent(LocalDateTime.now());
 
         transactionService.saveTransaction(transac);
     }
 
-    @RabbitListener(queues = "recharge.queue")
+    @RabbitListener(queues = "recharge.queue.transaction")
     public void receiveRechargeEvent(RechargeRetraitEventTemplate event) {
 
         TransactionEvent transac = new TransactionEvent();
@@ -62,13 +64,14 @@ public class TransactionsConsumer {
         transac.setAmount(event.getAmount());
         transac.setCreatedAt(event.getCreatedAt());
         transac.setStatus(TransactionStatus.valueOf(event.getStatus()));
+        transac.setIdBankSender(event.getBankidBankSender());
         transac.setTransactionType(TransactionType.RECHARGE);
         transac.setDateEvent(LocalDateTime.now());
 
         transactionService.saveTransaction(transac);
     }
 
-    @RabbitListener(queues = "retrait.queue")
+    @RabbitListener(queues = "retrait.queue.transaction")
     public void receiveRetraitEvent(RechargeRetraitEventTemplate event) {
 
         TransactionEvent transac = new TransactionEvent();
@@ -79,6 +82,7 @@ public class TransactionsConsumer {
         transac.setAmount(event.getAmount());
         transac.setCreatedAt(event.getCreatedAt());
         transac.setStatus(TransactionStatus.valueOf(event.getStatus()));
+        transac.setIdBankSender(event.getBankidBankSender());
         transac.setTransactionType(TransactionType.RETRAIT);
         transac.setDateEvent(LocalDateTime.now());
 

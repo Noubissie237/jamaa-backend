@@ -19,6 +19,9 @@ public class TransfertEvent {
     @JsonProperty("idAccountSender")
     private Long idAccountSender;
 
+    @JsonProperty("idBankSender")
+    private Long idBankSender;
+
     @JsonProperty("idAccountReceiver")
     private Long idAccountReceiver;
 

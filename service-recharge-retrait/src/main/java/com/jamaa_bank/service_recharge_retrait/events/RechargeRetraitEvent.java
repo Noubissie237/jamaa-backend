@@ -14,6 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class RechargeRetraitEvent {
+    private Long bankId;
     private Long accountId;
     private Long cardId;
     private BigDecimal amount;

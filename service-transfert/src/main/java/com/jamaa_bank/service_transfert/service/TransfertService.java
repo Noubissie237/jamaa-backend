@@ -110,7 +110,7 @@ public class TransfertService {
                         transfert.getId(), idSenderAccount, idReceiverAccount, amount);
             
             logger.debug("Publication des événements de transfert réussi");
-            publishTransfertEvents(idSenderAccount, idReceiverAccount, amount, TransactionStatus.SUCCESS, "APP");
+            publishTransfertEvents(idSenderAccount, idReceiverAccount, amount, TransactionStatus.SUCCESS, "APP", (long) 0);
             return transfert;
 
         } catch (Exception e) {
@@ -118,7 +118,7 @@ public class TransfertService {
                         idSenderAccount, idReceiverAccount, amount, e.getMessage(), e);
             
             logger.debug("Publication des événements de transfert échoué");
-            publishTransfertEvents(idSenderAccount, idReceiverAccount, amount, TransactionStatus.FAILED, "APP");
+            publishTransfertEvents(idSenderAccount, idReceiverAccount, amount, TransactionStatus.FAILED, "APP", (long) 0);
             throw e; 
         }
     }
@@ -211,15 +211,18 @@ public class TransfertService {
                         transfert.getId(), idSenderBank, idReceiverBank, amount, feeAmount, isSameBank ? "INTERNE" : "EXTERNE");
             
             logger.debug("Publication des événements de transfert bancaire réussi");
-            publishTransfertEvents(idSenderBank, idReceiverBank, amount, TransactionStatus.SUCCESS, "BANK");
+            publishTransfertEvents(idSenderBank, idReceiverBank, amount, TransactionStatus.SUCCESS, "BANK", senderCard.getBankId());
             return transfert;
 
         } catch (Exception e) {
             logger.error("Erreur lors du transfert bancaire de {} vers {}, montant: {}: {}", 
                         idSenderBank, idReceiverBank, amount, e.getMessage(), e);
             
+            CardDTO senderCard = cardUtil.getCardByBankId(idSenderBank);
+
+
             logger.debug("Publication des événements de transfert bancaire échoué");
-            publishTransfertEvents(idSenderBank, idReceiverBank, amount, TransactionStatus.FAILED, "BANK");
+            publishTransfertEvents(idSenderBank, idReceiverBank, amount, TransactionStatus.FAILED, "BANK", senderCard.getBankId());
             throw e; 
         }
     }
@@ -232,7 +235,7 @@ public class TransfertService {
     }
 
     private void publishTransfertEvents(Long idSenderAccount, Long idReceiverAccount, BigDecimal amount,
-            TransactionStatus status, String type) {
+            TransactionStatus status, String type, Long bankId) {
         logger.debug("Préparation de l'événement de transfert: {} -> {}, montant: {}, statut: {}", 
                     idSenderAccount, idReceiverAccount, amount, status);
         
@@ -241,6 +244,7 @@ public class TransfertService {
         event.setIdAccountReceiver(idReceiverAccount);
         event.setAmount(amount);
         event.setStatus(status);
+        event.setIdBankSender(bankId);
         event.setCreatedAt(LocalDateTime.now());
 
         String routingKey = type == "BANK" ? "transactions.virement.done" : "transactions.transfer.done";

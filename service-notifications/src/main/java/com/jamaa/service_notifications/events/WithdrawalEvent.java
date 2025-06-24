@@ -1,61 +1,23 @@
 package com.jamaa.service_notifications.events;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
+import org.springframework.boot.actuate.endpoint.OperationType;
+
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-@Data
-@AllArgsConstructor
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @NoArgsConstructor
-@ToString
-@EqualsAndHashCode(callSuper = true)
-public class WithdrawalEvent extends TransactionEvent {
-    @JsonProperty("withdrawal_method")
-    private String withdrawalMethod;  // Carte, Virement, etc.
-    
-    @JsonProperty("destination_account")
-    private String destinationAccount;
-    
-    @JsonProperty("bank_name")
-    private String bankName;
-    
-    @JsonProperty("account_number")
-    private String accountNumber;
-
-    // Getters and Setters
-    public String getWithdrawalMethod() {
-        return withdrawalMethod;
-    }
-
-    public void setWithdrawalMethod(String withdrawalMethod) {
-        this.withdrawalMethod = withdrawalMethod;
-    }
-
-    public String getDestinationAccount() {
-        return destinationAccount;
-    }
-
-    public void setDestinationAccount(String destinationAccount) {
-        this.destinationAccount = destinationAccount;
-    }
-
-    public String getBankName() {
-        return bankName;
-    }
-
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
-    }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
+public class WithdrawalEvent {
+    private Long accountId;
+    private Long cardId;
+    private BigDecimal amount;
+    private OperationType operationType;
+    private String status;
+    private LocalDateTime createdAt;
 } 

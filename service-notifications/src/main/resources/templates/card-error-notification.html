@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur de Traitement - Jamaa</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+        .header { background-color: #d32f2f; padding: 25px 0; text-align: center; }
+        .logo { max-width: 150px; height: auto; }
+        .content { padding: 30px; }
+        .error-icon { 
+            width: 80px; height: 80px; 
+            background-color: #ffebee; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: #d32f2f;
+        }
+        .card { background-color: #f9f9f9; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #e0e0e0; }
+        .info-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .info-item:last-child { border-bottom: none; }
+        .info-label { color: #666; font-weight: 500; }
+        .info-value { font-weight: 600; text-align: right; }
+        .footer { text-align: center; padding: 20px; background-color: #f5f5f5; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+        .btn { 
+            display: inline-block; 
+            padding: 12px 25px; 
+            background-color: #d32f2f; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            font-weight: 600; 
+            margin: 10px 0; 
+            text-align: center;
+        }
+        .error-message { 
+            background-color: #ffebee; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0; 
+            border-left: 4px solid #d32f2f; 
+            color: #c62828;
+        }
+        .solution { 
+            background-color: #e3f2fd; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin: 20px 0; 
+            border-left: 4px solid #1976d2;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-error { background-color: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <div class="header">
+            <img src="https://jamaa.com/logo-white.png" alt="Jamaa" class="logo">
+        </div>
+        
+        <!-- Contenu principal -->
+        <div class="content">
+            <div class="error-icon">⚠️</div>
+            <h1 style="color: #d32f2f; text-align: center; margin-top: 0; margin-bottom: 10px;">
+                Une erreur est survenue
+            </h1>
+            <p style="text-align: center; color: #666; margin-top: 0; margin-bottom: 30px;">
+                Nous n'avons pas pu traiter votre demande concernant votre carte.
+            </p>
+            
+            <!-- Détails de l'erreur -->
+            <div class="card">
+                <h3 style="margin-top: 0; color: #333; font-size: 18px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0;">
+                    Détails de l'erreur
+                </h3>
+                
+                <div class="info-item">
+                    <span class="info-label">Date et heure</span>
+                    <span class="info-value">
+                        ${#temporals.format(timestamp, 'dd/MM/yyyy à HH\'h\'mm')}
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Titulaire</span>
+                    <span class="info-value" th:text="${holderName}">-</span>
+                </div>
+                <div class="info-item" th:if="${bankName != null}">
+                    <span class="info-label">Banque</span>
+                    <span class="info-value" th:text="${bankName}">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Statut</span>
+                    <span class="info-value">
+                        <span class="status-badge status-error">
+                            Échec du traitement
+                        </span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Message d'erreur -->
+            <div class="error-message" style="background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 12px 15px; margin-bottom: 20px; border-radius: 0 4px 4px 0;">
+                <p style="margin: 0 0 5px 0; font-weight: 600; color: #e65100;">
+                    Une erreur est survenue avec votre carte
+                </p>
+                <p style="margin: 0; font-size: 14px; color: #5d4037;">
+                    Notre équipe technique a été notifiée et travaille à résoudre ce problème.
+                </p>
+            </div>
+            
+            <!-- Détails de la carte concernée -->
+            <div class="card" style="background-color: #f9f9f9; border-radius: 4px; padding: 15px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; color: #333; font-size: 16px; margin-bottom: 15px;">
+                    Détails de l'erreur
+                </h3>
+                
+                <div class="info-item" style="margin-bottom: 8px;">
+                    <span class="info-label" style="color: #666; display: inline-block; width: 120px;">Date et heure :</span>
+                    <span class="info-value" style="font-weight: 500;" th:text="${#temporals.format(timestamp, 'dd/MM/yyyy HH:mm')}">
+                    </span>
+                </div>
+                
+                <div class="info-item" th:if="${cardNumber != null}">
+                    <span class="info-label">Numéro de carte</span>
+                    <span class="info-value" style="font-family: monospace; letter-spacing: 1px;">
+                        •••• •••• •••• 
+                        <span th:if="${#strings.length(cardNumber) > 4}" 
+                              th:text="${cardNumber.substring(#strings.length(cardNumber) - 4)}">
+                        </span>
+                        <span th:if="${#strings.length(cardNumber) <= 4}">••••</span>
+                    </span>
+                </div>
+                
+                <div class="info-item" style="margin-bottom: 8px;" th:if="${cardType != null}">
+                    <span class="info-label" style="color: #666; display: inline-block; width: 120px;">Type de carte :</span>
+                    <span class="info-value" style="font-weight: 500;" th:text="${cardType}"></span>
+                </div>
+            </div>
+            
+            <!-- Solution proposée -->
+            <div class="solution">
+                <h3 style="margin-top: 0; color: #0d47a1; font-size: 16px; margin-bottom: 12px;">
+                    Comment résoudre ce problème ?
+                </h3>
+                <ul style="margin: 0; padding-left: 20px; color: #0d47a1;">
+                    <li style="margin-bottom: 8px;">Vérifiez que les informations saisies sont correctes</li>
+                    <li style="margin-bottom: 8px;">Assurez-vous que votre carte est active et non expirée</li>
+                    <li>Si le problème persiste, contactez notre service client</li>
+                </ul>
+            </div>
+            
+            <!-- Bouton d'action -->
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${contactUrl ?: 'https://jamaa.com/contact'}" class="btn">
+                    Contacter le support
+                </a>
+                <p style="font-size: 13px; color: #666; margin-top: 15px;">
+                    Référence à mentionner : <strong>${errorReference}</strong>
+                </p>
+            </div>
+            
+            
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="padding: 20px 30px; text-align: center; font-size: 12px; color: #888888; background-color: #f6f6f6;">
+                <p style="margin: 0 0 10px 0;">© ${currentYear} Jamaa Bank. Tous droits réservés.</p>
+                <p style="margin: 0 0 5px 0; font-size: 11px; color: #aaaaaa;">
+                    Cet email a été envoyé à ${email}. Pour garantir la réception de nos emails, veuillez ajouter noreply@jamaa-bank.com à votre carnet d'adresses.
+                </p>
+                <p style="margin: 10px 0 0 0; font-size: 11px; color: #aaaaaa;">
+                    <a href="${appUrl}/confidentialite" style="color: #0A5D32; text-decoration: none;">Politique de confidentialité</a> | 
+                    <a href="${appUrl}/conditions" style="color: #0A5D32; text-decoration: none; margin: 0 8px;">Conditions d'utilisation</a> | 
+                    <a href="${appUrl}/contact" style="color: #0A5D32; text-decoration: none;">Contact</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

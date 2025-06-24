@@ -57,8 +57,8 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Compte source</td>
-                                                <td style="font-size: 14px; text-align: right;">${sourceAccount}</td>
+                                                <td style="font-size: 14px; color: #666666;">Compte expéditeur</td>
+                                                <td style="font-size: 14px; text-align: right;">${idAccountSender}</td>
                                             </tr>
                                         </table>
                                     </td>
@@ -68,7 +68,7 @@
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
                                                 <td style="font-size: 14px; color: #666666;">Compte destinataire</td>
-                                                <td style="font-size: 14px; text-align: right;">${destinationAccount}</td>
+                                                <td style="font-size: 14px; text-align: right;">${idAccountReceiver}</td>
                                             </tr>
                                         </table>
                                     </td>
@@ -77,28 +77,8 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Banque destinataire</td>
-                                                <td style="font-size: 14px; text-align: right;">${destinationBank}</td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tr>
-                                                <td style="font-size: 14px; color: #666666;">Bénéficiaire</td>
-                                                <td style="font-size: 14px; text-align: right;">${beneficiaryName}</td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 20px;">
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tr>
-                                                <td style="font-size: 14px; color: #666666;">Motif</td>
-                                                <td style="font-size: 14px; text-align: right;">${transferReason}</td>
+                                                <td style="font-size: 14px; color: #666666;">Statut</td>
+                                                <td style="font-size: 14px; text-align: right;">${status}</td>
                                             </tr>
                                         </table>
                                     </td>
@@ -108,7 +88,7 @@
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
                                                 <td style="font-size: 14px; color: #666666;">Date</td>
-                                                <td style="font-size: 14px; text-align: right;">${date}</td>
+                                                <td style="font-size: 14px; text-align: right;">${createdAt}</td>
                                             </tr>
                                         </table>
                                     </td>

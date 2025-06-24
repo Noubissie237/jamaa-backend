@@ -49,17 +49,23 @@ import org.springframework.beans.factory.annotation.Autowired;
         private ResourceLoader resourceLoader;
         
         public enum NotificationType {
+            // Notifications générales
             DEPOSIT("deposit-notification", "Confirmation de dépôt"),
             WITHDRAWAL("withdrawal-notification", "Confirmation de retrait"),
             TRANSFER("transfer-notification", "Confirmation de transfert"),
             ACCOUNT("account-notification", "Information de compte"),
-            AUTHENTICATION("auth-notification", "Notification de sécurité"),
-            INSUFFICIENT_FUNDS("insufficient-funds-notification", "Alerte de solde"),
             PASSWORD_CHANGE("password-change-notification", "Modification de mot de passe"),
-            CONFIRMATION_SOUSCRIPTION_BANQUE("successful-registration", "Compte créé avec success"),
+            CONFIRMATION_CREATION_COMPTE_JAMAA("successful-registration", "Compte créé avec succès"),
             RECHARGE("recharge-confirmation", "Confirmation de transfert"),
-            ACCOUNT_DELETION("delete-notification", "Compte supprimé"),
-            ACCOUNT_CREATION_ERROR("error-registration", "Erreur lors de la création du compte");
+            ACCOUNT_CREATION_ERROR("error-registration", "Erreur lors de la création du compte"),
+            
+            // Notifications pour les cartes
+            CARD_CREATED("card-created-notification", "Nouvelle carte créée"),
+            CARD_UPDATED("card-updated-notification", "Mise à jour de carte"),
+            CARD_ACTIVATED("card-activated-notification", "Carte activée"),
+            CARD_BLOCKED("card-blocked-notification", "Carte bloquée"),
+            CARD_DELETED("card-deleted-notification", "Carte supprimée"),
+            CARD_ERROR("card-error-notification", "Erreur de carte");
             
             private final String templateName;
             private final String defaultSubject;
@@ -124,17 +130,7 @@ import org.springframework.beans.factory.annotation.Autowired;
             sendNotification(to, NotificationType.PASSWORD_CHANGE, data);
         }
         
-        public void sendInsufficientFundsAlert(String to, String accountNumber, double balance, 
-                double requiredAmount, String transactionType) throws MessagingException, IOException {
-            
-            Map<String, Object> data = new HashMap<>();
-            data.put("accountNumber", accountNumber);
-            data.put("balance", String.format("%.2f", balance));
-            data.put("requiredAmount", String.format("%.2f", requiredAmount));
-            data.put("transactionType", transactionType);
-            
-            sendNotification(to, NotificationType.INSUFFICIENT_FUNDS, data);
-        }
+        
         
         private String loadAndProcessTemplate(String templateName, Map<String, Object> data) throws IOException {
             String templatePath = TEMPLATES_BASE_PATH + templateName + ".html";

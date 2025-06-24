@@ -28,20 +28,20 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
-    public List<Notification> getNotificationsByUser(String email) {
-        return notificationRepository.findByEmail(email);
+    public List<Notification> getNotificationsByUser(String userId) {
+        return notificationRepository.findByUserId(userId);
     }
     
-    public List<Notification> getUnreadNotificationsByUser(String email) {
-        return notificationRepository.findByEmailAndLuFalse(email);
+    public List<Notification> getUnreadNotificationsByUser(String userId) {
+        return notificationRepository.findByUserIdAndLuFalse(userId);
     }
 
-    public List<Notification> getNotificationsByTypeAndUser(String email, Notification.NotificationType type) {
-        return notificationRepository.findByEmailAndType(email, type);
+    public List<Notification> getNotificationsByTypeAndUser(String userId, Notification.NotificationType type) {
+        return notificationRepository.findByUserIdAndType(userId, type);
     }
 
-    public List<Notification> getNotificationsByServiceAndUser(String email, Notification.ServiceEmetteur service) {
-        return notificationRepository.findByEmailAndServiceEmetteur(email, service);
+    public List<Notification> getNotificationsByServiceAndUser(String userId, Notification.ServiceEmetteur service) {
+        return notificationRepository.findByUserIdAndServiceEmetteur(userId, service);
     }
     
     public Notification marquerCommeLue(Long id) {
@@ -53,8 +53,8 @@ public class NotificationService {
             .orElseThrow(() -> new RuntimeException("Notification non trouvée"));
     }
     
-    public int marquerToutesCommeLues(String email) {
-        List<Notification> notificationsNonLues = notificationRepository.findByEmailAndLuFalse(email);
+    public int marquerToutesCommeLues(String userId) {
+        List<Notification> notificationsNonLues = notificationRepository.findByUserIdAndLuFalse(userId);
         notificationsNonLues.forEach(notification -> notification.setLu(true));
         notificationRepository.saveAll(notificationsNonLues);
         return notificationsNonLues.size();

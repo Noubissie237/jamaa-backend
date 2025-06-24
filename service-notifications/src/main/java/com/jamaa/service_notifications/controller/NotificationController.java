@@ -20,23 +20,23 @@ public class NotificationController {
     }
 
     @QueryMapping
-    public List<Notification> notificationsByUser(@Argument String email) {
-        return notificationService.getNotificationsByUser(email);
+    public List<Notification> notificationsByUser(@Argument String userId) {
+        return notificationService.getNotificationsByUser(userId);
     }
 
     @QueryMapping
-    public List<Notification> notificationsByType(@Argument String email, @Argument Notification.NotificationType type) {
-        return notificationService.getNotificationsByTypeAndUser(email, type);
+    public List<Notification> notificationsByType(@Argument String userId, @Argument Notification.NotificationType type) {
+        return notificationService.getNotificationsByTypeAndUser(userId, type);
     }
 
     @QueryMapping
-    public List<Notification> notificationsByService(@Argument String email, @Argument Notification.ServiceEmetteur service) {
-        return notificationService.getNotificationsByServiceAndUser(email, service);
+    public List<Notification> notificationsByService(@Argument String userId, @Argument Notification.ServiceEmetteur service) {
+        return notificationService.getNotificationsByServiceAndUser(userId, service);
     }
     
     @QueryMapping
-    public List<Notification> unreadNotifications(@Argument String email) {
-        return notificationService.getUnreadNotificationsByUser(email);
+    public List<Notification> unreadNotifications(@Argument String userId) {
+        return notificationService.getUnreadNotificationsByUser(userId);
     }
     
     @MutationMapping
@@ -46,7 +46,7 @@ public class NotificationController {
     }
     
     @MutationMapping
-    public Integer marquerToutesCommeLues(@Argument String email) {
-        return notificationService.marquerToutesCommeLues(email);
+    public Integer marquerToutesCommeLues(@Argument String userId) {
+        return notificationService.marquerToutesCommeLues(userId);
     }
 } 

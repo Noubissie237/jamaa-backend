@@ -39,46 +39,42 @@
                     <tr>
                         <td>
                             <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">Bonjour,</p>
-                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">Votre compte a été ${accountStatus} avec succès.</p>
-                            
-                            <!-- INFORMATION DU COMPTE -->
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">
+                                Votre carte a été créée avec succès.
+                            </p>
+
+                            <!-- INFORMATION DE LA CARTE -->
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #f9f9f9; border-radius: 4px;">
                                 <tr>
                                     <td style="padding: 15px 20px; border-bottom: 1px solid #eeeeee;">
                                         <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Type de compte</td>
-                                                <td style="font-size: 14px; text-align: right; font-weight: bold;">${accountType}</td>
+                                                <td style="font-size: 14px; color: #666666;">Numéro de carte</td>
+                                                <td style="font-size: 14px; text-align: right; font-weight: bold;">${cardNumber}</td>
                                             </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
-                                        <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Devise</td>
-                                                <td style="font-size: 14px; text-align: right;">FCFA</td>
+                                                <td style="font-size: 14px; color: #666666;">Nom du porteur</td>
+                                                <td style="font-size: 14px; text-align: right;">${holderName}</td>
                                             </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 20px;">
-                                        <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Solde initial</td>
-                                                <td style="font-size: 16px; font-weight: bold; text-align: right; color: #0A5D32;">${balance} FCFA</td>
+                                                <td style="font-size: 14px; color: #666666;">ID Client</td>
+                                                <td style="font-size: 14px; text-align: right;">${customerId}</td>
                                             </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 20px;">
-                                        <table style="width: 100%; border-collapse: collapse;">
                                             <tr>
-                                                <td style="font-size: 14px; color: #666666;">Date</td>
-                                                <td style="font-size: 14px; text-align: right;">${date}</td>
+                                                <td style="font-size: 14px; color: #666666;">Type de carte</td>
+                                                <td style="font-size: 14px; text-align: right;">${cardType}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Date d'expiration</td>
+                                                <td style="font-size: 14px; text-align: right;">${expiryDate}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">CVV</td>
+                                                <td style="font-size: 14px; text-align: right;">${cvv}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Limite de crédit</td>
+                                                <td style="font-size: 14px; text-align: right;">${creditLimit}</td>
                                             </tr>
                                         </table>
                                     </td>

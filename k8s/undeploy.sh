@@ -14,7 +14,7 @@ kubectl delete -f configs/ --ignore-not-found=true
 
 # Supprimer l'infrastructure
 echo "🔥 Suppression de l'infrastructure..."
-# kubectl delete -f infrastructure/mysql-deployment.yaml --ignore-not-found=true
+kubectl delete -f infrastructure/mysql-deployment.yaml --ignore-not-found=true
 kubectl delete -f infrastructure/rabbitmq-deployment.yaml --ignore-not-found=true
 
 # Supprimer le namespace (cela supprimera tout ce qui reste)

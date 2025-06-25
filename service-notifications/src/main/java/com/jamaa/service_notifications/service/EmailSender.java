@@ -60,6 +60,8 @@ import org.springframework.beans.factory.annotation.Autowired;
             CARD_CREATE("card-create-notification", "Carte crée"),
             RECHARGE("recharge-confirmation", "Confirmation de transfert"),
             ACCOUNT_DELETION("delete-notification", "Compte supprimé"),
+            TRANSFER_SENT("transfer-sent-notification", "Confirmation de transfert envoyé"),
+            TRANSFER_RECEIVED("transfer-received-notification", "Confirmation de transfert reçu"),
             ACCOUNT_CREATION_ERROR("error-registration", "Erreur lors de la création du compte");
             
             private final String templateName;

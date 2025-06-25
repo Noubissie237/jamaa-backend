@@ -60,6 +60,8 @@ public class Notification implements Serializable {
         AUTHENTIFICATION,
         ALERTE_SOLDE,
         CARD_CREATE,
+        TRANSFER_SENT,
+        TRANSFER_RECEIVED,
         CONFIRMATION_RECHARGE,
         RECHARGE,
         SUPPRESSION_COMPTE,

@@ -8,8 +8,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jamaa.service_notifications.dto.UserDTO;
 import com.jamaa.service_notifications.events.AccountEvent;
 import com.jamaa.service_notifications.events.AuthEvent;
 import com.jamaa.service_notifications.events.CardCreateDTO;
@@ -17,13 +19,15 @@ import com.jamaa.service_notifications.events.CustomerEvent;
 import com.jamaa.service_notifications.events.DepositEvent;
 import com.jamaa.service_notifications.events.InsufficientFundsEvent;
 import com.jamaa.service_notifications.events.RechargeEvent;
-import com.jamaa.service_notifications.events.TransferEvent;
+import com.jamaa.service_notifications.events.TransactionStatus;
+import com.jamaa.service_notifications.events.TransfertEvent;
 import com.jamaa.service_notifications.events.WithdrawalEvent;
 import com.jamaa.service_notifications.model.Notification;
 import com.jamaa.service_notifications.model.Notification.NotificationType;
 import com.jamaa.service_notifications.model.Notification.ServiceEmetteur;
 import com.jamaa.service_notifications.service.EmailSender;
 import com.jamaa.service_notifications.service.NotificationService;
+import com.jamaa.service_notifications.utils.TransferUtil;
 
 import jakarta.mail.MessagingException;
 
@@ -32,6 +36,9 @@ public class NotificationConsumer {
     private static final Logger logger = LoggerFactory.getLogger(NotificationConsumer.class);
     private final NotificationService notificationService;
     private final EmailSender emailService;
+    
+    @Autowired
+    private TransferUtil transferUtil;
 
     public NotificationConsumer(NotificationService notificationService, EmailSender emailService) {
         this.notificationService = notificationService;
@@ -55,7 +62,7 @@ public class NotificationConsumer {
 
             // Message pour la base de données (version simplifiée)
             String message = String.format(
-                    "Dépôt de %.2f € effectué avec succès via %s (Réf: %s)",
+                    "Dépôt de %.2f FCFA effectué avec succès via %s (Réf: %s)",
                     event.getAmount(), event.getDepositMethod(), event.getReferenceNumber());
 
             // Création de la notification
@@ -162,7 +169,7 @@ public class NotificationConsumer {
         try {
             // Message pour la base de données
             String message = String.format(
-                    "Retrait de %.2f € effectué avec succès via %s",
+                    "Retrait de %.2f FCFA effectué avec succès via %s",
                     event.getAmount(), event.getWithdrawalMethod());
 
             // Création de la notification
@@ -180,32 +187,6 @@ public class NotificationConsumer {
             logger.info("Notification de retrait traitée pour: {}", event.getEmail());
         } catch (Exception e) {
             logger.error("Erreur lors du traitement de la notification de retrait: {}", e.getMessage());
-        }
-    }
-
-    @RabbitListener(queues = "transfer.notification.queue")
-    public void handleTransferNotification(TransferEvent event) {
-        try {
-            // Message pour la base de données
-            String message = String.format(
-                    "Transfert de %.2f € vers %s (Compte: %s) effectué avec succès",
-                    event.getAmount(), event.getBeneficiaryName(), event.getDestinationAccount());
-
-            // Création de la notification
-            Notification notification = new Notification();
-            notification.setEmail(event.getEmail());
-            notification.setTitle("Confirmation de transfert");
-            notification.setMessage(message);
-            notification.setType(NotificationType.CONFIRMATION_TRANSFERT);
-            notification.setServiceEmetteur(ServiceEmetteur.TRANSFER_SERVICE);
-            notification.setCanal(Notification.CanalNotification.IN_APP);
-
-            // Traiter la notification (sauvegarde + envoi si nécessaire)
-            traiterNotification(notification);
-            
-            logger.info("Notification de transfert traitée pour: {}", event.getEmail());
-        } catch (Exception e) {
-            logger.error("Erreur lors du traitement de la notification de transfert: {}", e.getMessage());
         }
     }
 
@@ -335,7 +316,7 @@ public class NotificationConsumer {
 
             // // Création et sauvegarde de la notification
             String message = String.format(
-                    "Solde insuffisant pour %s. Solde actuel: %.2f €, Montant requis: %.2f €",
+                    "Solde insuffisant pour %s. Solde actuel: %.2f FCFA, Montant requis: %.2f FCFA",
                     event.getTransactionType(), event.getCurrentBalance(), event.getRequiredAmount());
 
             Notification notification = new Notification();
@@ -473,6 +454,146 @@ public class NotificationConsumer {
         logger.info("=== Fin du traitement d'erreur ===");
     }
 
+@RabbitListener(queues = "transfer.notification.queue")
+public void handleTransferNotification(TransfertEvent event) throws Exception {
+    try {
+        logger.info("Traitement de la notification de transfert - Montant: {}, Status: {}", 
+                   event.getAmount(), event.getStatus());
+        
+        // Validation du statut - on envoie seulement si le transfert est réussi
+        if (event.getStatus() != TransactionStatus.SUCCESS) {
+            logger.info("Transfert non réussi, pas d'envoi de notification");
+            return;
+        }
+        
+        // Récupération des informations des utilisateurs
+        UserDTO senderUser;
+        UserDTO receiverUser;
+        
+        if (event.getIdBankSender() == 0) {
+            // Cas 1: Transfert interne via accounts
+            logger.info("Transfert interne détecté - utilisation du service account");
+            
+            Long senderUserId = transferUtil.getUserIdFromAccount(event.getIdAccountSender());
+            Long receiverUserId = transferUtil.getUserIdFromAccount(event.getIdAccountReceiver());
+            
+            senderUser = transferUtil.getUserById(senderUserId);
+            receiverUser = transferUtil.getUserById(receiverUserId);
+            
+        } else {
+            // Cas 2: Transfert bancaire via cards
+            logger.info("Transfert bancaire détecté - utilisation du service card");
+            
+            Long senderUserId = transferUtil.getUserIdFromCard(event.getIdAccountSender());
+            Long receiverUserId = transferUtil.getUserIdFromCard(event.getIdAccountReceiver());
+            
+            senderUser = transferUtil.getUserById(senderUserId);
+            receiverUser = transferUtil.getUserById(receiverUserId);
+        }
+        
+        // Envoi des notifications aux deux parties
+        sendTransferSentNotification(senderUser, receiverUser, event);
+        sendTransferReceivedNotification(receiverUser, senderUser, event);
+        
+        logger.info("Notifications de transfert envoyées avec succès");
+        
+    } catch (Exception e) {
+        logger.error("Erreur lors du traitement de la notification de transfert: {}", e.getMessage(), e);
+        throw e;
+    }
+}
+
+/**
+ * Envoie la notification à l'expéditeur
+ */
+private void sendTransferSentNotification(UserDTO sender, UserDTO receiver, TransfertEvent event) 
+        throws Exception {
+    try {
+        // Préparation des données pour le template
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("email", sender.getEmail());
+        templateData.put("senderName", sender.getFullName());
+        templateData.put("senderFirstName", sender.getFirstName());
+        templateData.put("receiverName", receiver.getFullName());
+        templateData.put("receiverFirstName", receiver.getFirstName());
+        templateData.put("receiverLastName", receiver.getLastName());
+        templateData.put("amount", event.getAmount());
+        templateData.put("transferDate", event.getCreatedAt());
+        templateData.put("year", LocalDate.now().getYear());
+        templateData.put("transferType", event.getIdBankSender() == 0 ? "Interne" : "Bancaire");
+        
+        // Création de la notification
+        Notification notification = new Notification();
+        notification.setEmail(sender.getEmail());
+        notification.setTitle("Confirmation de transfert envoyé");
+        notification.setMessage(String.format(
+            "Vous avez envoyé %.2fFCFA à %s",
+            event.getAmount(), receiver.getFullName()));
+        notification.setType(NotificationType.TRANSFER_SENT);
+        notification.setServiceEmetteur(ServiceEmetteur.TRANSFER_SERVICE);
+        notification.setCanal(Notification.CanalNotification.EMAIL);
+
+        // Mapping du type d'email
+        EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
+        
+        // Chargement et envoi du template
+        String templateContent = emailService.loadAndProcessTemplate(emailType.getTemplateName(), templateData);
+        emailService.sendEmailWithTemplate(sender.getEmail(), notification.getTitle(), templateContent);
+        
+        logger.info("Notification d'envoi de transfert envoyée à: {}", sender.getEmail());
+        
+    } catch (Exception e) {
+        logger.error("Erreur lors de l'envoi de la notification d'expédition à {}: {}", 
+                   sender.getEmail(), e.getMessage(), e);
+        throw e;
+    }
+}
+
+/**
+ * Envoie la notification au destinataire
+ */
+private void sendTransferReceivedNotification(UserDTO receiver, UserDTO sender, TransfertEvent event) 
+        throws Exception {
+    try {
+        // Préparation des données pour le template
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("email", receiver.getEmail());
+        templateData.put("receiverName", receiver.getFullName());
+        templateData.put("receiverFirstName", receiver.getFirstName());
+        templateData.put("senderName", sender.getFullName());
+        templateData.put("senderFirstName", sender.getFirstName());
+        templateData.put("senderLastName", sender.getLastName());
+        templateData.put("amount", event.getAmount());
+        templateData.put("transferDate", event.getCreatedAt());
+        templateData.put("year", LocalDate.now().getYear());
+        templateData.put("transferType", event.getIdBankSender() == 0 ? "Interne" : "Bancaire");
+        
+        // Création de la notification
+        Notification notification = new Notification();
+        notification.setEmail(receiver.getEmail());
+        notification.setTitle("Confirmation de transfert reçu");
+        notification.setMessage(String.format(
+            "Vous avez reçu %.2fFCFA de %s",
+            event.getAmount(), sender.getFullName()));
+        notification.setType(NotificationType.TRANSFER_RECEIVED);
+        notification.setServiceEmetteur(ServiceEmetteur.TRANSFER_SERVICE);
+        notification.setCanal(Notification.CanalNotification.EMAIL);
+
+        // Mapping du type d'email
+        EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
+        
+        // Chargement et envoi du template
+        String templateContent = emailService.loadAndProcessTemplate(emailType.getTemplateName(), templateData);
+        emailService.sendEmailWithTemplate(receiver.getEmail(), notification.getTitle(), templateContent);
+        
+        logger.info("Notification de réception de transfert envoyée à: {}", receiver.getEmail());
+        
+    } catch (Exception e) {
+        logger.error("Erreur lors de l'envoi de la notification de réception à {}: {}", 
+                   receiver.getEmail(), e.getMessage(), e);
+        throw e;
+    }
+}
 
     @RabbitListener(queues = "card.created.notification")
     public void createCardNotification(CardCreateDTO event) throws Exception {

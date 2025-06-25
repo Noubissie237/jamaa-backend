@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfert reçu</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f6f6f6; color: #333333;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; border-collapse: collapse;">
+        <!-- HEADER AVEC BANNIÈRE -->
+        <tr>
+            <td style="padding: 0;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td style="background-color: #0A5D32; height: 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 15px 20px; border-bottom: 1px solid #eeeeee;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="25%" align="left">
+                                        <img src="cid:logoImage" alt="Jamaa Bank" width="70" style="display: block;">
+                                    </td>
+                                    <td width="75%" align="right" style="color: #0A5D32; font-size: 18px; font-weight: bold;">
+                                        Transfert Reçu 💰
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- CONTENU PRINCIPAL -->
+        <tr>
+            <td style="background-color: #ffffff; padding: 30px 30px 20px 30px; border-radius: 0px 0px 4px 4px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">Bonjour ${receiverFirstName},</p>
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">Bonne nouvelle ! Vous avez reçu un transfert d'argent.</p>
+                            
+                            <!-- MONTANT PRINCIPAL -->
+                            <div style="text-align: center; margin: 25px 0;">
+                                <div style="background: linear-gradient(135deg, #28a745 0%, #34ce57 100%); border-radius: 8px; padding: 20px; color: white; display: inline-block; min-width: 200px;">
+                                    <div style="font-size: 14px; opacity: 0.8; margin-bottom: 5px;">MONTANT REÇU</div>
+                                    <div style="font-size: 32px; font-weight: bold;">+${amount}FCFA</div>
+                                    <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;">de ${senderFirstName} ${senderLastName}</div>
+                                </div>
+                            </div>
+
+                            <!-- DÉTAILS DU TRANSFERT -->
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #f9f9f9; border-radius: 4px;">
+                                <tr>
+                                    <td style="padding: 15px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Expéditeur</td>
+                                                <td style="font-size: 14px; text-align: right; font-weight: bold; color: #0A5D32;">${senderName}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Destinataire</td>
+                                                <td style="font-size: 14px; text-align: right; font-weight: bold;">${receiverName}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Montant</td>
+                                                <td style="font-size: 14px; text-align: right; font-weight: bold; color: #28a745;">+${amount}FCFA</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #eeeeee;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Type de transfert</td>
+                                                <td style="font-size: 14px; text-align: right;">${transferType}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #666666;">Date et heure</td>
+                                                <td style="font-size: 14px; text-align: right;">${transferDate}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- STATUT -->
+                            <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; padding: 15px; margin: 20px 0; text-align: center;">
+                                <p style="margin: 0; font-size: 14px; font-weight: bold; color: #0c5460;">💰 Fonds disponibles dans votre compte</p>
+                                <p style="margin: 5px 0 0 0; font-size: 13px; color: #0c5460;">Le montant a été ajouté à votre solde</p>
+                            </div>
+
+                            <!-- ACTIONS SUGGÉRÉES -->
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6; font-weight: bold; color: #0A5D32;">Actions suggérées :</p>
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 8px 0;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td width="30" valign="top" style="padding-right: 10px;">
+                                                    <div style="background-color: #28a745; color: white; width: 24px; height: 24px; border-radius: 12px; text-align: center; line-height: 24px; font-size: 14px; font-weight: bold;">1</div>
+                                                </td>
+                                                <td style="font-size: 14px;">Vérifiez votre nouveau solde dans l'application</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td width="30" valign="top" style="padding-right: 10px;">
+                                                    <div style="background-color: #28a745; color: white; width: 24px; height: 24px; border-radius: 12px; text-align: center; line-height: 24px; font-size: 14px; font-weight: bold;">2</div>
+                                                </td>
+                                                <td style="font-size: 14px;">Consultez votre historique de transactions</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0;">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td width="30" valign="top" style="padding-right: 10px;">
+                                                    <div style="background-color: #28a745; color: white; width: 24px; height: 24px; border-radius: 12px; text-align: center; line-height: 24px; font-size: 14px; font-weight: bold;">3</div>
+                                                </td>
+                                                <td style="font-size: 14px;">Remerciez l'expéditeur si vous le souhaitez</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">Merci d'utiliser Jamaa Bank pour vos transactions financières.</p>
+                            <p style="margin: 0; font-size: 16px; line-height: 1.6;">Cordialement,<br>L'équipe Jamaa Bank</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="padding: 20px 30px; text-align: center; font-size: 12px; color: #888888; background-color: #f6f6f6;">
+                <p style="margin: 0 0 10px 0;">© ${year} Jamaa Bank. Tous droits réservés.</p>
+                <p style="margin: 0 0 10px 0;">Ce message a été envoyé depuis une adresse qui ne peut pas recevoir d'emails. Merci de ne pas y répondre.</p>
+                <p style="margin: 0;">
+                    <a href="https://www.jamaa.com/privacy" style="color: #0A5D32; text-decoration: underline; margin-right: 10px;">Politique de confidentialité</a>
+                    <a href="https://www.jamaa.com/terms" style="color: #0A5D32; text-decoration: underline; margin-right: 10px;">Conditions d'utilisation</a>
+                    <a href="https://www.jamaa.com/contact" style="color: #0A5D32; text-decoration: underline;">Contact</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

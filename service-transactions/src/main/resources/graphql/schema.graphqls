@@ -20,6 +20,7 @@ type Transaction {
     status: TransactionStatus!
     createdAt: String!
     dateEvent: String!
+    bankId: ID!
 }
 
 type Query {

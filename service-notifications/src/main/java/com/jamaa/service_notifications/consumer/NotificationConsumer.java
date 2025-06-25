@@ -147,6 +147,10 @@ public class NotificationConsumer {
                 return EmailSender.NotificationType.CARD_CREATE;
             case MOT_DE_PASSE_REINITIALISE:
                 return EmailSender.NotificationType.PASSWORD_CHANGE;
+            case TRANSFER_SENT:
+                return EmailSender.NotificationType.TRANSFER_SENT;
+            case TRANSFER_RECEIVED:
+                return EmailSender.NotificationType.TRANSFER_RECEIVED;
             case RECHARGE:
                 return EmailSender.NotificationType.RECHARGE;
             case SUPPRESSION_COMPTE:

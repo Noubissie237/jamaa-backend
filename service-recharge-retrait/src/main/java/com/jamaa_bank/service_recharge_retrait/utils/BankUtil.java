@@ -25,7 +25,7 @@ public class BankUtil {
     private static final Logger logger = LoggerFactory.getLogger(BankUtil.class);
     
     // Configuration pour le service bank-account
-    @Value("${service.bank-account.endpoint:http://service-proxy:8079/service-banks/graphql}")
+    @Value("${service.bank-account.endpoint:http://service-proxy:8079/service-banks-account/graphql}")
     private String bankAccountServiceEndpoint;
     
     // Configuration pour le service bank

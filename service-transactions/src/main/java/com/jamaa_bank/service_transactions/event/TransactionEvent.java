@@ -25,8 +25,8 @@ public class TransactionEvent {
     @JsonProperty("idAccountSender")
     private Long idAccountSender;
 
-    @JsonProperty("idBankSender")
-    private Long idBankSender;
+    @JsonProperty("bankId")
+    private Long bankId;
 
     @JsonProperty("idAccountReceiver")
     private Long idAccountReceiver;

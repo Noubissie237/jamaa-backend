@@ -20,8 +20,8 @@ import lombok.ToString;
 public class TransactionTemplate {
     @JsonProperty("idAccountSender")
     private Long idAccountSender;
-    @JsonProperty("idBankSender")
-    private Long idBankSender;
+    @JsonProperty("bankId")
+    private Long bankId;
     @JsonProperty("idAccountReceiver")
     private Long idAccountReceiver;
     @JsonProperty("amount")

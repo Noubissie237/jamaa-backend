@@ -43,9 +43,9 @@ public class TransactionService {
     }
 
     public CompletableFuture<String> saveTransaction(TransactionEvent event) {
-        logger.info("Saving transaction: type={}, sender={}, receiver={}, amount={}",
+        logger.info("Saving transaction: type={}, sender={}, receiver={}, amount={}, bankId={}",
                 event.getTransactionType(), event.getIdAccountSender(),
-                event.getIdAccountReceiver(), event.getAmount());
+                event.getIdAccountReceiver(), event.getAmount(), event.getBankId());
 
         TransactionEvent transactionEvent = new TransactionEvent();
         transactionEvent.setDateEvent(LocalDateTime.now());

@@ -18,13 +18,13 @@ import okhttp3.*;
 @Component
 public class TransferUtil {
     
-    @Value("${service.account.endpoint:http://service-proxy:30079/service-account/graphql}")
+    @Value("${service.account.endpoint:http://service-proxy:8079/service-account/graphql}")
     private String accountServiceEndpoint;
     
-    @Value("${service.users.endpoint:http://service-proxy:30079/service-users/graphql}")
+    @Value("${service.users.endpoint:http://service-proxy:8079/service-users/graphql}")
     private String usersServiceEndpoint;
     
-    @Value("${service.card.endpoint:http://service-proxy:30079/service-card/graphql}")
+    @Value("${service.card.endpoint:http://service-proxy:8079/service-card/graphql}")
     private String cardServiceEndpoint;
     
     @Value("${service.timeout.connect:5}")

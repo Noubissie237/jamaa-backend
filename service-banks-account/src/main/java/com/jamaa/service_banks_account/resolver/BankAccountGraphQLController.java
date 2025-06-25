@@ -41,4 +41,9 @@ public class BankAccountGraphQLController {
     public BankAccount addExternalTransferFees(@Argument Long id, @Argument Double amount) {
         return bankAccountService.addExternalTransferFees(id, BigDecimal.valueOf(amount));
     }
+
+    @MutationMapping
+    public BankAccount incrementTotalBalance(@Argument Long id, @Argument Double amount) {
+        return bankAccountService.incrementTotalBalance(id, BigDecimal.valueOf(amount));
+    }
 }

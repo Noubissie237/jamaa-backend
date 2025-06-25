@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jamaa_bank.service_recharge_retrait.dto.AccountDTO;
+import com.jamaa_bank.service_recharge_retrait.dto.BankAccountDTO;
+import com.jamaa_bank.service_recharge_retrait.dto.BankDTO;
 import com.jamaa_bank.service_recharge_retrait.dto.CardDTO;
 import com.jamaa_bank.service_recharge_retrait.events.RechargeRetraitEvent;
 import com.jamaa_bank.service_recharge_retrait.exception.InsufficientBalanceException;
@@ -22,6 +24,7 @@ import com.jamaa_bank.service_recharge_retrait.model.RechargeRetrait;
 import com.jamaa_bank.service_recharge_retrait.model.TransactionStatus;
 import com.jamaa_bank.service_recharge_retrait.repository.RechargeRetraitRepository;
 import com.jamaa_bank.service_recharge_retrait.utils.AccountUtil;
+import com.jamaa_bank.service_recharge_retrait.utils.BankUtil;
 import com.jamaa_bank.service_recharge_retrait.utils.CardUtil;
 
 @Service
@@ -40,6 +43,9 @@ public class RechargeRetraitService {
 
     @Autowired
     private CardUtil cardUtil;
+
+    @Autowired
+    private BankUtil bankUtil;
 
     @Transactional(rollbackFor = { IOException.class, RuntimeException.class })
     public RechargeRetrait recharge(Long accountId, Long cardId, BigDecimal amount) {
@@ -158,12 +164,61 @@ public class RechargeRetraitService {
                 throw new RechargeRetraitException("Compte introuvable");
             }
 
+            // ==================== NOUVELLE LOGIQUE POUR LES FRAIS BANCAIRES ====================
+            
+            // Extraction du bankId depuis la carte
+            Long bankId = card.getBankId();
+            logger.debug("BankId extrait de la carte: {}", bankId);
+            
+            // Récupération des informations de la banque pour obtenir les frais de retrait
+            logger.debug("Récupération des informations de la banque {}", bankId);
+            BankDTO bank = bankUtil.getBank(bankId);
+            if (bank == null) {
+                logger.error("Retrait impossible: banque {} introuvable", bankId);
+                throw new RechargeRetraitException("Banque introuvable");
+            }
+            
+            BigDecimal withdrawFeesPercentage = bank.getWithdrawFees();
+            logger.debug("Pourcentage de frais de retrait pour la banque {}: {}%", bankId, withdrawFeesPercentage);
+            
+            // Calcul des frais en montant : (amount * withdrawFeesPercentage) / 100
+            @SuppressWarnings("deprecation")
+            BigDecimal feesAmount = amount.multiply(withdrawFeesPercentage)
+                                        .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
+            
+            // Calcul du montant net pour l'utilisateur : amount - feesAmount
+            BigDecimal netAmount = amount.subtract(feesAmount);
+            
+            logger.debug("Montant original: {}, Frais calculés: {}, Montant net pour l'utilisateur: {}", 
+                        amount, feesAmount, netAmount);
+            
+            // Récupération du compte bancaire pour cette banque
+            logger.debug("Récupération du compte bancaire pour bankId: {}", bankId);
+            BankAccountDTO bankAccount = bankUtil.getBankAccount(bankId);
+            if (bankAccount == null) {
+                logger.error("Retrait impossible: compte bancaire introuvable pour bankId: {}", bankId);
+                throw new RechargeRetraitException("Compte bancaire introuvable");
+            }
+            
+            // ==================== FIN NOUVELLE LOGIQUE ====================
+
             // Effectuer les opérations de débit/crédit
-            logger.debug("Débit de la carte {} d'un montant de {}", cardId, amount);
+            logger.debug("Débit de la carte {} du montant total: {}", cardId, amount);
             cardUtil.decrementCardBalance(cardId, amount);
             
-            logger.debug("Crédit du compte {} d'un montant de {}", accountId, amount);
-            accountUtil.incrementBalance(accountId, amount);
+            logger.debug("Crédit du compte utilisateur {} du montant net: {} (après déduction des frais: {})", 
+                        accountId, netAmount, feesAmount);
+            accountUtil.incrementBalance(accountId, netAmount);
+
+            // ==================== AJOUT DES FRAIS AU COMPTE BANCAIRE ====================
+            
+            // Incrémenter le solde total du compte bancaire avec les frais de retrait
+            logger.debug("Ajout des frais de retrait ({}) au compte bancaire ID: {}", feesAmount, bankAccount.getId());
+            bankUtil.incrementTotalBalance(bankAccount.getId(), feesAmount);
+            logger.info("Frais de retrait de {} ({}%) prélevés sur {} et ajoutés au compte bancaire de la banque {}", 
+                    feesAmount, withdrawFeesPercentage, amount, bankId);
+            
+            // ==================== FIN AJOUT DES FRAIS ====================
 
             // Enregistrement de l'opération
             RechargeRetrait retrait = new RechargeRetrait();
@@ -177,8 +232,8 @@ public class RechargeRetraitService {
             logger.debug("Enregistrement du retrait en base de données");
             retrait = rechargeRetraitRepository.save(retrait);
 
-            logger.info("Retrait réussi: ID={}, carte {} vers compte {}, montant: {}", 
-                        retrait.getId(), cardId, accountId, amount);
+            logger.info("Retrait réussi: ID={}, carte {} vers compte {}, montant débité: {}, montant net crédité: {}, frais bancaires: {}", 
+                        retrait.getId(), cardId, accountId, amount, netAmount, feesAmount);
             
             // Publication de l'événement
             logger.debug("Publication de l'événement de retrait réussi");
@@ -189,10 +244,17 @@ public class RechargeRetraitService {
         } catch (Exception e) {
             logger.error("Erreur lors du retrait de la carte {} vers compte {}, montant: {}: {}", 
                         cardId, accountId, amount, e.getMessage(), e);
-            CardDTO card = cardUtil.getCard(cardId);
-            // Publication de l'événement d'échec
-            logger.debug("Publication de l'événement de retrait échoué");
-            publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RETRAIT, TransactionStatus.FAILED, card.getBankId());
+            
+            // Récupération sécurisée de la carte pour l'événement d'échec
+            try {
+                CardDTO card = cardUtil.getCard(cardId);
+                logger.debug("Publication de l'événement de retrait échoué");
+                publishRechargeRetraitEvent(accountId, cardId, amount, OperationType.RETRAIT, TransactionStatus.FAILED, 
+                                        card != null ? card.getBankId() : null);
+            } catch (Exception eventException) {
+                logger.warn("Impossible de publier l'événement d'échec: {}", eventException.getMessage());
+            }
+            
             throw e; 
         }
     }

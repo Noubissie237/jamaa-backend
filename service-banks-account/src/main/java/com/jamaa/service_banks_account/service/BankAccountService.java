@@ -112,4 +112,15 @@ public class BankAccountService {
         return bankAccountRepository.save(bankAccount);
     }
 
+    @Transactional
+    public BankAccount incrementTotalBalance(Long id, BigDecimal amount) {
+        BankAccount bankAccount = bankAccountRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Compte bancaire non trouvé avec l'ID: " + id));
+        
+        bankAccount.setTotalBalance(
+            bankAccount.getTotalBalance().add(amount)
+        );
+        
+        return bankAccountRepository.save(bankAccount);
+    }
 }

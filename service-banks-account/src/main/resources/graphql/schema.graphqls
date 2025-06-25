@@ -18,4 +18,5 @@ type Query {
 type Mutation {
     addInternalTransferFees(id: ID!, amount: Float!): BankAccount!
     addExternalTransferFees(id: ID!, amount: Float!): BankAccount!
+    incrementTotalBalance(id: ID!, amount: Float!): BankAccount!
 }

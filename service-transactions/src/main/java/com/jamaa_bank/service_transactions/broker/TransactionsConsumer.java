@@ -64,7 +64,7 @@ public class TransactionsConsumer {
         transac.setAmount(event.getAmount());
         transac.setCreatedAt(event.getCreatedAt());
         transac.setStatus(TransactionStatus.valueOf(event.getStatus()));
-        transac.setIdBankSender(event.getBankidBankSender());
+        transac.setIdBankSender(event.getBankId());
         transac.setTransactionType(TransactionType.RECHARGE);
         transac.setDateEvent(LocalDateTime.now());
 
@@ -82,7 +82,7 @@ public class TransactionsConsumer {
         transac.setAmount(event.getAmount());
         transac.setCreatedAt(event.getCreatedAt());
         transac.setStatus(TransactionStatus.valueOf(event.getStatus()));
-        transac.setIdBankSender(event.getBankidBankSender());
+        transac.setIdBankSender(event.getBankId());
         transac.setTransactionType(TransactionType.RETRAIT);
         transac.setDateEvent(LocalDateTime.now());
 

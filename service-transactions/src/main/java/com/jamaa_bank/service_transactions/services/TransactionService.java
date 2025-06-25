@@ -28,7 +28,7 @@ import com.jamaa_bank.service_transactions.utils.Util;
 public class TransactionService {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
-    private static final String TRANSACTION_STREAM = "jamaaTransactionStream2";
+    private static final String TRANSACTION_STREAM = "jamaaTransactionStream";
 
     private final EventStoreDBClient eventStoreDBClient;
     private final ObjectMapper objectMapper;

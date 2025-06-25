@@ -33,6 +33,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public TopicExchange accountExchange() {
+        return new TopicExchange("AccountExchange", true, false);
+    }
+
+    @Bean
     public Queue depotDoneQueue() {
         return new Queue("depotDoneQueue", true, false, false);
     }
@@ -54,6 +59,6 @@ public class RabbitConfig {
 
     @Bean
     public Queue rechargeDoneQueue() {
-        return new Queue("recharge.queue", true, false, false);
+        return new Queue("recharge.queue.transaction", true, false, false);
     }
 }

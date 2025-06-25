@@ -57,6 +57,7 @@ import org.springframework.beans.factory.annotation.Autowired;
             INSUFFICIENT_FUNDS("insufficient-funds-notification", "Alerte de solde"),
             PASSWORD_CHANGE("password-change-notification", "Modification de mot de passe"),
             CONFIRMATION_SOUSCRIPTION_BANQUE("successful-registration", "Compte créé avec success"),
+            CARD_CREATE("card-create-notification", "Carte crée"),
             RECHARGE("recharge-confirmation", "Confirmation de transfert"),
             ACCOUNT_DELETION("delete-notification", "Compte supprimé"),
             ACCOUNT_CREATION_ERROR("error-registration", "Erreur lors de la création du compte");
@@ -136,7 +137,7 @@ import org.springframework.beans.factory.annotation.Autowired;
             sendNotification(to, NotificationType.INSUFFICIENT_FUNDS, data);
         }
         
-        private String loadAndProcessTemplate(String templateName, Map<String, Object> data) throws IOException {
+        public String loadAndProcessTemplate(String templateName, Map<String, Object> data) throws IOException {
             String templatePath = TEMPLATES_BASE_PATH + templateName + ".html";
             Resource resource = resourceLoader.getResource("classpath:" + templatePath);
             
@@ -160,7 +161,7 @@ import org.springframework.beans.factory.annotation.Autowired;
             return template;
         }
 
-        private void sendEmailWithTemplate(String to, String subject, String htmlContent) throws MessagingException {
+        public void sendEmailWithTemplate(String to, String subject, String htmlContent) throws MessagingException {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             

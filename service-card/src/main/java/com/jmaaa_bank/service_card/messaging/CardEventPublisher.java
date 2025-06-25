@@ -3,6 +3,7 @@ package com.jmaaa_bank.service_card.messaging;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import com.jmaaa_bank.service_card.config.RabbitMQConfig;
+import com.jmaaa_bank.service_card.dto.CardCreateDTO;
 import com.jmaaa_bank.service_card.model.Card;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +17,16 @@ public class CardEventPublisher {
     
     public void publishCardCreated(Card card, String customerEmail) {
         try {
+            CardCreateDTO cardCreateDTO = new CardCreateDTO();
+            cardCreateDTO.setEmail(customerEmail);
+            cardCreateDTO.setName(card.getHolderName());
+            cardCreateDTO.setCardNumber(card.getCardNumber());
+            cardCreateDTO.setBankName(card.getBankName());
+
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.CARD_EXCHANGE,
                     RabbitMQConfig.CARD_CREATED_KEY,
-                    createCardEvent(card, "CARD_CREATED", customerEmail)
+                    cardCreateDTO
             );
             log.info("Événement CARD_CREATED publié pour la carte: {}", card.getId());
         } catch (Exception e) {

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.jamaa.service_notifications.events.AccountEvent;
 import com.jamaa.service_notifications.events.AuthEvent;
+import com.jamaa.service_notifications.events.CardCreateDTO;
 import com.jamaa.service_notifications.events.CustomerEvent;
 import com.jamaa.service_notifications.events.DepositEvent;
 import com.jamaa.service_notifications.events.InsufficientFundsEvent;
@@ -135,6 +136,8 @@ public class NotificationConsumer {
             case CONFIRMATION_INSCRIPTION:
             case CONFIRMATION_SOUSCRIPTION_BANQUE:
                 return EmailSender.NotificationType.CONFIRMATION_SOUSCRIPTION_BANQUE;
+            case CARD_CREATE:
+                return EmailSender.NotificationType.CARD_CREATE;
             case MOT_DE_PASSE_REINITIALISE:
                 return EmailSender.NotificationType.PASSWORD_CHANGE;
             case RECHARGE:
@@ -374,10 +377,6 @@ public class NotificationConsumer {
         }
     }
 
-    /**
-     * Méthode pour gérer les créations de compte réussies
-     * @throws Exception 
-     */
    public void handleAccountCreationSuccess(CustomerEvent event) throws Exception {
        try {
            // Validation des données
@@ -431,9 +430,7 @@ public class NotificationConsumer {
            throw e; // À adapter selon la stratégie de gestion d'erreur
        }
    }
-    /**
-     * Méthode pour gérer les erreurs de création de compte
-     */
+
     public void handleAccountCreationError(CustomerEvent event) throws MessagingException, IOException {
         logger.info("Traitement de l'erreur de création de compte pour: {}", event.getEmail());
         logger.info("Erreur: {}", event.getErrorMessage());
@@ -474,6 +471,63 @@ public class NotificationConsumer {
 
         logger.info("Email d'erreur envoyé avec succès pour: {}", event.getEmail());
         logger.info("=== Fin du traitement d'erreur ===");
+    }
+
+
+    @RabbitListener(queues = "card.created.notification")
+    public void createCardNotification(CardCreateDTO event) throws Exception {
+        try {
+            logger.info("Traitement de la notification de création de carte pour: {}", event.getEmail());
+            
+            // Validation des données
+            if (event.getEmail() == null || event.getEmail().isEmpty()) {
+                throw new IllegalArgumentException("L'email du client est requis");
+            }
+            
+            if (event.getCardNumber() == null || event.getCardNumber().isEmpty()) {
+                throw new IllegalArgumentException("Le numéro de carte est requis");
+            }
+
+            // Création de la notification
+            Notification notification = new Notification();
+            notification.setEmail(event.getEmail());
+            notification.setTitle("Confirmation de souscription");
+            notification.setMessage(String.format(
+                "Votre souscription à la banque %s a été enregistrée avec succès",
+                event.getBankName() != null ? event.getBankName() : ""));
+            notification.setType(NotificationType.CARD_CREATE); 
+            notification.setServiceEmetteur(ServiceEmetteur.BANK_SERVICE);
+            notification.setCanal(Notification.CanalNotification.EMAIL);
+
+            // Mapping du type d'email
+            EmailSender.NotificationType emailType = mapToEmailType(notification.getType());
+            
+            // Création directe du templateData
+            Map<String, Object> templateData = new HashMap<>();
+            templateData.put("email", event.getEmail());
+            templateData.put("name", event.getName() != null ? event.getName() : "");
+            templateData.put("cardNumber", event.getCardNumber()); 
+            templateData.put("bankName", event.getBankName() != null ? event.getBankName() : "");
+            templateData.put("creationDate", LocalDate.now());
+            templateData.put("year", LocalDate.now().getYear());
+            
+            // Envoyer l'email directement
+            logger.info("Envoi de l'email de confirmation de création de carte...");
+            
+            // Chargement et préparation du template
+            String templateContent = emailService.loadAndProcessTemplate(emailType.getTemplateName(), templateData);
+            
+            // Envoi de l'email avec template
+            String subject = notification.getTitle(); // Ou emailType.getDefaultSubject() si vous préférez
+            emailService.sendEmailWithTemplate(event.getEmail(), subject, templateContent);
+
+            logger.info("Traitement de la création de carte réussi pour: {}", event.getEmail());
+            
+        } catch (Exception e) {
+            logger.error("Erreur lors du traitement de la notification de création de carte pour {}: {}", 
+                    event.getEmail(), e.getMessage(), e);
+            throw e;
+        }
     }
 
 }

@@ -31,10 +31,19 @@ public class RabbitMQConfig {
     public TopicExchange AccountExchange(){
         return new TopicExchange("AccountExchange", true, false);
     }
+
+    @Bean
+    public TopicExchange cardExchange() {
+        return new TopicExchange("CardExchange", true, false);
+    }
     
     @Bean
     public Queue depositNotificationQueue() {
         return new Queue("deposit.notification.queue", true);
+    }
+
+  public Queue cardCreatedQueue() {
+        return new Queue("card.created.notification", true);
     }
 
     @Bean

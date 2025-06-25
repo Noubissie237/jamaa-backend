@@ -25,11 +25,11 @@ public class BankUtil {
     private static final Logger logger = LoggerFactory.getLogger(BankUtil.class);
     
     // Configuration pour le service bank-account
-    @Value("${service.bank-account.endpoint:http://service-banks-account:8079/service-banks/graphql}")
+    @Value("${service.bank-account.endpoint:http://service-proxy:8079/service-banks/graphql}")
     private String bankAccountServiceEndpoint;
     
     // Configuration pour le service bank
-    @Value("${service.bank.endpoint:http://service-banks:8079/service-banks/graphql}")
+    @Value("${service.bank.endpoint:http://service-proxy:8079/service-banks/graphql}")
     private String bankServiceEndpoint;
     
     @Value("${service.bank.timeout.connect:30}")

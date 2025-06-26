@@ -202,3 +202,4 @@ jobs:
           if [ "${{ needs.changes.outputs.service-transactions }}" == "true" ]; then echo "✅ service-transactions"; fi
           if [ "${{ needs.changes.outputs.service-transfert }}" == "true" ]; then echo "✅ service-transfert"; fi
           if [ "${{ needs.changes.outputs.service-account }}" == "true" ]; then echo "✅ service-account"; fi
+          

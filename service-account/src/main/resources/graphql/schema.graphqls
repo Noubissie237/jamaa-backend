@@ -48,3 +48,4 @@ type Query {
     getWallet(userId: String!): Wallet
     getCustomerByAccountId(id: ID!): CustomerDTO
 }
+

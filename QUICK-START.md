@@ -116,3 +116,4 @@ kubectl scale deployment service-users --replicas=5 -n jamaa
 - **RabbitMQ** : Port-forward 15672
 - **EventStore** : Port-forward 2113
 - **MySQL** : Port-forward 3306
+

@@ -1,5 +1,4 @@
 #!/bin/bash
-# export KUBECONFIG=/var/lib/jenkins/.kube/config
 
 echo "🔄 Mise à jour des images vers Docker Hub..."
 

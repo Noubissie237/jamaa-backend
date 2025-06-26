@@ -34,7 +34,7 @@
 **Jamaa Backend** est une plateforme complète de gestion multi-bancaire, conçue autour d'une architecture microservices moderne et scalable. Le projet vise à offrir un écosystème sécurisé et performant pour la gestion des comptes, des cartes, des transferts (inter-comptes et inter-banques), des recharges/retraits, et des notifications, adapté aux besoins des institutions financières et fintechs.
 
 ### 🏗️ **Architecture et Technologies**
-- **Microservices** : 13 services indépendants (Java Spring Boot, Python Django, Node.js)
+- **Microservices** : 13 services indépendants (Java Spring Boot)
 - **Front-end** : React.js (gestion et visualisation)
 - **Communication** : RabbitMQ (asynchrone), GraphQL (requêtes inter-services)
 - **Base de données** : MySQL (relationnel), EventStoreDB (événements)
